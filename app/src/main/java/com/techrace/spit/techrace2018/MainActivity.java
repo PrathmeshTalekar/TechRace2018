@@ -4,6 +4,8 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
+import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
@@ -33,7 +35,7 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     static int level=1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
-    static String NSID="bbbb",UID;
+    static String NSID;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,7 +48,7 @@ public class MainActivity extends AppCompatActivity
 //            }
 //        }
         setContentView(R.layout.activity_main);
-        verifyBluetooth();
+
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android M Permission check
             if (this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -66,6 +68,13 @@ public class MainActivity extends AppCompatActivity
                 });
                 builder.show();
             }
+        }
+        SharedPreferences pref = getSharedPreferences(AppConstants.PREFS, MODE_PRIVATE);
+        boolean locked = !pref.getBoolean(AppConstants.PREFS_UNLOCKED, false);
+        if (locked) {
+            //  Launch app intro
+            Intent i = new Intent(MainActivity.this, SignUpActivity.class);
+            startActivity(i);
         }
         HomeFragment.firebaseDatabase= FirebaseDatabase.getInstance();
         HomeFragment.UserDatabaseReference=HomeFragment.firebaseDatabase.getReference().child("Users").child("001 Ram Shyam");
@@ -110,6 +119,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         displaySelectedScreen(R.id.home);
 
+
     }
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -135,10 +145,13 @@ public class MainActivity extends AppCompatActivity
 
             }
         }
+
     }
     @Override
     public void onResume() {
         super.onResume();
+        verifyBluetooth();
+
     }
 
     @Override
