@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:orientation="vertical"
+    android:layout_width="match_parent"
+    android:padding="5dp"
+    android:layout_height="match_parent"
+    android:background="@color/tan_background">
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Doubts:"
+        android:textColor="@android:color/black"
+        android:textSize="25sp"/>
+
+    <TextView
+        android:textSize="20sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="->Contact nearest volunteers for location,clue realted doubts"/>
+    <TextView
+        android:textSize="20sp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="->OR Call"/>
+
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:text="Yashvi Desai:"/>
+        <TextView
+            android:id="@+id/eventSupport"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="+917738107772"
+            android:textColor="@color/phonecall"
+            android:textSize="20sp"
+            android:onClick="eventSupportCall"/>
+    </LinearLayout>
+
+    <View
+        android:background="@android:color/black"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Techinal support:"
+        android:textColor="@android:color/black"
+        android:textSize="25sp"/>
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:textSize="20sp"
+        android:text="Call"/>
+    <LinearLayout
+        android:orientation="horizontal"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:textSize="20sp"
+            android:textColor="@android:color/black"
+            android:text="Aman Agrawal:"/>
+        <TextView
+            android:id="@+id/techSupport"
+            android:layout_width="wrap_content"
+            android:layout_height="match_parent"
+            android:text="+919930004241"
+            android:textColor="@color/phonecall"
+            android:textSize="20sp"
+            android:onClick="techSupportCall"/>
+    </LinearLayout>
+    <View
+        android:background="@android:color/black"
+        android:layout_width="match_parent"
+        android:layout_height="1dp"/>
+
+</LinearLayout>

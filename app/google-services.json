@@ -1,0 +1,42 @@
+{
+  "project_info": {
+    "project_number": "765572487780",
+    "firebase_url": "https://techrace2018-f680d.firebaseio.com",
+    "project_id": "techrace2018-f680d",
+    "storage_bucket": "techrace2018-f680d.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:765572487780:android:7bb6144c12f9b373",
+        "android_client_info": {
+          "package_name": "com.techrace.spit.techrace2018"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "765572487780-sa3k7b0070jlslb91ep4s8lrlarc1q9a.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD-C-Azb6iJQjItrmDhWZ_kCMIpHdyalk0"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 1,
+          "other_platform_oauth_client": []
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
