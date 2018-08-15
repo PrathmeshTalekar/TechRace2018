@@ -100,7 +100,11 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
     @Override
     public void onDestroy() {
         super.onDestroy();
-        beaconManager.unbind(this);
+        if (beaconManager != null) {
+            if (beaconManager.isBound(HomeFragment.this)) {
+                beaconManager.unbind(this);
+            }
+        }
     }
 
     @Override
@@ -131,7 +135,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                             //Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
                             double distanceinmetres = clueLocation.distanceTo(location);
 
-                            Toast.makeText(getActivity(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
+                            Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
 
                             if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
                                 if (distanceinmetres <= 250) {
@@ -195,10 +199,14 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                                                        //Beacon firstBeacon = beacons.iterator().next();
                                                        String s = "id1: " + NSID + " id2: 0x000000000000";
                                                        Log.i("AAAA", s);
-                                                       if (beaconID.equals(s) && firstBeacon.getDistance() <= 0.45) {
+                                                       double dist = firstBeacon.getDistance();
+                                                       t2.setText(String.valueOf(dist));
+                                                       Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
+                                                       if (beaconID.equals(s) && dist <= 0.45) {
+
                                                            //  locationTracker.stopLocationService(getActivity());
                                                            beaconManager.unbind(HomeFragment.this);
-                                                           beaconManager.disableForegroundServiceScanning();
+                                                           //   beaconManager.disableForegroundServiceScanning();
                                                            beaconManager.removeAllRangeNotifiers();
                                                            beaconManager.applySettings();
 
@@ -245,6 +253,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                                                                break;
 
                                                            } else {
+                                                               clueTextView.setBackgroundColor(Color.GREEN);
                                                                abc = true;
                                                                UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
                                                                UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
@@ -256,8 +265,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
 
                                                        }
                                                        //locationTracker.start(getActivity(),null);
-                                                       t2.setText(String.valueOf(firstBeacon.getDistance()));
-                                                       Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
+
                                                        beacons.remove(firstBeacon);
                                                    }
                                                    beacons.clear();
