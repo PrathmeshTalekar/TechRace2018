@@ -106,7 +106,10 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
     @Override
     public void onPause() {
         super.onPause();
-//        if (beaconManager.isBound(this)) beaconManager.setBackgroundMode(true);
+        if (beaconManager != null) {
+            if (beaconManager.isBound(this)) beaconManager.setBackgroundMode(true);
+        }
+//
     }
 
     @Override
@@ -125,10 +128,10 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                     .currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
                         @Override
                         public void onCurrentLocation(Location location) {
-                            Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+                            //Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
                             double distanceinmetres = clueLocation.distanceTo(location);
 
-                            //Toast.makeText(getActivity(),"Distance: "+distanceinmetres,Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
 
                             if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
                                 if (distanceinmetres <= 250) {
@@ -194,8 +197,13 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                                                        Log.i("AAAA", s);
                                                        if (beaconID.equals(s) && firstBeacon.getDistance() <= 0.45) {
                                                            //  locationTracker.stopLocationService(getActivity());
-                                                           beaconManager.setForegroundBetweenScanPeriod(30000);
-                                                           if (level == 2) {
+                                                           beaconManager.unbind(HomeFragment.this);
+                                                           beaconManager.disableForegroundServiceScanning();
+                                                           beaconManager.removeAllRangeNotifiers();
+                                                           beaconManager.applySettings();
+
+                                                           //beaconManager.setForegroundBetweenScanPeriod(30000);
+                                                           if (level == 3) {
                                                                abc = false;
                                                                clueTextView.setBackgroundColor(Color.GREEN);
                                                                final AlertDialog.Builder alertDialog = new AlertDialog.Builder(myView.getContext());
@@ -223,7 +231,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                                                                                    UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
                                                                                    UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
                                                                                    updateClue();
-
+                                                                                   abc = true;
                                                                                } else {
 
                                                                                    Toast.makeText(getActivity(),
@@ -233,10 +241,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                                                                            }
                                                                        });
                                                                alertDialog.show();
-                                                               beaconManager.unbind(HomeFragment.this);
-                                                               beaconManager.disableForegroundServiceScanning();
-                                                               beaconManager.removeAllRangeNotifiers();
-                                                               beaconManager.applySettings();
+//
                                                                break;
 
                                                            } else {
@@ -245,6 +250,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                                                                UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
                                                                UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
                                                                updateClue();
+                                                               break;
                                                            }
 
 
@@ -315,8 +321,6 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
         }
 
         UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-//        UserDatabaseReference.child("Users").child(UID).child("level").setValue(level+1);
-//        UserDatabaseReference.child("Users").child(UID).child("points").setValue(points+5);
         UserDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -332,6 +336,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                 Log.i("LEVEL STNG", String.valueOf(level) + "  " + levelString);
 
                 NSID = locationDS.child("NSID").getValue(String.class);
+                Log.i("NSID", NSID);
                 clueLocation.setLatitude(Double.parseDouble(locationDS.child("Latitude").getValue(String.class)));
                 clueLocation.setLongitude(Double.parseDouble(locationDS.child("Longitude").getValue(String.class)));
                 Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
