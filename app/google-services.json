@@ -15,6 +15,14 @@
       },
       "oauth_client": [
         {
+          "client_id": "765572487780-qi02vrh173cf9h05kkrt40nti0r0ulnh.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.techrace.spit.techrace2018",
+            "certificate_hash": "85ea8d1e2453936fbdbc9eeca0d6ff6375637465"
+          }
+        },
+        {
           "client_id": "765572487780-sa3k7b0070jlslb91ep4s8lrlarc1q9a.apps.googleusercontent.com",
           "client_type": 3
         }
@@ -29,8 +37,13 @@
           "status": 1
         },
         "appinvite_service": {
-          "status": 1,
-          "other_platform_oauth_client": []
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "765572487780-sa3k7b0070jlslb91ep4s8lrlarc1q9a.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
         },
         "ads_service": {
           "status": 2

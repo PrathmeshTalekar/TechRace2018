@@ -23,6 +23,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.EditText;
 
+import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.FirebaseDatabase;
@@ -35,8 +36,8 @@ public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener {
     static int level=1;
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
-    static String NSID;
 
+    static FirebaseAuth mAuth;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -69,42 +70,21 @@ public class MainActivity extends AppCompatActivity
                 builder.show();
             }
         }
-        SharedPreferences pref = getSharedPreferences(AppConstants.PREFS, MODE_PRIVATE);
-        boolean locked = !pref.getBoolean(AppConstants.PREFS_UNLOCKED, false);
-        if (locked) {
-            //  Launch app intro
+        mAuth = FirebaseAuth.getInstance();
+        // Log.i("MAUTH",mAuth.getCurrentUser().getDisplayName());
+        if (mAuth.getCurrentUser() == null) {
             Intent i = new Intent(MainActivity.this, SignUpActivity.class);
             startActivity(i);
         }
-        HomeFragment.firebaseDatabase= FirebaseDatabase.getInstance();
-        HomeFragment.UserDatabaseReference=HomeFragment.firebaseDatabase.getReference().child("Users").child("001 Ram Shyam");
-        HomeFragment.UserDatabaseReference.child("Level").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String s=dataSnapshot.getValue(String.class);
-                Log.i("LEVEL",s);
-                MainActivity.level=Integer.parseInt(s);
-            }
 
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
 
-            }
-        });
-        HomeFragment.databaseReference=HomeFragment.firebaseDatabase.getReference().child("Locations");
-        //if(level==1){
-        HomeFragment.databaseReference.child("Location "+MainActivity.level).child("NSID").addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                NSID=dataSnapshot.getValue(String.class);
-                Log.i("NSID",NSID);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
+//        SharedPreferences pref = getSharedPreferences(AppConstants.PREFS, MODE_PRIVATE);
+//        boolean locked = !pref.getBoolean(AppConstants.PREFS_UNLOCKED, false);
+//        if (locked) {
+//            //  Launch app intro
+//            Intent i = new Intent(MainActivity.this, SignUpActivity.class);
+//            startActivity(i);
+//        }
 
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -117,7 +97,7 @@ public class MainActivity extends AppCompatActivity
 
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
-        displaySelectedScreen(R.id.home);
+        // displaySelectedScreen(R.id.home);
 
 
     }
@@ -200,8 +180,8 @@ public class MainActivity extends AppCompatActivity
                 builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
-                        finish();
-                        System.exit(0);
+//                        finish();
+//                        System.exit(0);
                     }
                 });
                 builder.show();
