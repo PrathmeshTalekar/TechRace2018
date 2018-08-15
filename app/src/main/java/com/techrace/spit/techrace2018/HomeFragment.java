@@ -119,7 +119,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
         try {
 
             locationTracker = new LocationTracker("my.action")
-                    .setInterval(10000)
+                    .setInterval(30000)
                     .setGps(true)
                     .setNetWork(false)
                     .currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
@@ -193,6 +193,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                                                        String s = "id1: " + NSID + " id2: 0x000000000000";
                                                        Log.i("AAAA", s);
                                                        if (beaconID.equals(s) && firstBeacon.getDistance() <= 0.45) {
+                                                           //  locationTracker.stopLocationService(getActivity());
                                                            beaconManager.setForegroundBetweenScanPeriod(30000);
                                                            if (level == 2) {
                                                                abc = false;
@@ -248,6 +249,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
 
 
                                                        }
+                                                       //locationTracker.start(getActivity(),null);
                                                        t2.setText(String.valueOf(firstBeacon.getDistance()));
                                                        Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
                                                        beacons.remove(firstBeacon);
@@ -334,6 +336,7 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                 clueLocation.setLongitude(Double.parseDouble(locationDS.child("Longitude").getValue(String.class)));
                 Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
                 clueTextView.setText(levelString);
+                clueTextView.setBackgroundColor(Color.BLUE);
             }
 
             @Override

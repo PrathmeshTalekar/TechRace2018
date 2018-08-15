@@ -34,14 +34,15 @@
             android:textSize="20sp"
             android:textColor="@android:color/black"
             android:text="Yashvi Desai:"/>
+
         <TextView
             android:id="@+id/eventSupport"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:onClick="numberClicked"
             android:text="+917738107772"
             android:textColor="@color/phonecall"
-            android:textSize="20sp"
-            android:onClick="eventSupportCall"/>
+            android:textSize="20sp" />
     </LinearLayout>
 
     <View
@@ -69,14 +70,15 @@
             android:textSize="20sp"
             android:textColor="@android:color/black"
             android:text="Aman Agrawal:"/>
+
         <TextView
             android:id="@+id/techSupport"
             android:layout_width="wrap_content"
             android:layout_height="match_parent"
+            android:onClick="numberClicked"
             android:text="+919930004241"
             android:textColor="@color/phonecall"
-            android:textSize="20sp"
-            android:onClick="techSupportCall"/>
+            android:textSize="20sp" />
     </LinearLayout>
     <View
         android:background="@android:color/black"
