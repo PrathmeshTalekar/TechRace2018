@@ -3,6 +3,7 @@ package com.techrace.spit.techrace2018;
 
 import android.content.Context;
 
+import com.techrace.spit.techrace2018.MainActivity;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.ServiceConnection;
@@ -48,37 +49,74 @@ import org.altbeacon.beacon.Region;
 
 
 import java.util.Collection;
+import java.util.Date;
 
 import br.com.safety.locationlistenerhelper.core.CurrentLocationListener;
 import br.com.safety.locationlistenerhelper.core.CurrentLocationReceiver;
 import br.com.safety.locationlistenerhelper.core.LocationTracker;
 
 
-public class HomeFragment extends Fragment implements BeaconConsumer {
+public class HomeFragment extends Fragment {
 
-    protected static final String TAG = "MonitoringActivity";
-    View myView;
-    TextView clueTextView, t2, t3, pointsTextView;
-    DatabaseReference UserDatabaseReference, cooldownReference;
-    FirebaseDatabase firebaseDatabase;
-    FirebaseAuth homeFragAuth = MainActivity.mAuth;
-    String UID;
-    int level = 1, points, cooldown;
-    String levelString;
-    String beaconID, NSID;
-    Beacon firstBeacon;
+    static final String TAG = "MonitoringActivity";
+    static View myView;
+    static TextView clueTextView, t2, t3, pointsTextView;
+    static DatabaseReference UserDatabaseReference;
+    static FirebaseDatabase firebaseDatabase;
+    static FirebaseAuth homeFragAuth = MainActivity.mAuth;
+    static String UID;
+    static int level = 1, points, cooldown;
+    static String levelString;
+    static String beaconID, NSID;
+    static Beacon firstBeacon;
     NetworkInfo.State wifi, mobile;
-    Location clueLocation;
-    String volunteerPassword;
-    private BeaconManager beaconManager;
+    static Location clueLocation;
+    static String volunteerPassword;
+    static boolean abc = true;
+    static long l;
+    static String name;
+    // private BeaconManager MainActivity.beaconManager;
     private LocationTracker locationTracker;
-    boolean abc = true;
 
-    @Nullable
-    @Override
-    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
-        myView = inflater.inflate(R.layout.home_layout, container, false);
-        return myView;
+    public static void updateClue() {
+        clueLocation = new Location("");
+        firebaseDatabase = FirebaseDatabase.getInstance();
+        if (homeFragAuth.getCurrentUser() != null) {
+
+
+            UID = homeFragAuth.getCurrentUser().getUid();
+            Log.i("UID", UID);
+        }
+
+        UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+        UserDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
+                level = userDS.child("level").getValue(Integer.class);
+                Log.i("LEVELL", String.valueOf(level));
+                points = userDS.child("points").getValue(Integer.class);
+                pointsTextView.setText(String.valueOf(points));
+                name = (String) userDS.child("name").getValue();
+
+                DataSnapshot locationDS = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level));
+                levelString = locationDS.child("Clue").getValue(String.class);
+                Log.i("LEVEL STNG", String.valueOf(level) + "  " + levelString);
+                NSID = locationDS.child("NSID").getValue(String.class);
+                Log.i("NSID", NSID);
+                clueLocation.setLatitude(Double.parseDouble(locationDS.child("Latitude").getValue(String.class)));
+                clueLocation.setLongitude(Double.parseDouble(locationDS.child("Longitude").getValue(String.class)));
+                Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
+                clueTextView.setText(levelString);
+                clueTextView.setBackgroundColor(Color.BLUE);
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
 
     @Override
@@ -97,29 +135,203 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
 
     }
 
+    @Nullable
+    @Override
+    public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, Bundle savedInstanceState) {
+        myView = inflater.inflate(R.layout.home_layout, container, false);
+
+        return myView;
+    }
+
     @Override
     public void onDestroy() {
         super.onDestroy();
-        if (beaconManager != null) {
-            if (beaconManager.isBound(HomeFragment.this)) {
-                beaconManager.unbind(this);
+        if (MainActivity.beaconManager != null) {
+            if (MainActivity.beaconManager.isBound((MainActivity) HomeFragment.this.getActivity())) {
+                MainActivity.beaconManager.unbind((MainActivity) HomeFragment.this.getActivity());
             }
         }
+        locationTracker.stopLocationService(getActivity());
     }
 
     @Override
     public void onPause() {
         super.onPause();
-        if (beaconManager != null) {
-            if (beaconManager.isBound(this)) beaconManager.setBackgroundMode(true);
+        if (MainActivity.beaconManager != null) {
+            if (MainActivity.beaconManager.isBound((MainActivity) HomeFragment.this.getActivity()))
+                MainActivity.beaconManager.setBackgroundMode(true);
         }
+        locationTracker.stopLocationService(getActivity());
 //
     }
 
     @Override
+    public void onAttach(Context context) {
+        super.onAttach(context);
+    }
+
+
+//    @Override
+//    public void onBeaconServiceConnect() {
+////        MainActivity.beaconManager.addRangeNotifier(new RangeNotifier() {
+////                                           @Override
+////                                           public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
+////                                               if (beacons.size() > 0) {
+////                                                   //MainActivity.beaconManager.setForegroundBetweenScanPeriod(2000);
+////                                                   Log.i(TAG, "didRangeBeaconsInRegion called with beacon count:  " + beacons.size());
+////                                                   while (beacons.iterator().hasNext()) {
+////                                                       Beacon b = beacons.iterator().next();
+////                                                       firstBeacon = b;
+////
+////                                                       beaconID = firstBeacon.toString();
+////                                                       Log.i("SIZE", String.valueOf(beacons.size()));
+////                                                       Log.i("BID", beaconID);
+////                                                       Log.i("BEACON blue address", firstBeacon.getBluetoothAddress());
+////                                                       Log.i("BEACON Id1", firstBeacon.getId1().toString());
+////                                                       Log.i("BEACON Manufacture", String.valueOf(firstBeacon.getManufacturer()));
+////                                                       //Log.i("NSIDDD",MainActivity.NSID);
+////                                                       //Beacon firstBeacon = beacons.iterator().next();
+////                                                       String s = "id1: " + NSID + " id2: 0x000000000000";
+////                                                       Log.i("AAAA", s);
+////                                                       double dist = firstBeacon.getDistance();
+////                                                       t2.setText(String.valueOf(dist));
+////                                                       Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
+////                                                       if (beaconID.equals(s) && dist <= 0.45) {
+////
+////                                                           //  locationTracker.stopLocationService(getActivity());
+////                                                           MainActivity.beaconManager.unbind((MainActivity)HomeFragment.this.getActivity());
+////                                                           //   MainActivity.beaconManager.disableForegroundServiceScanning();
+////                                                           MainActivity.beaconManager.removeAllRangeNotifiers();
+////                                                           MainActivity.beaconManager.applySettings();
+////
+////                                                           //MainActivity.beaconManager.setForegroundBetweenScanPeriod(30000);
+////                                                           if (level == 3) {
+////                                                               abc = false;
+////                                                               clueTextView.setBackgroundColor(Color.GREEN);
+////                                                               final AlertDialog.Builder alertDialog = new AlertDialog.Builder(myView.getContext());
+////                                                               alertDialog.setTitle("MEET THE VOLUNTEER");
+////                                                               alertDialog.setMessage("Enter Password");
+////                                                               alertDialog.setCancelable(false);
+////
+////                                                               final EditText passwordEditText = new EditText(myView.getContext());
+////                                                               LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
+////                                                                       LinearLayout.LayoutParams.MATCH_PARENT,
+////                                                                       LinearLayout.LayoutParams.MATCH_PARENT);
+////                                                               passwordEditText.setLayoutParams(lp);
+////                                                               alertDialog.setView(passwordEditText);
+////
+////
+////                                                               alertDialog.setPositiveButton("GO!",
+////                                                                       new DialogInterface.OnClickListener() {
+////                                                                           public void onClick(DialogInterface dialog, int which) {
+////                                                                               volunteerPassword = passwordEditText.getText().toString();
+////                                                                               if (volunteerPassword.equals("hello")) {
+////
+////                                                                                   Toast.makeText(getActivity(),
+////                                                                                           "Password Matched", Toast.LENGTH_SHORT).show();
+////                                                                                   UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+////                                                                                   UserDatabaseReference.child("Users")
+////                                                                                           .child(UID)
+////                                                                                           .child("level")
+////                                                                                           .setValue(level + 1);
+////                                                                                   UserDatabaseReference.child("Users")
+////                                                                                           .child(UID)
+////                                                                                           .child("points")
+////                                                                                           .setValue(points + 5);
+////                                                                                   l = d.getTime();
+////                                                                                   UserDatabaseReference.child("Users")
+////                                                                                           .child(UID)
+////                                                                                           .child("Time" + String.valueOf(level))
+////                                                                                           .setValue(l);
+////                                                                                   UserDatabaseReference.child("Leaderboard")
+////                                                                                           .child(UID)
+////                                                                                           .setValue(new LeaderBoardOBject(name, level, points, l));
+////                                                                                   updateClue();
+////                                                                                   abc = true;
+////                                                                               } else {
+////                                                                                   Toast.makeText(getActivity(),
+////                                                                                           "Wrong Password!", Toast.LENGTH_SHORT).show();
+////                                                                               }
+////
+////                                                                           }
+////                                                                       });
+////                                                               alertDialog.show();
+//////
+////                                                               break;
+////
+////                                                           } else {
+////
+////                                                               clueTextView.setBackgroundColor(Color.GREEN);
+////                                                               abc = true;
+////                                                               UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+////                                                               UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+////                                                               UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
+////                                                               l = d.getTime();
+////                                                               UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+////                                                               UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(name, level, points, l));
+////                                                               updateClue();
+////                                                               break;
+////                                                           }
+////
+////
+////                                                       }
+////
+////                                                       beacons.remove(firstBeacon);
+////                                                   }
+////                                                   beacons.clear();
+////
+////
+////                                               }
+////                                           }
+////                                       }
+////        );
+////        MainActivity.beaconManager.addMonitorNotifier(new
+////
+////                                                 MonitorNotifier() {
+////                                                     @Override
+////                                                     public void didEnterRegion(Region region) {
+////
+////                                                         Log.i("YESSS", "I just saw a beacon for the first time!");
+////                                                     }
+////
+////                                                     @Override
+////                                                     public void didExitRegion(Region region) {
+////                                                         Log.i("NOOO", "I no longer see a beacon");
+////                                                     }
+////
+////                                                     @Override
+////                                                     public void didDetermineStateForRegion(int state, Region region) {
+////                                                         Log.i("OOOO", "I have just switched from seeing/not seeing beacons: " + state);
+////                                                     }
+////                                                 });
+////
+////        try
+////
+////        {
+////
+////            MainActivity.beaconManager.startMonitoringBeaconsInRegion(new Region("myMonitoringUniqueId", null, null, null));
+////
+////        } catch (
+////                RemoteException e)
+////
+////        {
+////        }
+////        try
+////
+////        {
+////            MainActivity.beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
+////        } catch (
+////                RemoteException e)
+////
+////        {
+////        }
+//
+//    }
+
+    @Override
     public void onResume() {
         super.onResume();
-        cooldownReference = FirebaseDatabase.getInstance().getReference().child("Users");
+
         updateClue();
 
 
@@ -141,19 +353,22 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                                 if (distanceinmetres <= 250) {
                                     clueTextView.setBackgroundColor(Color.RED);
                                     if (abc) {
-                                        beaconManager = BeaconManager.getInstanceForApplication(myView.getContext());
+                                        MainActivity.beaconManager = BeaconManager.getInstanceForApplication(getActivity());
+
                                         // To detect proprietary beacons, you must add a line like below corresponding to your beacon
                                         // type.  Do a web search for "setBeaconLayout" to get the proper expression.
-                                        beaconManager.getBeaconParsers().add(new BeaconParser().
-                                                setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
-                                        beaconManager.setForegroundBetweenScanPeriod(2000);
 
-                                        beaconManager.bind(HomeFragment.this);
+                                        MainActivity.beaconManager.getBeaconParsers().add(new BeaconParser().
+                                                setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
+                                        if (HomeFragment.this == null) {
+                                            Log.i("CONNULL", "NULL");
+                                        }
+                                        MainActivity.beaconManager.bind((MainActivity) HomeFragment.this.getActivity());
                                     } else {
-                                        beaconManager.unbind(HomeFragment.this);
-                                        beaconManager.disableForegroundServiceScanning();
-                                        beaconManager.removeAllMonitorNotifiers();
-                                        beaconManager.applySettings();
+                                        MainActivity.beaconManager.unbind((MainActivity) HomeFragment.this.getActivity());
+                                        MainActivity.beaconManager.disableForegroundServiceScanning();
+                                        MainActivity.beaconManager.removeAllMonitorNotifiers();
+                                        MainActivity.beaconManager.applySettings();
                                     }
                                 } else {
                                     clueTextView.setBackgroundColor(Color.BLUE);
@@ -169,208 +384,25 @@ public class HomeFragment extends Fragment implements BeaconConsumer {
                             // hotcoldtext.setText("Location OFF");
                         }
                     }))
-                    .start(getActivity().getBaseContext(), (AppCompatActivity) getActivity());
+                    .start(getActivity(), (AppCompatActivity) getActivity());
         } catch (Exception e) {
             Log.v("EROOR", "" + e);
         }
-        //    if (beaconManager.isBound(this)) beaconManager.setBackgroundMode(false);
+        //    if (MainActivity.beaconManager.isBound(this)) MainActivity.beaconManager.setBackgroundMode(false);
     }
 
-
-    @Override
-    public void onBeaconServiceConnect() {
-        beaconManager.addRangeNotifier(new RangeNotifier() {
-                                           @Override
-                                           public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
-                                               if (beacons.size() > 0) {
-                                                   //beaconManager.setForegroundBetweenScanPeriod(2000);
-                                                   Log.i(TAG, "didRangeBeaconsInRegion called with beacon count:  " + beacons.size());
-                                                   while (beacons.iterator().hasNext()) {
-                                                       Beacon b = beacons.iterator().next();
-                                                       firstBeacon = b;
-
-                                                       beaconID = firstBeacon.toString();
-                                                       Log.i("SIZE", String.valueOf(beacons.size()));
-                                                       Log.i("BID", beaconID);
-                                                       Log.i("BEACON blue address", firstBeacon.getBluetoothAddress());
-                                                       Log.i("BEACON Id1", firstBeacon.getId1().toString());
-                                                       Log.i("BEACON Manufacture", String.valueOf(firstBeacon.getManufacturer()));
-                                                       //Log.i("NSIDDD",MainActivity.NSID);
-                                                       //Beacon firstBeacon = beacons.iterator().next();
-                                                       String s = "id1: " + NSID + " id2: 0x000000000000";
-                                                       Log.i("AAAA", s);
-                                                       double dist = firstBeacon.getDistance();
-                                                       t2.setText(String.valueOf(dist));
-                                                       Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
-                                                       if (beaconID.equals(s) && dist <= 0.45) {
-
-                                                           //  locationTracker.stopLocationService(getActivity());
-                                                           beaconManager.unbind(HomeFragment.this);
-                                                           //   beaconManager.disableForegroundServiceScanning();
-                                                           beaconManager.removeAllRangeNotifiers();
-                                                           beaconManager.applySettings();
-
-                                                           //beaconManager.setForegroundBetweenScanPeriod(30000);
-                                                           if (level == 3) {
-                                                               abc = false;
-                                                               clueTextView.setBackgroundColor(Color.GREEN);
-                                                               final AlertDialog.Builder alertDialog = new AlertDialog.Builder(myView.getContext());
-                                                               alertDialog.setTitle("MEET THE VOLUNTEER");
-                                                               alertDialog.setMessage("Enter Password");
-                                                               alertDialog.setCancelable(false);
-
-                                                               final EditText passwordEditText = new EditText(myView.getContext());
-                                                               LinearLayout.LayoutParams lp = new LinearLayout.LayoutParams(
-                                                                       LinearLayout.LayoutParams.MATCH_PARENT,
-                                                                       LinearLayout.LayoutParams.MATCH_PARENT);
-                                                               passwordEditText.setLayoutParams(lp);
-                                                               alertDialog.setView(passwordEditText);
-
-
-                                                               alertDialog.setPositiveButton("GO!",
-                                                                       new DialogInterface.OnClickListener() {
-                                                                           public void onClick(DialogInterface dialog, int which) {
-                                                                               volunteerPassword = passwordEditText.getText().toString();
-                                                                               if (volunteerPassword.equals("hello")) {
-
-                                                                                   Toast.makeText(getActivity(),
-                                                                                           "Password Matched", Toast.LENGTH_SHORT).show();
-                                                                                   UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                                                                                   UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-                                                                                   UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
-                                                                                   updateClue();
-                                                                                   abc = true;
-                                                                               } else {
-
-                                                                                   Toast.makeText(getActivity(),
-                                                                                           "Wrong Password!", Toast.LENGTH_SHORT).show();
-                                                                               }
-
-                                                                           }
-                                                                       });
-                                                               alertDialog.show();
+//    @Override
+//    public Context getApplicationContext() {
+//        return null;
+//    }
 //
-                                                               break;
-
-                                                           } else {
-                                                               clueTextView.setBackgroundColor(Color.GREEN);
-                                                               abc = true;
-                                                               UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                                                               UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-                                                               UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
-                                                               updateClue();
-                                                               break;
-                                                           }
-
-
-                                                       }
-                                                       //locationTracker.start(getActivity(),null);
-
-                                                       beacons.remove(firstBeacon);
-                                                   }
-                                                   beacons.clear();
-
-
-                                               }
-                                           }
-                                       }
-        );
-        beaconManager.addMonitorNotifier(new
-
-                                                 MonitorNotifier() {
-                                                     @Override
-                                                     public void didEnterRegion(Region region) {
-
-                                                         Log.i("YESSS", "I just saw a beacon for the first time!");
-                                                     }
-
-                                                     @Override
-                                                     public void didExitRegion(Region region) {
-                                                         Log.i("NOOO", "I no longer see a beacon");
-                                                     }
-
-                                                     @Override
-                                                     public void didDetermineStateForRegion(int state, Region region) {
-                                                         Log.i("OOOO", "I have just switched from seeing/not seeing beacons: " + state);
-                                                     }
-                                                 });
-
-        try
-
-        {
-
-            beaconManager.startMonitoringBeaconsInRegion(new Region("myMonitoringUniqueId", null, null, null));
-
-        } catch (
-                RemoteException e)
-
-        {
-        }
-        try
-
-        {
-            beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
-        } catch (
-                RemoteException e)
-
-        {
-        }
-
-    }
-
-    public void updateClue() {
-        clueLocation = new Location("");
-        firebaseDatabase = FirebaseDatabase.getInstance();
-        if (homeFragAuth.getCurrentUser() != null) {
-
-
-            UID = homeFragAuth.getCurrentUser().getUid();
-            Log.i("UID", UID);
-        }
-
-        UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-        UserDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
-
-                level = userDS.child("level").getValue(Integer.class);
-                Log.i("LEVELL", String.valueOf(level));
-                points = userDS.child("points").getValue(Integer.class);
-                pointsTextView.setText(String.valueOf(points));
-
-                DataSnapshot locationDS = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level));
-                levelString = locationDS.child("Clue").getValue(String.class);
-                Log.i("LEVEL STNG", String.valueOf(level) + "  " + levelString);
-
-                NSID = locationDS.child("NSID").getValue(String.class);
-                Log.i("NSID", NSID);
-                clueLocation.setLatitude(Double.parseDouble(locationDS.child("Latitude").getValue(String.class)));
-                clueLocation.setLongitude(Double.parseDouble(locationDS.child("Longitude").getValue(String.class)));
-                Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
-                clueTextView.setText(levelString);
-                clueTextView.setBackgroundColor(Color.BLUE);
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
-
-    @Override
-    public Context getApplicationContext() {
-        return null;
-    }
-
-    @Override
-    public void unbindService(ServiceConnection serviceConnection) {
-
-    }
-
-    @Override
-    public boolean bindService(Intent intent, ServiceConnection serviceConnection, int i) {
-        return false;
-    }
+//    @Override
+//    public void unbindService(ServiceConnection serviceConnection) {
+//
+//    }
+//
+//    @Override
+//    public boolean bindService(Intent intent, ServiceConnection serviceConnection, int i) {
+//        return false;
+//    }
 }
