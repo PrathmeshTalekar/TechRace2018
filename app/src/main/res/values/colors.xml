@@ -7,6 +7,7 @@
 
     <color name="tan_background">#FFF7DA</color>
     <color name="background">#3f3f3f</color>
+    <color name="cardBackground">#635e65</color>
     <color name="confirmGreen">#76FF03</color>
     <color name="hotRed">#e61919</color>
     <color name="coldBlue">#33ccff</color>
