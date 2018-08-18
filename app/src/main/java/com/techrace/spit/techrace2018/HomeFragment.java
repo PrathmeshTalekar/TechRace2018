@@ -151,7 +151,9 @@ public class HomeFragment extends Fragment {
                 MainActivity.beaconManager.unbind((MainActivity) HomeFragment.this.getActivity());
             }
         }
-        locationTracker.stopLocationService(getActivity());
+//        if(locationTracker!=null) {
+//            locationTracker.stopLocationService(getActivity());
+//        }
     }
 
     @Override
@@ -161,7 +163,7 @@ public class HomeFragment extends Fragment {
             if (MainActivity.beaconManager.isBound((MainActivity) HomeFragment.this.getActivity()))
                 MainActivity.beaconManager.setBackgroundMode(true);
         }
-        locationTracker.stopLocationService(getActivity());
+        //locationTracker.stopLocationService(getActivity());
 //
     }
 

@@ -23,4 +23,29 @@
     <string name="permission_rationale">"Contacts permissions are needed for providing email
         completions."
     </string>
+
+
+    <string name="contact">Helpline</string>
+    <string name="other_events">Other events</string>
+
+    <string name="action_help">Help</string>
+    <string name="action_confirm">Confirm</string>
+
+    <string name="scan_help">Tap the floating action button to open the scanner.
+        Place the barcode anywhere in the viewfinder and it will be automatically scanned.
+        In case your camera fails to scan the code, try holding your device in landscape, or ask a volunteer or organizer to input code manually.</string>
+    <string name="scan_manual">Tap here to input code manually</string>
+    <string name="manual_desc">Input the code below:</string>
+    <string name="contact_help">Need help?</string>
+    <string name="contact_help_desc">Call our helpline numbers!</string>
+    <string name="helpline_1">Sahil Sheth: +91 91673 44892</string>
+    <string name="helpline_2">Sarah Hawa: +91 98200 62422</string>
+    <string name="helpline_3">Yashvi Desai: +91 77381 07772</string>
+    <string name="helpline_4">Raksha Jain: +91 95881 80100</string>
+    <string name="helpline_5">Sunit Vaidya: +91 97691 32344</string>
+    <string name="helpline_6">Taksh Soni: +91 98702 45451</string>
+    <string name="app_help">Issue with the app?</string>
+    <string name="app_help_desc">Call the tech guys!</string>
+    <string name="app_helpline_1">Aman Agrawal: +91 99300 04241</string>
+    <string name="app_helpline_2">Prathmesh Talekar: +91 75069 47244</string>
 </resources>

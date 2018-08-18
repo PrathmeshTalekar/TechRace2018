@@ -3,10 +3,10 @@
     <color name="colorPrimary">#0288D1</color>
     <color name="colorPrimaryDark">#0277BD</color>
     <color name="colorPrimaryDarker">#01579B</color>
-    <color name="colorAccent">#E91E63</color>>
+    <color name="colorAccent">#E91E63</color>
 
     <color name="tan_background">#FFF7DA</color>
-    <color name="background">#FFFFFF</color>
+    <color name="background">#3f3f3f</color>
     <color name="confirmGreen">#76FF03</color>
     <color name="hotRed">#e61919</color>
     <color name="coldBlue">#33ccff</color>

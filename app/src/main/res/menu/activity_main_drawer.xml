@@ -14,8 +14,8 @@
             android:id="@+id/locations"
             android:title="Locations" />
         <item
-            android:id="@+id/achievements"
-            android:title="Achievements" />
+            android:id="@+id/powerCards"
+            android:title="Power Cards" />
     </group>
 
     <group android:checkableBehavior="single">

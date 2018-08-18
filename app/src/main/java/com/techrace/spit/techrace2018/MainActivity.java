@@ -2,6 +2,7 @@ package com.techrace.spit.techrace2018;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlertDialog;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -251,7 +252,7 @@ public class MainActivity extends AppCompatActivity
 
         //initializing the fragment object which is selected
         switch (id) {
-            case R.id.achievements:
+            case R.id.powerCards:
                 fragment = new AchievementsFragment();
                 break;
             case R.id.clues:
@@ -270,7 +271,7 @@ public class MainActivity extends AppCompatActivity
                 fragment = new HelpFragment();
                 break;
             case R.id.leaderboard:
-                fragment = new LeaderBoardFragment();
+                startActivity(new Intent(MainActivity.this, LeaderboardActivity.class));
                 break;
             case R.id.locations:
                 fragment = new LocationsFragment();
@@ -293,6 +294,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
+
         super.onDestroy();
 
     }
