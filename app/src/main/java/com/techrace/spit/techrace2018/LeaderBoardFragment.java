@@ -7,27 +7,38 @@ import android.support.v4.app.Fragment;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.Button;
+import android.widget.ListView;
+
+import java.util.ArrayList;
 
 public class LeaderBoardFragment extends Fragment {
-    View myView;
-    Button refreshButton;
+    public LeaderBoardFragment() {
+    }
     @Nullable
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
-        myView=inflater.inflate(R.layout.leaderboard_layout,container,false);
-        return myView;
-    }
+        View rootView = inflater.inflate(R.layout.leaderboard_layout, container, false);
+        final ArrayList<Leaderboard> leaderboard = new ArrayList<Leaderboard>();
+        leaderboard.add(new Leaderboard("ram and sham", 10, 100));
+        leaderboard.add(new Leaderboard("pammer and charotan", 9, 90));
+        leaderboard.add(new Leaderboard("ram andsham", 10, 100));
+        leaderboard.add(new Leaderboard("pammer and charotan", 9, 90));
+        leaderboard.add(new Leaderboard("ram and sham", 10, 100));
+        leaderboard.add(new Leaderboard("pammer and charotan", 9, 90));
+        leaderboard.add(new Leaderboard("ram andsham", 10, 100));
+        leaderboard.add(new Leaderboard("pammer and charotan", 9, 90));
+        leaderboard.add(new Leaderboard("ram and sham", 10, 100));
+        leaderboard.add(new Leaderboard("pammer and charotan", 9, 90));
+        leaderboard.add(new Leaderboard("ram andsham", 10, 100));
+        leaderboard.add(new Leaderboard("pammer and charotan", 9, 90));
+        leaderboard.add(new Leaderboard("ram and sham", 10, 100));
+        leaderboard.add(new Leaderboard("pammer and charotan", 9, 90));
+        leaderboard.add(new Leaderboard("ram andsham", 10, 100));
+        leaderboard.add(new Leaderboard("pammer and charotan", 9, 90));
 
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
-        super.onViewCreated(view, savedInstanceState);
-        refreshButton = myView.findViewById(R.id.refreshButton);
-        refreshButton.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                LBUpdate.leaderUpdate();
-            }
-        });
+        LeaderboardAdapter adapter = new LeaderboardAdapter(getActivity(), leaderboard);
+        ListView listView = (ListView) rootView.findViewById(R.id.list);
+        listView.setAdapter(adapter);
+        return rootView;
     }
 }

@@ -3,14 +3,18 @@
     android:orientation="vertical" android:layout_width="match_parent"
     android:layout_height="match_parent">
 
-    <TextView
 
-        android:layout_centerInParent="true"
-        android:text="LeaderBoard"
-        android:textSize="32dp"
-        android:textAlignment="center"
+    <ListView xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/list"
+        android:layout_height="match_parent"
         android:layout_width="match_parent"
-        android:layout_height="match_parent" />
+        android:background="@color/transparent_black"
+        android:drawSelectorOnTop="true"
+        android:orientation="vertical">
+
+    </ListView>
 
     <Button
         android:id="@+id/refreshButton"

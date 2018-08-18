@@ -109,7 +109,7 @@ public class HomeFragment extends Fragment {
                 clueLocation.setLongitude(Double.parseDouble(locationDS.child("Longitude").getValue(String.class)));
                 Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
                 clueTextView.setText(levelString);
-                clueTextView.setBackgroundColor(Color.BLUE);
+                clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
             }
 
             @Override
@@ -351,7 +351,7 @@ public class HomeFragment extends Fragment {
 
                             if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
                                 if (distanceinmetres <= 250) {
-                                    clueTextView.setBackgroundColor(Color.RED);
+                                    clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
                                     if (abc) {
                                         MainActivity.beaconManager = BeaconManager.getInstanceForApplication(getActivity());
 
@@ -371,10 +371,10 @@ public class HomeFragment extends Fragment {
                                         MainActivity.beaconManager.applySettings();
                                     }
                                 } else {
-                                    clueTextView.setBackgroundColor(Color.BLUE);
+                                    clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
                                 }
                             } else {
-                                clueTextView.setBackgroundColor(Color.BLUE);
+                                clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
                             }
                         }
 

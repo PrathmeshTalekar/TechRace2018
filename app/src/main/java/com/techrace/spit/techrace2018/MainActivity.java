@@ -7,6 +7,7 @@ import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.content.res.Resources;
 import android.graphics.Color;
 import android.os.Build;
 import android.os.Bundle;
@@ -62,6 +63,7 @@ public class MainActivity extends AppCompatActivity
     //static BeaconManager beaconManager;
     static FirebaseAuth mAuth;
     static BeaconManager beaconManager;
+    public static Resources resources;
     Date d = new Date();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -124,7 +126,7 @@ public class MainActivity extends AppCompatActivity
         navigationView.setNavigationItemSelectedListener(this);
         // displaySelectedScreen(R.id.home);
 
-
+        resources = getResources();
     }
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -202,13 +204,15 @@ public class MainActivity extends AppCompatActivity
                 builder.setTitle("Bluetooth not enabled");
                 builder.setMessage("Please enable bluetooth in settings and restart this application.");
                 builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-//                        finish();
-//                        System.exit(0);
-                    }
-                });
+                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                            //                        finish();
+                            //                        System.exit(0);
+                        }
+                    });
+                }
                 builder.show();
             }
         }
@@ -217,15 +221,17 @@ public class MainActivity extends AppCompatActivity
             builder.setTitle("Bluetooth LE not available");
             builder.setMessage("Sorry, this device does not support Bluetooth LE.");
             builder.setPositiveButton(android.R.string.ok, null);
-            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    finish();
-                    System.exit(0);
-                }
+                    @Override
+                    public void onDismiss(DialogInterface dialog) {
+                        finish();
+                        System.exit(0);
+                    }
 
-            });
+                });
+            }
             builder.show();
 
         }
@@ -271,9 +277,6 @@ public class MainActivity extends AppCompatActivity
                 break;
             case R.id.rules:
                 fragment = new RulesFragment();
-                break;
-            case R.id.scanner:
-
                 break;
         }
 
@@ -337,7 +340,7 @@ public class MainActivity extends AppCompatActivity
                                                                         //MainActivity.beaconManager.setForegroundBetweenScanPeriod(30000);
                                                                         if (level == 3) {
                                                                             HomeFragment.abc = false;
-                                                                            clueTextView.setBackgroundColor(Color.GREEN);
+                                                                            clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.confirmGreen));
                                                                             final android.support.v7.app.AlertDialog.Builder alertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
                                                                             alertDialog.setTitle("MEET THE VOLUNTEER");
                                                                             alertDialog.setMessage("Enter Password");
@@ -349,8 +352,6 @@ public class MainActivity extends AppCompatActivity
                                                                                     LinearLayout.LayoutParams.MATCH_PARENT);
                                                                             passwordEditText.setLayoutParams(lp);
                                                                             alertDialog.setView(passwordEditText);
-
-
                                                                             alertDialog.setPositiveButton("GO!",
                                                                                     new DialogInterface.OnClickListener() {
                                                                                         public void onClick(DialogInterface dialog, int which) {
@@ -360,40 +361,26 @@ public class MainActivity extends AppCompatActivity
                                                                                                 Toast.makeText(MainActivity.this,
                                                                                                         "Password Matched", Toast.LENGTH_SHORT).show();
                                                                                                 UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                                                                                                UserDatabaseReference.child("Users")
-                                                                                                        .child(UID)
-                                                                                                        .child("level")
-                                                                                                        .setValue(level + 1);
-                                                                                                UserDatabaseReference.child("Users")
-                                                                                                        .child(UID)
-                                                                                                        .child("points")
-                                                                                                        .setValue(HomeFragment.points + 5);
+                                                                                                UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+                                                                                                UserDatabaseReference.child("Users").child(UID).child("points").setValue(HomeFragment.points + 5);
                                                                                                 l = d.getTime();
-                                                                                                UserDatabaseReference.child("Users")
-                                                                                                        .child(UID)
-                                                                                                        .child("Time" + String.valueOf(level))
-                                                                                                        .setValue(l);
-                                                                                                UserDatabaseReference.child("Leaderboard")
-                                                                                                        .child(UID)
-                                                                                                        .setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
+                                                                                                UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+                                                                                                UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
                                                                                                 updateClue();
                                                                                                 HomeFragment.abc = true;
                                                                                             } else {
-                                                                                                Toast.makeText(MainActivity.this,
-                                                                                                        "Wrong Password!", Toast.LENGTH_SHORT).show();
+                                                                                                Toast.makeText(MainActivity.this, "Wrong Password!", Toast.LENGTH_SHORT).show();
                                                                                             }
-
                                                                                         }
                                                                                     });
                                                                             alertDialog.show();
-//
                                                                             break;
 
                                                                         } else {
                                                                             runOnUiThread(new Runnable() {
                                                                                 @Override
                                                                                 public void run() {
-                                                                                    clueTextView.setBackgroundColor(Color.GREEN);
+                                                                                    clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.confirmGreen));
                                                                                 }
                                                                             });
 
@@ -420,46 +407,30 @@ public class MainActivity extends AppCompatActivity
                                                         }
                                                     }
         );
-        MainActivity.beaconManager.addMonitorNotifier(new
+        MainActivity.beaconManager.addMonitorNotifier(new MonitorNotifier() {
+            @Override
+            public void didEnterRegion(Region region) {
 
-                                                              MonitorNotifier() {
-                                                                  @Override
-                                                                  public void didEnterRegion(Region region) {
+                Log.i("YESSS", "I just saw a beacon for the first time!");
+            }
 
-                                                                      Log.i("YESSS", "I just saw a beacon for the first time!");
-                                                                  }
+            @Override
+            public void didExitRegion(Region region) {
+                Log.i("NOOO", "I no longer see a beacon");
+            }
 
-                                                                  @Override
-                                                                  public void didExitRegion(Region region) {
-                                                                      Log.i("NOOO", "I no longer see a beacon");
-                                                                  }
-
-                                                                  @Override
-                                                                  public void didDetermineStateForRegion(int state, Region region) {
-                                                                      Log.i("OOOO", "I have just switched from seeing/not seeing beacons: " + state);
-                                                                  }
-                                                              });
-
-        try
-
-        {
-
+            @Override
+            public void didDetermineStateForRegion(int state, Region region) {
+                Log.i("OOOO", "I have just switched from seeing/not seeing beacons: " + state);
+            }
+        });
+        try {
             MainActivity.beaconManager.startMonitoringBeaconsInRegion(new Region("myMonitoringUniqueId", null, null, null));
-
-        } catch (
-                RemoteException e)
-
-        {
+        } catch (RemoteException e) {
         }
-        try
-
-        {
+        try {
             MainActivity.beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
-        } catch (
-                RemoteException e)
-
-        {
+        } catch (RemoteException e) {
         }
-
     }
 }
