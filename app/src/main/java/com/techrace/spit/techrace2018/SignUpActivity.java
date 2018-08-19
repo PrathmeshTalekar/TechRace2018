@@ -29,11 +29,9 @@ import static com.techrace.spit.techrace2018.MainActivity.mAuth;
 
 public class SignUpActivity extends AppCompatActivity {
 
-    EditText nameEditText, passwordEditText, emailEditText;
+    EditText nameEditText, passwordEditText, emailEditText, contactEditText;
     FirebaseDatabase firebaseDatabase;
     DatabaseReference userDatabaseReference, countRef;
-    ValueEventListener listener;
-    int count;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -45,135 +43,73 @@ public class SignUpActivity extends AppCompatActivity {
         nameEditText = findViewById(R.id.nameEditText);
         passwordEditText = findViewById(R.id.passwordEditText);
         emailEditText = findViewById(R.id.emailEditText);
+        contactEditText = findViewById(R.id.contactEditText);
         mAuth = FirebaseAuth.getInstance();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
-
-
     }
 
     @Override
     protected void onPause() {
         super.onPause();
-        //myRef.removeEventListener();
     }
 
     @Override
     public void onBackPressed() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
             finishAffinity();
-        }
     }
 
     public void logInClicked(View view) {
 
-
-//        if (nameEditText.getText().toString().equals("") || !passwordEditText.getText().toString().equals(password)) {
-//            Toast.makeText(this, "Please Enter Correct Details", Toast.LENGTH_SHORT).show();
-//        } else {
-//            myRef.addValueEventListener(new ValueEventListener() {
-//                @Override
-//                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                    count = (dataSnapshot.getValue(Integer.class));
-//                    Log.i("CNT", String.valueOf(count));
-//                }
-//
-//                @Override
-//                public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                }
-//            });
-//            count++;
-//            userDatabaseReference.child(String.valueOf(count) + " " + nameEditText.getText().toString()).setValue(String.valueOf(count) + " " + nameEditText.getText().toString());
-//            // userDatabaseReference.push().child("Password").setValue(passwordEditText.getText().toString());
-//            myRef.setValue(count);
-//
-//            SharedPreferences pref = getSharedPreferences(AppConstants.PREFS, MODE_PRIVATE);
-//            pref.edit().putBoolean(PREFS_UNLOCKED, true).apply();
-//            finish();
-//        }
-        registerUser();
-    }
-
-    public void registerUser() {
-        final String name = nameEditText.getText().toString();
-        final String email = emailEditText.getText().toString();
-        final String password = passwordEditText.getText().toString();
-
-        if (name.equals("") || !password.equals(AppConstants.password)) {
-            Toast.makeText(this, "Please Enter Correct Details", Toast.LENGTH_SHORT).show();
-        } else {
-            //final ProgressBar progressBar=findViewById(R.id.progressBar);
-            //   progressBar.setVisibility(View.VISIBLE);
-            mAuth.signInWithEmailAndPassword(email, password)
-                    .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                        @Override
-                        public void onComplete(@NonNull Task<AuthResult> task) {
-                            if (task.isSuccessful()) {
-                                Toast.makeText(SignUpActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
-                            } else {
-                                mAuth.createUserWithEmailAndPassword(email, password)
-                                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
-                                            @Override
-                                            public void onComplete(@NonNull Task<AuthResult> task) {
-                                                if (task.isSuccessful()) {
-
-
-//                                                    listener=countRef.addValueEventListener(new ValueEventListener() {
-//                                                        @Override
-//                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                                                            count=dataSnapshot.getValue(Integer.class);
-//                                                            Log.i("COUNT",String.valueOf(count));
-//                                                            //dataSnapshot.getRef().setValue(count+1);
-//                                                        }
-//
-//                                                        @Override
-//                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                                                        }
-//                                                    });
-//                                                    countRef.removeEventListener(listener);
-                                                    //String uName=String.format("%03d",count)+" "+name;
-                                                    String uName = String.valueOf(count) + " " + name;
-                                                    //String uName=name;
-                                                    Log.i("UNAME", uName);
-                                                    User user = new User(uName, password, email);
-                                                    // countRef.setValue(count++);
-                                                    FirebaseDatabase.getInstance().getReference("Users")
-                                                            .child(mAuth.getCurrentUser().getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
-                                                        @Override
-                                                        public void onComplete(@NonNull Task<Void> task) {
-                                                            if (task.isSuccessful()) {
-//                                                                countRef.addListenerForSingleValueEvent(new ValueEventListener() {
-//                                                                    @Override
-//                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                                                                        dataSnapshot.getRef().setValue(count+1);
-//                                                                    }
-//
-//                                                                    @Override
-//                                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//                                                                    }
-//                                                                });
-                                                                //    progressBar.setVisibility(View.GONE);
-
-                                                                Toast.makeText(SignUpActivity.this, "Signed Up Successfully", Toast.LENGTH_LONG).show();
-                                                            } else {
-                                                                Toast.makeText(SignUpActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+        final String name = nameEditText.getText().toString().trim();
+        final String email = emailEditText.getText().toString().trim();
+        final String password = passwordEditText.getText().toString().trim();
+        String contact = contactEditText.getText().toString().trim();
+        String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+        if (email.matches(emailPattern) && email.length() > 0) {
+            Toast.makeText(getApplicationContext(), "valid email address", Toast.LENGTH_SHORT).show();
+            if (name.equals("") || !password.equals(AppConstants.password)) {
+                Toast.makeText(this, "Please Enter Correct Details", Toast.LENGTH_SHORT).show();
+            } else {
+                mAuth.signInWithEmailAndPassword(email, password)
+                        .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                            @Override
+                            public void onComplete(@NonNull Task<AuthResult> task) {
+                                if (task.isSuccessful()) {
+                                    Toast.makeText(SignUpActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                                } else {
+                                    mAuth.createUserWithEmailAndPassword(email, password)
+                                            .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
+                                                @Override
+                                                public void onComplete(@NonNull Task<AuthResult> task) {
+                                                    if (task.isSuccessful()) {
+                                                        Log.i("UNAME", name);
+                                                        User user = new User(name, password, email);
+                                                        FirebaseDatabase.getInstance().getReference("Users")
+                                                                .child(mAuth.getCurrentUser().getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                            @Override
+                                                            public void onComplete(@NonNull Task<Void> task) {
+                                                                if (task.isSuccessful()) {
+                                                                    Toast.makeText(SignUpActivity.this, "Signed Up Successfully", Toast.LENGTH_LONG).show();
+                                                                } else {
+                                                                    Toast.makeText(SignUpActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                                                }
                                                             }
-                                                        }
-                                                    });
+                                                        });
+                                                    }
                                                 }
-                                            }
-                                        });
+                                            });
+                                }
                             }
-                        }
-                    });
-
-            finish();
+                        });
+                finish();
+            }
+        } else {
+            Toast.makeText(getApplicationContext(), "Invalid email address", Toast.LENGTH_SHORT).show();
         }
+
     }
 }

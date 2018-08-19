@@ -10,7 +10,7 @@
         android:layout_height="wrap_content"
         android:layout_margin="8sp"
         android:elevation="5sp"
-        app:cardCornerRadius="10dp">
+        app:cardCornerRadius="8sp">
 
         <RelativeLayout
             android:layout_width="match_parent"

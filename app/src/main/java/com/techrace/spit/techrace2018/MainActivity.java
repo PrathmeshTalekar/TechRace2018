@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
 import android.app.AlertDialog;
+import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
@@ -55,7 +56,7 @@ import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
 import static com.techrace.spit.techrace2018.HomeFragment.l;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.HomeFragment.t2;
-import static com.techrace.spit.techrace2018.HomeFragment.updateClue;
+
 
 
 public class MainActivity extends AppCompatActivity
@@ -65,17 +66,13 @@ public class MainActivity extends AppCompatActivity
     static FirebaseAuth mAuth;
     static BeaconManager beaconManager;
     public static Resources resources;
+    static SharedPreferences pref;
+    static SharedPreferences.Editor prefEditor;
     Date d = new Date();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-//        if(isMockSettingsON(MainActivity.this))
-//        {
-//            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN) {
-//                Toast.makeText(this,"Turn off mock location",Toast.LENGTH_SHORT).show();
-//                this.finishAffinity();
-//            }
-//        }
+
         setContentView(R.layout.activity_main);
 
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
@@ -83,7 +80,7 @@ public class MainActivity extends AppCompatActivity
             if (this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                 builder.setTitle("This app needs location access");
-                builder.setMessage("Please grant location access so this app can detect beacons in the background.");
+                builder.setMessage("Please grant location access.");
                 builder.setPositiveButton(android.R.string.ok, null);
                 builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
@@ -126,8 +123,10 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         // displaySelectedScreen(R.id.home);
+        pref = getSharedPreferences("com.techrace.spit.techrace2018", MODE_PRIVATE);
 
         resources = getResources();
+        displaySelectedScreen(R.id.home);
     }
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -141,13 +140,13 @@ public class MainActivity extends AppCompatActivity
                     builder.setTitle("Functionality limited");
                     builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
                     builder.setPositiveButton(android.R.string.ok, null);
-                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                        builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                             @Override
                             public void onDismiss(DialogInterface dialog) {
                             }
                         });
-                    }
+
                     builder.show();
                 }
 
@@ -205,15 +204,15 @@ public class MainActivity extends AppCompatActivity
                 builder.setTitle("Bluetooth not enabled");
                 builder.setMessage("Please enable bluetooth in settings and restart this application.");
                 builder.setPositiveButton(android.R.string.ok, null);
-                if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                         @Override
                         public void onDismiss(DialogInterface dialog) {
                             //                        finish();
                             //                        System.exit(0);
                         }
                     });
-                }
+
                 builder.show();
             }
         }
@@ -222,8 +221,8 @@ public class MainActivity extends AppCompatActivity
             builder.setTitle("Bluetooth LE not available");
             builder.setMessage("Sorry, this device does not support Bluetooth LE.");
             builder.setPositiveButton(android.R.string.ok, null);
-            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.JELLY_BEAN_MR1) {
-                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+
+            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
 
                     @Override
                     public void onDismiss(DialogInterface dialog) {
@@ -232,7 +231,7 @@ public class MainActivity extends AppCompatActivity
                     }
 
                 });
-            }
+
             builder.show();
 
         }
@@ -368,7 +367,7 @@ public class MainActivity extends AppCompatActivity
                                                                                                 l = d.getTime();
                                                                                                 UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
                                                                                                 UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
-                                                                                                updateClue();
+                                                                                                new HomeFragment().updateClue();
                                                                                                 HomeFragment.abc = true;
                                                                                             } else {
                                                                                                 Toast.makeText(MainActivity.this, "Wrong Password!", Toast.LENGTH_SHORT).show();
@@ -393,7 +392,7 @@ public class MainActivity extends AppCompatActivity
                                                                             l = d.getTime();
                                                                             UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
                                                                             UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
-                                                                            updateClue();
+                                                                            new HomeFragment().updateClue();
                                                                             break;
                                                                         }
 
