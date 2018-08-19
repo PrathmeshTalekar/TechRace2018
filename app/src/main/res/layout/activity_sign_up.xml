@@ -42,7 +42,7 @@
                 android:layout_marginRight="8dp"
                 android:ems="10"
                 android:hint="Name"
-                android:inputType="textPersonName" />
+                android:inputType="textCapWords" />
         </LinearLayout>
     </android.support.v7.widget.CardView>
 

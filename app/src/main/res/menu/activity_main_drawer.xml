@@ -3,39 +3,59 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:showIn="navigation_view">
 
-    <group android:checkableBehavior="single">
+    <group
+        android:id="@+id/game"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/home"
-            android:title="Home"/>
+            android:icon="@drawable/home"
+            android:title="Home" />
+        <item
+            android:id="@+id/powerCards"
+            android:icon="@drawable/power_cards"
+            android:title="Power Cards" />
+
+
+    </group>
+
+    <group
+        android:id="@+id/twists"
+        android:checkableBehavior="single">
+
+
+        <item
+            android:id="@+id/leaderboard"
+            android:icon="@drawable/leaderboard"
+            android:title="Leaderboard" />
         <item
             android:id="@+id/clues"
+            android:icon="@drawable/clues"
             android:title="Clues" />
         <item
             android:id="@+id/locations"
+            android:icon="@drawable/locations"
             android:title="Locations" />
-        <item
-            android:id="@+id/powerCards"
-            android:title="Power Cards" />
+
     </group>
 
-    <group android:checkableBehavior="single">
-        <item
-            android:id="@+id/leaderboard"
-            android:title="Leaderboard" />
+    <group
+        android:id="@+id/news"
+        android:checkableBehavior="single">
         <item
             android:id="@+id/feed"
+            android:icon="@drawable/feed"
             android:title="Feed" />
-    </group>
-
-    <group android:checkableBehavior="single">
         <item
             android:id="@+id/rules"
+            android:icon="@drawable/rules"
             android:title="Rules" />
         <item
             android:id="@+id/help"
+            android:icon="@drawable/help"
             android:title="Help" />
         <item
             android:id="@+id/credits"
+            android:icon="@drawable/credits"
             android:title="Credits" />
     </group>
 
