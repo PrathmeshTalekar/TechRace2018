@@ -69,4 +69,14 @@
         android:layout_marginBottom="85dp"
         android:text="0"
         android:textSize="36sp" />
+
+    <TextView
+        android:id="@+id/timerTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_alignParentStart="true"
+        android:layout_marginBottom="184dp"
+        android:layout_marginStart="151dp"
+        android:text="TextView" />
 </RelativeLayout>

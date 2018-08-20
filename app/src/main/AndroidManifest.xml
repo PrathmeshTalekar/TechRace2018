@@ -39,7 +39,15 @@
         <activity
             android:name=".SignUpActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".LeaderboardActivity"></activity>
+        <activity android:name=".LeaderboardActivity" />
+
+        <receiver android:name=".LocationReceiver">
+            <intent-filter>
+                <action android:name="my.action" />
+            </intent-filter>
+        </receiver>
+
+        <receiver android:name=".NotificationReceiver"></receiver>
     </application>
 
 </manifest>

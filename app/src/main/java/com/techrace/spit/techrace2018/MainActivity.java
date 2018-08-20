@@ -3,7 +3,10 @@ package com.techrace.spit.techrace2018;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -11,12 +14,17 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+import android.location.Location;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
+import android.support.v4.app.NotificationCompat;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -39,24 +47,35 @@ import com.google.firebase.database.ValueEventListener;
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
+import org.altbeacon.beacon.BeaconParser;
 import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
+import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
 
+import br.com.safety.locationlistenerhelper.core.CurrentLocationListener;
+import br.com.safety.locationlistenerhelper.core.CurrentLocationReceiver;
+import br.com.safety.locationlistenerhelper.core.LocationTracker;
+
 import static com.techrace.spit.techrace2018.HomeFragment.NSID;
 import static com.techrace.spit.techrace2018.HomeFragment.UID;
+import static com.techrace.spit.techrace2018.HomeFragment.beacon;
 import static com.techrace.spit.techrace2018.HomeFragment.beaconID;
 import static com.techrace.spit.techrace2018.HomeFragment.clueLocation;
 import static com.techrace.spit.techrace2018.HomeFragment.clueTextView;
+import static com.techrace.spit.techrace2018.HomeFragment.cooldown;
 import static com.techrace.spit.techrace2018.HomeFragment.firstBeacon;
 import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
 import static com.techrace.spit.techrace2018.HomeFragment.l;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
-import static com.techrace.spit.techrace2018.HomeFragment.t2;
 
+import static com.techrace.spit.techrace2018.HomeFragment.locationTracker;
+import static com.techrace.spit.techrace2018.HomeFragment.myView;
+import static com.techrace.spit.techrace2018.HomeFragment.t2;
+import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
 
 
 public class MainActivity extends AppCompatActivity
@@ -69,6 +88,8 @@ public class MainActivity extends AppCompatActivity
     static SharedPreferences pref;
     static SharedPreferences.Editor prefEditor;
     Date d = new Date();
+    static boolean timerOn = false;
+    CountDownTimer countDownTimer;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -100,17 +121,22 @@ public class MainActivity extends AppCompatActivity
         if (mAuth.getCurrentUser() == null) {
             Intent i = new Intent(MainActivity.this, SignUpActivity.class);
             startActivity(i);
+        } else {
+            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    cooldown = dataSnapshot.getValue(Integer.class);
+                    Log.i("COOLDOWN FOUND", "" + cooldown);
+                    timerOn = false;
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
         }
-
-
-//        SharedPreferences pref = getSharedPreferences(AppConstants.PREFS, MODE_PRIVATE);
-//        boolean locked = !pref.getBoolean(AppConstants.PREFS_UNLOCKED, false);
-//        if (locked) {
-//            //  Launch app intro
-//            Intent i = new Intent(MainActivity.this, SignUpActivity.class);
-//            startActivity(i);
-//        }
-
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
 
@@ -127,6 +153,7 @@ public class MainActivity extends AppCompatActivity
 
         resources = getResources();
         displaySelectedScreen(R.id.home);
+
     }
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -252,7 +279,7 @@ public class MainActivity extends AppCompatActivity
         //initializing the fragment object which is selected
         switch (id) {
             case R.id.powerCards:
-                fragment = new AchievementsFragment();
+                fragment = new PowerCardsFragment();
                 break;
             case R.id.clues:
                 fragment = new CluesFragment();
@@ -332,16 +359,23 @@ public class MainActivity extends AppCompatActivity
                                                                     Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
                                                                     if (beaconID.equals(s) && dist <= 0.45) {
 
-                                                                        //  locationTracker.stopLocationService(getActivity());
-                                                                        MainActivity.beaconManager.unbind(MainActivity.this);
-                                                                        //   MainActivity.beaconManager.disableForegroundServiceScanning();
-                                                                        MainActivity.beaconManager.removeAllRangeNotifiers();
-                                                                        MainActivity.beaconManager.applySettings();
 
+                                                                        // locationTracker.stopLocationService(getBaseContext());
+                                                                        MainActivity.beaconManager.unbind(MainActivity.this);
+                                                                        MainActivity.beaconManager.removeAllRangeNotifiers();
+                                                                        MainActivity.beaconManager.disableForegroundServiceScanning();
+                                                                        MainActivity.beaconManager.applySettings();
+                                                                        beacon = false;
+                                                                        runOnUiThread(new Runnable() {
+                                                                            @Override
+                                                                            public void run() {
+                                                                                clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.confirmGreen));
+                                                                            }
+                                                                        });
                                                                         //MainActivity.beaconManager.setForegroundBetweenScanPeriod(30000);
                                                                         if (level == 3) {
-                                                                            HomeFragment.abc = false;
-                                                                            clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.confirmGreen));
+
+
                                                                             final android.support.v7.app.AlertDialog.Builder alertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
                                                                             alertDialog.setTitle("MEET THE VOLUNTEER");
                                                                             alertDialog.setMessage("Enter Password");
@@ -368,7 +402,8 @@ public class MainActivity extends AppCompatActivity
                                                                                                 UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
                                                                                                 UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
                                                                                                 new HomeFragment().updateClue();
-                                                                                                HomeFragment.abc = true;
+                                                                                                beacon = true;
+
                                                                                             } else {
                                                                                                 Toast.makeText(MainActivity.this, "Wrong Password!", Toast.LENGTH_SHORT).show();
                                                                                             }
@@ -378,22 +413,84 @@ public class MainActivity extends AppCompatActivity
                                                                             break;
 
                                                                         } else {
-                                                                            runOnUiThread(new Runnable() {
-                                                                                @Override
-                                                                                public void run() {
-                                                                                    clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.confirmGreen));
-                                                                                }
-                                                                            });
 
-                                                                            HomeFragment.abc = true;
-                                                                            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                                                                            UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-                                                                            UserDatabaseReference.child("Users").child(UID).child("points").setValue(HomeFragment.points + 5);
-                                                                            l = d.getTime();
-                                                                            UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
-                                                                            UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
-                                                                            new HomeFragment().updateClue();
-                                                                            break;
+
+                                                                            if (cooldown == 0) {
+                                                                                timerOn = false;
+                                                                                beacon = true;
+                                                                                UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                                                                                UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+                                                                                UserDatabaseReference.child("Users").child(UID).child("points").setValue(HomeFragment.points + 5);
+                                                                                l = d.getTime();
+                                                                                UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+                                                                                UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
+                                                                                new HomeFragment().onResume();
+                                                                                beacon = true;
+                                                                                break;
+                                                                            } else {
+
+                                                                                Log.i("IN ELSE 1", "yes");
+                                                                                if (!timerOn) {
+                                                                                    Log.i("IN timer on false", "yes");
+                                                                                    timerOn = true;
+                                                                                    Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
+                                                                                    PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
+                                                                                            MainActivity.this, 9999, intent, 0);
+
+                                                                                    AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
+
+                                                                                    alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+                                                                                            + (cooldown * 60000), pendingIntentforAlarm);
+
+                                                                                    String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+                                                                                    Log.i("cool", "" + cooldown);
+
+
+                                                                                    NotificationCompat.Builder builderalarm =
+                                                                                            new NotificationCompat.Builder(MainActivity.this)
+                                                                                                    .setSmallIcon(R.drawable.ic_launcher_foreground)
+                                                                                                    .setContentTitle("Please Wait")
+                                                                                                    .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
+                                                                                                    .setOngoing(true)
+                                                                                                    .setAutoCancel(false);
+
+                                                                                    NotificationManager notificationManagerforAlarm =
+                                                                                            (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                                                                    notificationManagerforAlarm.notify(1, builderalarm.build());
+
+//                                        countDownTimer=new CountDownTimer(cooldown * 60000, 1000) {
+//                                            @Override
+//                                            public void onTick(long millisUntilFinished) {
+//
+//                                                Log.i("TIME LEFT",""+millisUntilFinished/1000);
+////                                                                                            runOnUiThread(new Runnable() {
+////                                                                                               @Override
+////                                                                                               public void run() {
+////                                                                                                   timerTextView.setText(""+millisUntilFinished/1000);
+////                                                                                               }
+////                                                                                            });
+//                                            }
+//
+//                                            @Override
+//                                            public void onFinish() {
+//
+//                                                UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+//                                                UserDatabaseReference.child("Users").child(UID).child("cooldown").setValue(0);
+//                                                UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+//                                                UserDatabaseReference.child("Users").child(UID).child("points").setValue(HomeFragment.points + 5);
+//                                                l = d.getTime();
+//                                                UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+//                                                UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
+//                                                new HomeFragment().onResume();
+//                                                HomeFragment.beacon = true;
+//                                                timerOn=false;
+//
+//                                            }
+//                                        }.start();
+
+                                                                                }
+
+                                                                            }
                                                                         }
 
 

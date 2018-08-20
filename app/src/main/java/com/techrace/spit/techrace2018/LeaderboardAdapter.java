@@ -14,6 +14,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
+import static com.techrace.spit.techrace2018.LeaderboardActivity.selectUser;
+
 
 public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.LeaderboardViewHolder> {
 
@@ -41,6 +43,14 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         holder.nameText.setText("" + leaderboardItems.get(position).name);
         holder.levelText.setText("" + leaderboardItems.get(position).level);
         holder.pointsText.setText("" + leaderboardItems.get(position).points);
+        if (selectUser) {
+            holder.cardView.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+
+                }
+            });
+        }
     }
 
     @Override

@@ -67,7 +67,7 @@ public class SignUpActivity extends AppCompatActivity {
         final String name = nameEditText.getText().toString().trim();
         final String email = emailEditText.getText().toString().trim();
         final String password = passwordEditText.getText().toString().trim();
-        String contact = contactEditText.getText().toString().trim();
+        final String contact = contactEditText.getText().toString().trim();
         String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
         if (email.matches(emailPattern) && email.length() > 0) {
             Toast.makeText(getApplicationContext(), "valid email address", Toast.LENGTH_SHORT).show();
@@ -87,7 +87,7 @@ public class SignUpActivity extends AppCompatActivity {
                                                 public void onComplete(@NonNull Task<AuthResult> task) {
                                                     if (task.isSuccessful()) {
                                                         Log.i("UNAME", name);
-                                                        User user = new User(name, password, email);
+                                                        User user = new User(name, password, email, contact);
                                                         FirebaseDatabase.getInstance().getReference("Users")
                                                                 .child(mAuth.getCurrentUser().getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                             @Override

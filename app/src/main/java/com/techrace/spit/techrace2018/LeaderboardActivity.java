@@ -2,6 +2,7 @@ package com.techrace.spit.techrace2018;
 
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -31,7 +32,7 @@ public class LeaderboardActivity extends AppCompatActivity {
     ArrayList<LBUpdate> leaderboardItems;
     ProgressDialog progressDialog;
     SwipeRefreshLayout swipeRefreshLayout;
-
+    static boolean selectUser = false;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -39,7 +40,12 @@ public class LeaderboardActivity extends AppCompatActivity {
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
         if (Build.VERSION.SDK_INT >= 21)
             setupWindowAnimations();
-
+        Intent i = this.getIntent();
+        if (i.getExtras() != null) {
+            if (i.getExtras().getString("SELECT USER").equals("TRUE")) {
+                selectUser = true;
+            }
+        }
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.leaderboard_swiperefresh);
         leaderboardItems = new ArrayList<LBUpdate>();
         recyclerView = (RecyclerView) findViewById(R.id.leaderboard_recycler);
@@ -66,6 +72,13 @@ public class LeaderboardActivity extends AppCompatActivity {
         slide.setDuration(300);
         getWindow().setEnterTransition(slide);
         getWindow().setReenterTransition(slide);
+    }
+
+    @Override
+    public void onBackPressed() {
+        super.onBackPressed();
+        progressDialog.dismiss();
+        finish();
     }
 
     @Override
@@ -143,8 +156,10 @@ public class LeaderboardActivity extends AppCompatActivity {
                     }
                     if (progressDialog.isShowing()) {
                         progressDialog.hide();
+
                     }
                     recyclerView.setAdapter(new LeaderboardAdapter(finalList, LeaderboardActivity.this));
+
 
                 }
 
@@ -173,4 +188,5 @@ public class LeaderboardActivity extends AppCompatActivity {
 
         }
     }
+
 }
