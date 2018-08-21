@@ -92,6 +92,7 @@ public class MainActivity extends AppCompatActivity
     String beaconID;
     static boolean timerOn = false;
     Beacon firstBeacon;
+    static String selectUID = null;
     long l;
     LocationTracker locationTracker;
     NetworkInfo.State wifi, mobile;
@@ -388,9 +389,11 @@ public class MainActivity extends AppCompatActivity
         super.onDestroy();
         if (MainActivity.beaconManager != null) {
             if (MainActivity.beaconManager.isBound(MainActivity.this)) {
+                beaconManager.setBackgroundMode(false);
                 MainActivity.beaconManager.unbind(MainActivity.this);
             }
         }
+        locationTracker.stopLocationService(getBaseContext());
 
 
     }

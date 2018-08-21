@@ -38,7 +38,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         final int level = leaderboardItems.get(position).level;
         final String name = leaderboardItems.get(position).name;
         final int points = leaderboardItems.get(position).points;
-
+        final String uid = leaderboardItems.get(position).uid;
         holder.positionText.setText("" + String.valueOf(position + 1));
         holder.nameText.setText("" + leaderboardItems.get(position).name);
         holder.levelText.setText("" + leaderboardItems.get(position).level);
@@ -47,7 +47,9 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
             holder.cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-
+                    Log.i("HI", "onclick");
+                    MainActivity.selectUID = uid;
+                    ((Activity) context).finish();
                 }
             });
         }

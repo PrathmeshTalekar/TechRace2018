@@ -24,6 +24,7 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 
 
@@ -33,6 +34,7 @@ public class LeaderboardActivity extends AppCompatActivity {
     ProgressDialog progressDialog;
     SwipeRefreshLayout swipeRefreshLayout;
     static boolean selectUser = false;
+    static ArrayList<LBUpdate> finalList = new ArrayList<>();
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -96,9 +98,11 @@ public class LeaderboardActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
     class back extends AsyncTask<Void, Void, Void> {
         ArrayList<LBUpdate> items = new ArrayList<>();
-        ArrayList<LBUpdate> finalList = new ArrayList<>();
+        //ArrayList<LBUpdate> finalList = new ArrayList<>();
+
 
         @Override
         protected void onPreExecute() {
@@ -122,11 +126,12 @@ public class LeaderboardActivity extends AppCompatActivity {
 
                     for (DataSnapshot d : dataSnapshot.getChildren()) {
                         Log.i("DDDDDD", d.toString());
+                        String uid = d.getKey();
                         String name = (String) d.child("Name").getValue();
                         int level = d.child("Level").getValue(Integer.class);
                         int points = d.child("Points").getValue(Integer.class);
                         long timeInMil = d.child("Time").getValue(Long.class);
-                        items.add(new LBUpdate(name, points, level, timeInMil));
+                        items.add(new LBUpdate(name, points, level, timeInMil, uid));
                     }
 
                     int maxLevel = 0;
@@ -158,6 +163,7 @@ public class LeaderboardActivity extends AppCompatActivity {
                         progressDialog.hide();
 
                     }
+
                     recyclerView.setAdapter(new LeaderboardAdapter(finalList, LeaderboardActivity.this));
 
 
@@ -177,14 +183,7 @@ public class LeaderboardActivity extends AppCompatActivity {
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
             Log.i("LBLIST", finalList.toString());
-//            LeaderboardAdapter adapter = new LeaderboardAdapter(finalList,LeaderboardActivity.this);
-//            ListView listView = (ListView) LeaderBoardFragment.myView1.findViewById(R.id.list);
-//            listView.setAdapter(adapter);
-//            if (progressDialog.isShowing())
-//            {
-//                progressDialog.hide();
-//            }
-//            recyclerView.setAdapter(new LeaderboardAdapter(finalList,LeaderboardActivity.this));
+//
 
         }
     }

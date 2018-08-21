@@ -24,71 +24,74 @@ public class LBUpdate implements Comparator<LBUpdate> {
     public int points;
     public int level;
     public long timeInMil;
+    public String uid;
     ArrayList<LBUpdate> items = new ArrayList<>();
     ArrayList<LBUpdate> finalList = new ArrayList<>();
 
-    public LBUpdate(String name, int points, int level, long timeInMil) {
+    public LBUpdate(String name, int points, int level, long timeInMil, String uid) {
         this.name = name;
         this.points = points;
         this.level = level;
         this.timeInMil = timeInMil;
+        this.uid = uid;
     }
 
     public LBUpdate() {
 
     }
 
-    ArrayList<LBUpdate> leaderUpdate() {
-        items.clear();
-        finalList.clear();
-        DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
-        db.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot d : dataSnapshot.getChildren()) {
-                    Log.i("DDDDDD", d.toString());
-                    String name = (String) d.child("Name").getValue();
-                    int level = d.child("Level").getValue(Integer.class);
-                    int points = d.child("Points").getValue(Integer.class);
-                    long timeInMil = d.child("Time").getValue(Long.class);
-                    items.add(new LBUpdate(name, points, level, timeInMil));
-                }
-
-                int maxLevel = 0;
-                for (int i = 0; i < items.size(); i++) {
-                    int current = items.get(i).level;
-                    if (current > maxLevel) {
-                        maxLevel = current;
-                    }
-                }
-                Log.i("MAXLEVEL", String.valueOf(maxLevel));
-                while (maxLevel > 0) {
-                    List<LBUpdate> sameLevelList = new ArrayList<>();
-                    for (int i = 0; i < items.size(); i++) {
-                        if (items.get(i).level == maxLevel) {
-                            sameLevelList.add(items.get(i));
-                        }
-                    }
-                    Log.i("SAMELEVELLIST", sameLevelList.toString());
-                    Collections.sort(sameLevelList, new LBUpdate.TimeComparator());
-                    Collections.reverse(sameLevelList);
-                    finalList.addAll(sameLevelList);
-                    // sameLevelList.clear();
-                    for (int j = 0; j < finalList.size(); j++) {
-                        Log.i("Final LIST LOG", finalList.toString());
-                    }
-                    maxLevel--;
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-        return finalList;
-    }
+//    ArrayList<LBUpdate> leaderUpdate() {
+//        items.clear();
+//        finalList.clear();
+//        DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
+//        db.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//
+//                for (DataSnapshot d : dataSnapshot.getChildren()) {
+//                    Log.i("DDDDDD", d.toString());
+//                    String uid=d.getKey();
+//                    String name = (String) d.child("Name").getValue();
+//                    int level = d.child("Level").getValue(Integer.class);
+//                    int points = d.child("Points").getValue(Integer.class);
+//                    long timeInMil = d.child("Time").getValue(Long.class);
+//                    items.add(new LBUpdate(name, points, level, timeInMil,uid));
+//                }
+//
+//                int maxLevel = 0;
+//                for (int i = 0; i < items.size(); i++) {
+//                    int current = items.get(i).level;
+//                    if (current > maxLevel) {
+//                        maxLevel = current;
+//                    }
+//                }
+//                Log.i("MAXLEVEL", String.valueOf(maxLevel));
+//                while (maxLevel > 0) {
+//                    List<LBUpdate> sameLevelList = new ArrayList<>();
+//                    for (int i = 0; i < items.size(); i++) {
+//                        if (items.get(i).level == maxLevel) {
+//                            sameLevelList.add(items.get(i));
+//                        }
+//                    }
+//                    Log.i("SAMELEVELLIST", sameLevelList.toString());
+//                    Collections.sort(sameLevelList, new LBUpdate.TimeComparator());
+//                    Collections.reverse(sameLevelList);
+//                    finalList.addAll(sameLevelList);
+//                    // sameLevelList.clear();
+//                    for (int j = 0; j < finalList.size(); j++) {
+//                        Log.i("Final LIST LOG", finalList.toString());
+//                    }
+//                    maxLevel--;
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+//        return finalList;
+//    }
 
     @Override
     public int compare(LBUpdate o1, LBUpdate o2) {
