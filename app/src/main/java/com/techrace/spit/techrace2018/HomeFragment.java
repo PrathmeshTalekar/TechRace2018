@@ -24,6 +24,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -54,24 +55,28 @@ public class HomeFragment extends Fragment {
 
     static final String TAG = "MonitoringActivity";
     static View myView;
-    static TextView clueTextView, t2, t3, pointsTextView, timerTextView;
+    static TextView clueTextView, pointsTextView, timerTextView;
+
     static DatabaseReference UserDatabaseReference;
     static FirebaseDatabase firebaseDatabase;
     static FirebaseAuth homeFragAuth = MainActivity.mAuth;
     static String UID;
-    static int level = 1, points, cooldown;
+    static int level = 1, points;
     static String levelString;
-    static String beaconID, NSID;
-    static Beacon firstBeacon;
-    NetworkInfo.State wifi, mobile;
+    static String NSID;
     static Location clueLocation;
     static String volunteerPassword;
-    static boolean beacon = true;
-    static long l;
     static String name;
+    static RelativeLayout clueRelativeLayout;
     // private BeaconManager MainActivity.beaconManager;
 
-    static LocationTracker locationTracker;
+
+    @Override
+    public void onStop() {
+        super.onStop();
+
+    }
+
 
     public void updateClue() {
         clueLocation = new Location("");
@@ -107,7 +112,7 @@ public class HomeFragment extends Fragment {
                     clueLocation.setLongitude(Double.parseDouble(locationDS.child("Longitude").getValue(String.class)));
                     Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
                     clueTextView.setText(levelString);
-                    clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
+                    clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
                 }
 
                 @Override
@@ -126,17 +131,13 @@ public class HomeFragment extends Fragment {
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
 
-        ConnectivityManager conMan = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-        mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
 
-        //wifi
-        wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
         clueTextView = myView.findViewById(R.id.clue_text);
-        t2 = myView.findViewById(R.id.textView3);
-        t3 = myView.findViewById(R.id.textView2);
+//        t2 = myView.findViewById(R.id.textView3);
+//        t3 = myView.findViewById(R.id.textView2);
         pointsTextView = myView.findViewById(R.id.pointsTextView);
-        timerTextView = myView.findViewById(R.id.timerTextView);
-
+        //   timerTextView = myView.findViewById(R.id.timerTextView);
+        clueRelativeLayout = myView.findViewById(R.id.clueLayout);
 
         clueTextView.setText(pref.getString("Clue", "Connect To Internet"));
         pointsTextView.setText(String.valueOf(pref.getInt("Points", 0)));
@@ -155,11 +156,7 @@ public class HomeFragment extends Fragment {
     public void onDestroy() {
         super.onDestroy();
         Log.i("DEST", "DESTROYYYEDDD");
-        if (MainActivity.beaconManager != null) {
-            if (MainActivity.beaconManager.isBound((MainActivity) HomeFragment.this.getActivity())) {
-                MainActivity.beaconManager.unbind((MainActivity) HomeFragment.this.getActivity());
-            }
-        }
+
 //        if(locationTracker!=null) {
 //            locationTracker.stopLocationService(getActivity());
 //        }
@@ -168,10 +165,16 @@ public class HomeFragment extends Fragment {
     @Override
     public void onPause() {
         super.onPause();
-        if (MainActivity.beaconManager != null) {
-            if (MainActivity.beaconManager.isBound((MainActivity) HomeFragment.this.getActivity()))
-                MainActivity.beaconManager.setBackgroundMode(false);
-        }
+//        if (MainActivity.beaconManager != null) {
+//            if (MainActivity.beaconManager.isBound((MainActivity) HomeFragment.this.getActivity()))
+//                MainActivity.beaconManager.unbind((MainActivity)HomeFragment.this.getActivity());
+//             //   beacon=false;
+//        }
+
+//        if(!beacon){
+//
+//            MainActivity.beaconManager.unbind((MainActivity) HomeFragment.this.getActivity());
+//        }
 //        if(locationTracker!=null) {
 //            locationTracker.stopLocationService(getActivity());
 //        }
@@ -188,67 +191,15 @@ public class HomeFragment extends Fragment {
     @Override
     public void onResume() {
         super.onResume();
-
+//        beacon=true;
         updateClue();
 
 
-        try {
-            locationTracker = new LocationTracker("my.action")
-                    .setInterval(15000)
-                    .setGps(true)
-                    .setNetWork(true)
-                    .setNetWork(false);
-            locationTracker.currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
-                @Override
-                public void onCurrentLocation(Location location) {
-                    //Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
-                    double distanceinmetres = clueLocation.distanceTo(location);
 
-                    Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
-
-                    if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
-                        if (!timerOn) {
-                                if (distanceinmetres <= 250) {
-                                    clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
-                                    if (beacon) {
-                                        MainActivity.beaconManager = BeaconManager.getInstanceForApplication((MainActivity) HomeFragment.this.getActivity());
-                                        // To detect proprietary beacons, you must add a line like below corresponding to your beacon
-                                        // type.  Do a web search for "setBeaconLayout" to get the proper expression.
-                                        MainActivity.beaconManager.getBeaconParsers().add(new BeaconParser().
-                                                setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
-                                        MainActivity.beaconManager.bind((MainActivity) HomeFragment.this.getActivity());
-                                    } else {
-                                        MainActivity.beaconManager.unbind((MainActivity) HomeFragment.this.getActivity());
-                                        MainActivity.beaconManager.disableForegroundServiceScanning();
-                                        MainActivity.beaconManager.removeAllMonitorNotifiers();
-                                        MainActivity.beaconManager.applySettings();
-                                    }
-
-                                } else {
-                                    clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
-                                }
-                        }
-                    } else {
-                        Toast.makeText(getActivity(), "No Internet", Toast.LENGTH_LONG).show();
-                        // clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
-
-                    }
-
-                }
-
-                @Override
-                public void onPermissionDiened() {
-
-                    // hotcoldtext.setText("Location OFF");
-                }
-            })).start(getActivity(), (AppCompatActivity) getActivity());
-        } catch (Exception e) {
-            Log.v("EROOR", "" + e);
-
-        }
 
         //    if (MainActivity.beaconManager.isBound(this)) MainActivity.beaconManager.setBackgroundMode(false);
     }
+
 
 //    @Override
 //    public Context getApplicationContext() {

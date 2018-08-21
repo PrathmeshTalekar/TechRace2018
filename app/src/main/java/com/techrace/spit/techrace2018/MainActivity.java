@@ -62,19 +62,18 @@ import br.com.safety.locationlistenerhelper.core.LocationTracker;
 
 import static com.techrace.spit.techrace2018.HomeFragment.NSID;
 import static com.techrace.spit.techrace2018.HomeFragment.UID;
-import static com.techrace.spit.techrace2018.HomeFragment.beacon;
-import static com.techrace.spit.techrace2018.HomeFragment.beaconID;
+
+
 import static com.techrace.spit.techrace2018.HomeFragment.clueLocation;
+import static com.techrace.spit.techrace2018.HomeFragment.clueRelativeLayout;
 import static com.techrace.spit.techrace2018.HomeFragment.clueTextView;
-import static com.techrace.spit.techrace2018.HomeFragment.cooldown;
-import static com.techrace.spit.techrace2018.HomeFragment.firstBeacon;
+
 import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
-import static com.techrace.spit.techrace2018.HomeFragment.l;
+
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 
-import static com.techrace.spit.techrace2018.HomeFragment.locationTracker;
 import static com.techrace.spit.techrace2018.HomeFragment.myView;
-import static com.techrace.spit.techrace2018.HomeFragment.t2;
+
 import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
 
 
@@ -88,8 +87,14 @@ public class MainActivity extends AppCompatActivity
     static SharedPreferences pref;
     static SharedPreferences.Editor prefEditor;
     Date d = new Date();
+    static boolean beacon = true;
+    int cooldown;
+    String beaconID;
     static boolean timerOn = false;
-    CountDownTimer countDownTimer;
+    Beacon firstBeacon;
+    long l;
+    LocationTracker locationTracker;
+    NetworkInfo.State wifi, mobile;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -184,7 +189,66 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+        ConnectivityManager conMan = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+
+        //wifi
+        wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
         verifyBluetooth();
+        try {
+            locationTracker = new LocationTracker("my.action")
+                    .setInterval(15000)
+                    .setGps(true)
+                    .setNetWork(true)
+                    .setNetWork(false);
+            locationTracker.currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
+                @Override
+                public void onCurrentLocation(Location location) {
+                    //Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+                    double distanceinmetres = clueLocation.distanceTo(location);
+
+                    Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
+
+                    if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
+                        if (!timerOn) {
+                            if (distanceinmetres <= 250) {
+                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
+                                if (beacon) {
+                                    MainActivity.beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
+                                    // To detect proprietary beacons, you must add a line like below corresponding to your beacon
+                                    // type.  Do a web search for "setBeaconLayout" to get the proper expression.
+                                    MainActivity.beaconManager.getBeaconParsers().add(new BeaconParser().
+                                            setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
+                                    MainActivity.beaconManager.bind(MainActivity.this);
+                                } else {
+                                    MainActivity.beaconManager.unbind(MainActivity.this);
+                                    MainActivity.beaconManager.disableForegroundServiceScanning();
+                                    MainActivity.beaconManager.removeAllMonitorNotifiers();
+                                    MainActivity.beaconManager.applySettings();
+                                }
+
+                            } else {
+                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
+                            }
+                        }
+                    } else {
+                        Toast.makeText(MainActivity.this, "No Internet", Toast.LENGTH_LONG).show();
+                        // clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
+
+                    }
+
+                }
+
+                @Override
+                public void onPermissionDiened() {
+
+                    // hotcoldtext.setText("Location OFF");
+                }
+            })).start(MainActivity.this, MainActivity.this);
+        } catch (Exception e) {
+            Log.v("EROOR", "" + e);
+
+        }
 
     }
 
@@ -320,8 +384,14 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-
+        locationTracker.stopLocationService(getBaseContext());
         super.onDestroy();
+        if (MainActivity.beaconManager != null) {
+            if (MainActivity.beaconManager.isBound(MainActivity.this)) {
+                MainActivity.beaconManager.unbind(MainActivity.this);
+            }
+        }
+
 
     }
 
@@ -349,12 +419,12 @@ public class MainActivity extends AppCompatActivity
                                                                     String s = "id1: " + NSID + " id2: 0x000000000000";
                                                                     Log.i("AAAA", s);
                                                                     final double dist = firstBeacon.getDistance();
-                                                                    runOnUiThread(new Runnable() {
-                                                                        @Override
-                                                                        public void run() {
-                                                                            t2.setText(String.valueOf(dist));
-                                                                        }
-                                                                    });
+//                                                                    runOnUiThread(new Runnable() {
+//                                                                        @Override
+//                                                                        public void run() {
+//                                                                            t2.setText(String.valueOf(dist));
+//                                                                        }
+//                                                                    });
 
                                                                     Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
                                                                     if (beaconID.equals(s) && dist <= 0.45) {
@@ -369,7 +439,7 @@ public class MainActivity extends AppCompatActivity
                                                                         runOnUiThread(new Runnable() {
                                                                             @Override
                                                                             public void run() {
-                                                                                clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.confirmGreen));
+                                                                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.confirmGreen));
                                                                             }
                                                                         });
                                                                         //MainActivity.beaconManager.setForegroundBetweenScanPeriod(30000);
@@ -531,4 +601,5 @@ public class MainActivity extends AppCompatActivity
         } catch (RemoteException e) {
         }
     }
+
 }

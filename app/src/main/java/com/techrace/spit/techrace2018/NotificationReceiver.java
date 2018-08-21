@@ -38,9 +38,9 @@ public class NotificationReceiver extends BroadcastReceiver {
         long l = d.getTime();
         UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
         UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
-        new HomeFragment().onResume();
-        HomeFragment.beacon = true;
+        MainActivity.beacon = true;
         timerOn = false;
         new HomeFragment().onResume();
+//        new HomeFragment().onResume();
     }
 }
