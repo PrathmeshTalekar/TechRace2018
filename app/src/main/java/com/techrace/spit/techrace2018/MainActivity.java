@@ -122,21 +122,59 @@ public class MainActivity extends AppCompatActivity
                 builder.show();
             }
         }
+
         mAuth = FirebaseAuth.getInstance();
         // Log.i("MAUTH",mAuth.getCurrentUser().getDisplayName());
         if (mAuth.getCurrentUser() == null) {
             Intent i = new Intent(MainActivity.this, SignUpActivity.class);
             startActivity(i);
         } else {
+            pref = MainActivity.this.getSharedPreferences("com.techrace.spit.techrace2018", MODE_PRIVATE);
+            prefEditor = pref.edit();
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    level = dataSnapshot.getValue(Integer.class);
+                    prefEditor.putInt("Level", level);
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(new ValueEventListener() {
+                @Override
+                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                    points = dataSnapshot.getValue(Integer.class);
+                    DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
+                    leadercooldown.child(UID).child("Points").setValue(points);
+                    Log.i("POints updated", "" + points);
+
+                    prefEditor.putInt("Points", points);
+                    HomeFragment.pointsTextView.setText(String.valueOf(MainActivity.points));
+                }
+
+                @Override
+                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                }
+            });
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     cooldown = dataSnapshot.getValue(Integer.class);
+                    int localCool = pref.getInt("Cooldown", -1);
+                    Log.i("local cool", "" + localCool);
+                    if (localCool == -1) {
+                        prefEditor.putInt("Cooldown", cooldown).apply();
+                        localCool = cooldown;
+                    }
                     DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
                     leadercooldown.child(UID).child("Cooldown").setValue(cooldown);
                     Log.i("COOLDOWN FOUND", "" + cooldown);
-                    if (cooldown > 0) {
+                    if (cooldown - localCool > 0) {
                         if (points >= AppConstants.reversePrice) {
                             final android.support.v7.app.AlertDialog.Builder reverseAlertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
                             reverseAlertDialog.setTitle("TIMER APPLIED").setMessage("Buy Right Back at Ya Card? for 60 points")
@@ -156,6 +194,8 @@ public class MainActivity extends AppCompatActivity
                                                     reverseReference1.child("Users").child(UID).child("points")
                                                             .setValue(MainActivity.points - AppConstants.reversePrice);
                                                     reverseReference1.child(mAuth.getCurrentUser().getUid()).child("cooldown").setValue(0);
+                                                    prefEditor = pref.edit();
+                                                    prefEditor.putInt("Cooldown", 0).apply();
                                                 }
 
                                                 @Override
@@ -168,27 +208,17 @@ public class MainActivity extends AppCompatActivity
                                     }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
+                                    prefEditor = pref.edit();
+                                    prefEditor.putInt("Cooldown", cooldown).apply();
 
                                 }
                             }).setCancelable(false).show();
+                        } else {
+                            prefEditor = pref.edit();
+                            prefEditor.putInt("Cooldown", cooldown).apply();
                         }
                     }
                     timerOn = false;
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    points = dataSnapshot.getValue(Integer.class);
-                    DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
-                    leadercooldown.child(UID).child("Points").setValue(points);
-                    Log.i("POints updated", "" + points);
                 }
 
                 @Override
@@ -209,7 +239,7 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         // displaySelectedScreen(R.id.home);
-        pref = getSharedPreferences("com.techrace.spit.techrace2018", MODE_PRIVATE);
+
 
         resources = getResources();
         displaySelectedScreen(R.id.home);
@@ -251,6 +281,7 @@ public class MainActivity extends AppCompatActivity
         wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
         verifyBluetooth();
         try {
+            //    new HomeFragment().updateClue();
             locationTracker = new LocationTracker("my.action")
                     .setInterval(15000)
                     .setGps(true)
@@ -260,6 +291,7 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onCurrentLocation(Location location) {
                     //Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+
                     double distanceinmetres = clueLocation.distanceTo(location);
 
                     // Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
@@ -551,7 +583,7 @@ public class MainActivity extends AppCompatActivity
                                                                                 l = d.getTime();
                                                                                 UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
                                                                                 UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
-                                                                                new HomeFragment().onResume();
+                                                                                new HomeFragment().updateClue();
                                                                                 beacon = true;
                                                                                 break;
                                                                             } else {

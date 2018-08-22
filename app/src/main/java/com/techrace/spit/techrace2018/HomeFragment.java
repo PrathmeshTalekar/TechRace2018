@@ -41,15 +41,12 @@ import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 
 import static com.techrace.spit.techrace2018.MainActivity.points;
-import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
-import static com.techrace.spit.techrace2018.MainActivity.pref;
+//import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
+//import static com.techrace.spit.techrace2018.MainActivity.pref;
 import static com.techrace.spit.techrace2018.MainActivity.timerOn;
 
 import java.util.prefs.Preferences;
 
-import br.com.safety.locationlistenerhelper.core.CurrentLocationListener;
-import br.com.safety.locationlistenerhelper.core.CurrentLocationReceiver;
-import br.com.safety.locationlistenerhelper.core.LocationTracker;
 
 
 public class HomeFragment extends Fragment {
@@ -70,7 +67,8 @@ public class HomeFragment extends Fragment {
     static String name;
     static RelativeLayout clueRelativeLayout;
     // private BeaconManager MainActivity.beaconManager;
-
+    SharedPreferences sharedPreferences;
+    SharedPreferences.Editor editor;
 
     @Override
     public void onStop() {
@@ -97,13 +95,16 @@ public class HomeFragment extends Fragment {
                     DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
                     level = userDS.child("level").getValue(Integer.class);
                     Log.i("LEVELL", String.valueOf(level));
+                    editor = sharedPreferences.edit();
+                    editor.putInt("Local Level", level);
                     points = userDS.child("points").getValue(Integer.class);
-
+                    editor.putInt("Points", points);
                     pointsTextView.setText(String.valueOf(MainActivity.points));
                     name = (String) userDS.child("name").getValue();
 
                     DataSnapshot locationDS = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level));
                     levelString = locationDS.child("Clue").getValue(String.class);
+                    editor.putString("Clue", levelString).apply();
                     //  pref = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
 
                     Log.i("LEVEL STNG", String.valueOf(level) + "  " + levelString);
@@ -123,26 +124,21 @@ public class HomeFragment extends Fragment {
             });
 
         }
-
-        prefEditor = pref.edit().putInt("Level", level).putInt("Points", points).putString("Clue", levelString);
-        prefEditor.apply();
     }
 
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-
+        sharedPreferences = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
 
         clueTextView = myView.findViewById(R.id.clue_text);
-//        t2 = myView.findViewById(R.id.textView3);
-//        t3 = myView.findViewById(R.id.textView2);
         pointsTextView = myView.findViewById(R.id.pointsTextView);
         //   timerTextView = myView.findViewById(R.id.timerTextView);
         clueRelativeLayout = myView.findViewById(R.id.clueLayout);
 
-        clueTextView.setText(pref.getString("Clue", "Connect To Internet"));
-        pointsTextView.setText(String.valueOf(pref.getInt("Points", 0)));
-//        MainActivity.pref=getActivity().getSharedPreferences("OFFLINE",Context.MODE_PRIVATE);
+        clueTextView.setText(sharedPreferences.getString("Clue", "Connect To Internet"));
+        pointsTextView.setText(String.valueOf(sharedPreferences.getInt("Points", 0)));
+        //pointsTextView.
     }
 
     @Nullable
@@ -153,67 +149,20 @@ public class HomeFragment extends Fragment {
         return myView;
     }
 
-    @Override
-    public void onDestroy() {
-        super.onDestroy();
-        Log.i("DEST", "DESTROYYYEDDD");
-
-//        if(locationTracker!=null) {
-//            locationTracker.stopLocationService(getActivity());
-//        }
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
-//        if (MainActivity.beaconManager != null) {
-//            if (MainActivity.beaconManager.isBound((MainActivity) HomeFragment.this.getActivity()))
-//                MainActivity.beaconManager.unbind((MainActivity)HomeFragment.this.getActivity());
-//             //   beacon=false;
-//        }
-
-//        if(!beacon){
-//
-//            MainActivity.beaconManager.unbind((MainActivity) HomeFragment.this.getActivity());
-//        }
-//        if(locationTracker!=null) {
-//            locationTracker.stopLocationService(getActivity());
-//        }
-//
-    }
-
-    @Override
-    public void onAttach(Context context) {
-        super.onAttach(context);
-
-    }
 
 
     @Override
     public void onResume() {
         super.onResume();
-//        beacon=true;
-        updateClue();
-
-
-
-
+        // sharedPreferences=getActivity().getSharedPreferences("com.techrace.spit.techrace2018",Context.MODE_PRIVATE);
+        if (sharedPreferences.getInt("Local Level", -1) != level) {
+            updateClue();
+        }
+        //else{
+        //    pointsTextView.setText(String.valueOf(MainActivity.points));
+        //}
         //    if (MainActivity.beaconManager.isBound(this)) MainActivity.beaconManager.setBackgroundMode(false);
     }
 
 
-//    @Override
-//    public Context getApplicationContext() {
-//        return null;
-//    }
-//
-//    @Override
-//    public void unbindService(ServiceConnection serviceConnection) {
-//
-//    }
-//
-//    @Override
-//    public boolean bindService(Intent intent, ServiceConnection serviceConnection, int i) {
-//        return false;
-//    }
 }

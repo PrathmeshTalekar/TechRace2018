@@ -83,10 +83,12 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                                     if (PowerCardsFragment.twoORfour == 2) {
                                         powerReference1.child("Users").child(UID).child("points")
                                                 .setValue(MainActivity.points - AppConstants.plusTwoPrice);
+                                        // MainActivity.prefEditor.putInt("Points",points).apply();
                                         powerReference1.child("Users").child(selectUID).child("Applied By").setValue(UID);
                                     } else if (PowerCardsFragment.twoORfour == 4) {
                                         powerReference1.child("Users").child(UID).child("points")
                                                 .setValue(MainActivity.points - AppConstants.plusFourPrice);
+                                        // MainActivity.prefEditor.putInt("Points",points).apply();
                                     }
                                     Toast.makeText(holder.cardView.getContext(), "Power Card Applied", Toast.LENGTH_SHORT).show();
 
