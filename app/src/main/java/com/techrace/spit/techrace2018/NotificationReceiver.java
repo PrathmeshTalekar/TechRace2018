@@ -33,11 +33,11 @@ public class NotificationReceiver extends BroadcastReceiver {
         UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
         UserDatabaseReference.child("Users").child(UID).child("cooldown").setValue(0);
         UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-        UserDatabaseReference.child("Users").child(UID).child("points").setValue(HomeFragment.points + 5);
+        UserDatabaseReference.child("Users").child(UID).child("points").setValue(MainActivity.points + 5);
         Date d = new Date();
         long l = d.getTime();
         UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
-        UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
+        UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, MainActivity.points, l, MainActivity.cooldown, UID));
         MainActivity.beacon = true;
         timerOn = false;
         new HomeFragment().onResume();

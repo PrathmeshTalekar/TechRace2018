@@ -40,6 +40,7 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 
+import static com.techrace.spit.techrace2018.MainActivity.points;
 import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 import static com.techrace.spit.techrace2018.MainActivity.pref;
 import static com.techrace.spit.techrace2018.MainActivity.timerOn;
@@ -61,7 +62,7 @@ public class HomeFragment extends Fragment {
     static FirebaseDatabase firebaseDatabase;
     static FirebaseAuth homeFragAuth = MainActivity.mAuth;
     static String UID;
-    static int level = 1, points;
+    static int level = 1;
     static String levelString;
     static String NSID;
     static Location clueLocation;
@@ -98,7 +99,7 @@ public class HomeFragment extends Fragment {
                     Log.i("LEVELL", String.valueOf(level));
                     points = userDS.child("points").getValue(Integer.class);
 
-                    pointsTextView.setText(String.valueOf(points));
+                    pointsTextView.setText(String.valueOf(MainActivity.points));
                     name = (String) userDS.child("name").getValue();
 
                     DataSnapshot locationDS = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level));

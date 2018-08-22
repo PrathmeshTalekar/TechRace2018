@@ -25,15 +25,17 @@ public class LBUpdate implements Comparator<LBUpdate> {
     public int level;
     public long timeInMil;
     public String uid;
+    public int cool;
     ArrayList<LBUpdate> items = new ArrayList<>();
     ArrayList<LBUpdate> finalList = new ArrayList<>();
 
-    public LBUpdate(String name, int points, int level, long timeInMil, String uid) {
+    public LBUpdate(String name, int points, int level, long timeInMil, String uid, int cool) {
         this.name = name;
         this.points = points;
         this.level = level;
         this.timeInMil = timeInMil;
         this.uid = uid;
+        this.cool = cool;
     }
 
     public LBUpdate() {

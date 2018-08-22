@@ -7,22 +7,28 @@ import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.Toast;
 
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
-import static com.techrace.spit.techrace2018.HomeFragment.points;
+import static com.techrace.spit.techrace2018.HomeFragment.UID;
+
+import static com.techrace.spit.techrace2018.MainActivity.points;
 
 
 public class PowerCardsFragment extends Fragment {
     View myView;
-    Button plusTwo, plusFour;
-
+    static int twoORfour = 0;
+    Button plusTwo, plusFour, unlockClue;
     public PowerCardsFragment() {
         // Required empty public constructor
     }
@@ -40,21 +46,18 @@ public class PowerCardsFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
         plusTwo = myView.findViewById(R.id.plusTwo);
         plusFour = myView.findViewById(R.id.plusFour);
+        unlockClue = myView.findViewById(R.id.unlockClue);
         plusTwo.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (points >= 20) {
-                    Intent i = new Intent(getActivity(), LeaderboardActivity.class);
-                    i.putExtra("SELECT USER", "TRUE");
-                    startActivity(i);
-                    if (MainActivity.selectUID != null) {
-                        DatabaseReference UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                        UserDatabaseReference.child("Users").child(MainActivity.selectUID).child("cooldown").setValue(2);
-                        Toast.makeText(getActivity(), "Power Card Applied", Toast.LENGTH_SHORT).show();
-                        MainActivity.selectUID = null;
-                    } else {
-                        Toast.makeText(getActivity(), "Power Card Not Applied", Toast.LENGTH_SHORT).show();
-                    }
+                if (points >= AppConstants.plusTwoPrice) {
+                    twoORfour = 2;
+                    LeaderboardActivity.selectUser = true;
+                    Intent i1 = new Intent(getActivity(), LeaderboardActivity.class);
+//                    i.putExtra("SELECT USER", "TRUE");
+                    startActivity(i1);
+
+
                 } else {
                     Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
                 }
@@ -63,20 +66,25 @@ public class PowerCardsFragment extends Fragment {
         plusFour.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (points >= 30) {
-                    Intent i = new Intent(getActivity(), LeaderboardActivity.class);
-                    i.putExtra("SELECT USER", "TRUE");
-                    startActivity(i);
-                    if (MainActivity.selectUID != null) {
-                        DatabaseReference UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                        UserDatabaseReference.child("Users").child(MainActivity.selectUID).child("cooldown").setValue(4);
-                        Toast.makeText(getActivity(), "Power Card Applied", Toast.LENGTH_SHORT).show();
-                        MainActivity.selectUID = null;
-                    } else {
-                        Toast.makeText(getActivity(), "Power Card Not Applied", Toast.LENGTH_SHORT).show();
-                    }
+                if (points >= AppConstants.plusFourPrice) {
+                    twoORfour = 4;
+                    LeaderboardActivity.selectUser = true;
+                    Intent i1 = new Intent(getActivity(), LeaderboardActivity.class);
+//                    i.putExtra("SELECT USER", "TRUE");
+                    startActivity(i1);
+
+
                 } else {
                     Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+        });
+        unlockClue.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (MainActivity.points >= AppConstants.unlockACluePrice) {
+
                 }
             }
         });

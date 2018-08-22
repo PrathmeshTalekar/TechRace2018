@@ -43,7 +43,9 @@ public class LeaderboardActivity extends AppCompatActivity {
         if (Build.VERSION.SDK_INT >= 21)
             setupWindowAnimations();
         Intent i = this.getIntent();
+//        Log.i("EXTRA INTENT11111",i.getExtras().getString("SELECT USER"));
         if (i.getExtras() != null) {
+            Log.i("EXTRA INTENT", i.getExtras().getString("SELECT USER"));
             if (i.getExtras().getString("SELECT USER").equals("TRUE")) {
                 selectUser = true;
             }
@@ -79,7 +81,7 @@ public class LeaderboardActivity extends AppCompatActivity {
     @Override
     public void onBackPressed() {
         super.onBackPressed();
-        progressDialog.dismiss();
+
         finish();
     }
 
@@ -98,6 +100,11 @@ public class LeaderboardActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+    @Override
+    protected void onPause() {
+        super.onPause();
+        progressDialog.dismiss();
+    }
 
     class back extends AsyncTask<Void, Void, Void> {
         ArrayList<LBUpdate> items = new ArrayList<>();
@@ -127,11 +134,12 @@ public class LeaderboardActivity extends AppCompatActivity {
                     for (DataSnapshot d : dataSnapshot.getChildren()) {
                         Log.i("DDDDDD", d.toString());
                         String uid = d.getKey();
+                        int cool = d.child("Cooldown").getValue(Integer.class);
                         String name = (String) d.child("Name").getValue();
                         int level = d.child("Level").getValue(Integer.class);
                         int points = d.child("Points").getValue(Integer.class);
                         long timeInMil = d.child("Time").getValue(Long.class);
-                        items.add(new LBUpdate(name, points, level, timeInMil, uid));
+                        items.add(new LBUpdate(name, points, level, timeInMil, uid, cool));
                     }
 
                     int maxLevel = 0;
