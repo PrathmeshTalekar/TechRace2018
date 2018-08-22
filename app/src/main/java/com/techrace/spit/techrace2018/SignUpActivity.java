@@ -70,7 +70,7 @@ public class SignUpActivity extends AppCompatActivity {
         final String contact = contactEditText.getText().toString().trim();
         String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
         if (email.matches(emailPattern) && email.length() > 0) {
-            Toast.makeText(getApplicationContext(), "valid email address", Toast.LENGTH_SHORT).show();
+
             if (name.equals("") || !password.equals(AppConstants.password)) {
                 Toast.makeText(this, "Please Enter Correct Details", Toast.LENGTH_SHORT).show();
             } else {

@@ -43,6 +43,8 @@ import org.altbeacon.beacon.BeaconParser;
 import static com.techrace.spit.techrace2018.MainActivity.points;
 //import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 //import static com.techrace.spit.techrace2018.MainActivity.pref;
+import static com.techrace.spit.techrace2018.MainActivity.pref;
+import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 import static com.techrace.spit.techrace2018.MainActivity.timerOn;
 
 import java.util.prefs.Preferences;
@@ -66,9 +68,7 @@ public class HomeFragment extends Fragment {
     static String volunteerPassword;
     static String name;
     static RelativeLayout clueRelativeLayout;
-    // private BeaconManager MainActivity.beaconManager;
-    SharedPreferences sharedPreferences;
-    SharedPreferences.Editor editor;
+
 
     @Override
     public void onStop() {
@@ -78,7 +78,8 @@ public class HomeFragment extends Fragment {
 
 
     public void updateClue() {
-        clueLocation = new Location("");
+        // clueLocation = new Location("");
+
         firebaseDatabase = FirebaseDatabase.getInstance();
         if (homeFragAuth.getCurrentUser() != null) {
 
@@ -95,16 +96,16 @@ public class HomeFragment extends Fragment {
                     DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
                     level = userDS.child("level").getValue(Integer.class);
                     Log.i("LEVELL", String.valueOf(level));
-                    editor = sharedPreferences.edit();
-                    editor.putInt("Local Level", level);
+                    prefEditor = pref.edit();
+                    prefEditor.putInt("Local Level", level);
                     points = userDS.child("points").getValue(Integer.class);
-                    editor.putInt("Points", points);
+                    prefEditor.putInt("Points", points);
                     pointsTextView.setText(String.valueOf(MainActivity.points));
                     name = (String) userDS.child("name").getValue();
 
                     DataSnapshot locationDS = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level));
                     levelString = locationDS.child("Clue").getValue(String.class);
-                    editor.putString("Clue", levelString).apply();
+                    prefEditor.putString("Clue", levelString).apply();
                     //  pref = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
 
                     Log.i("LEVEL STNG", String.valueOf(level) + "  " + levelString);
@@ -129,15 +130,14 @@ public class HomeFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-        sharedPreferences = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
 
         clueTextView = myView.findViewById(R.id.clue_text);
         pointsTextView = myView.findViewById(R.id.pointsTextView);
         //   timerTextView = myView.findViewById(R.id.timerTextView);
         clueRelativeLayout = myView.findViewById(R.id.clueLayout);
 
-        clueTextView.setText(sharedPreferences.getString("Clue", "Connect To Internet"));
-        pointsTextView.setText(String.valueOf(sharedPreferences.getInt("Points", 0)));
+        clueTextView.setText(pref.getString("Clue", "Connect To Internet"));
+        pointsTextView.setText(String.valueOf(pref.getInt("Points", 0)));
         //pointsTextView.
     }
 
@@ -155,7 +155,7 @@ public class HomeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // sharedPreferences=getActivity().getSharedPreferences("com.techrace.spit.techrace2018",Context.MODE_PRIVATE);
-        if (sharedPreferences.getInt("Local Level", -1) != level) {
+        if (pref.getInt("Local Level", -1) != level) {
             updateClue();
         }
         //else{

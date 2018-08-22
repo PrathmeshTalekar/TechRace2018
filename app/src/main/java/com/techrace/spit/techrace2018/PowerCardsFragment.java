@@ -56,7 +56,7 @@ public class PowerCardsFragment extends Fragment {
                     twoORfour = 2;
                     LeaderboardActivity.selectUser = true;
                     Intent i1 = new Intent(getActivity(), LeaderboardActivity.class);
-//                    i.putExtra("SELECT USER", "TRUE");
+                    i1.putExtra("SELECT USER", "TRUE");
                     startActivity(i1);
 
 
@@ -72,7 +72,7 @@ public class PowerCardsFragment extends Fragment {
                     twoORfour = 4;
                     LeaderboardActivity.selectUser = true;
                     Intent i1 = new Intent(getActivity(), LeaderboardActivity.class);
-//                    i.putExtra("SELECT USER", "TRUE");
+                    i1.putExtra("SELECT USER", "TRUE");
                     startActivity(i1);
 
 

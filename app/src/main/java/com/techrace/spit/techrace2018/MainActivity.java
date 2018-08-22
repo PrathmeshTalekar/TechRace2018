@@ -2,7 +2,6 @@ package com.techrace.spit.techrace2018;
 
 import android.Manifest;
 import android.annotation.TargetApi;
-import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.NotificationManager;
@@ -13,13 +12,11 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
-import android.graphics.Color;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.CountDownTimer;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
 import android.support.v4.app.Fragment;
@@ -67,10 +64,10 @@ import static com.techrace.spit.techrace2018.HomeFragment.UID;
 
 import static com.techrace.spit.techrace2018.HomeFragment.clueLocation;
 import static com.techrace.spit.techrace2018.HomeFragment.clueRelativeLayout;
-import static com.techrace.spit.techrace2018.HomeFragment.clueTextView;
 
 import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
 
+import static com.techrace.spit.techrace2018.HomeFragment.homeFragAuth;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 
 
@@ -122,13 +119,17 @@ public class MainActivity extends AppCompatActivity
                 builder.show();
             }
         }
-
+        pref = MainActivity.this.getSharedPreferences("com.techrace.spit.techrace2018", MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
+
+
         // Log.i("MAUTH",mAuth.getCurrentUser().getDisplayName());
         if (mAuth.getCurrentUser() == null) {
+
             Intent i = new Intent(MainActivity.this, SignUpActivity.class);
             startActivity(i);
         } else {
+            UID = mAuth.getCurrentUser().getUid();
             pref = MainActivity.this.getSharedPreferences("com.techrace.spit.techrace2018", MODE_PRIVATE);
             prefEditor = pref.edit();
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -243,6 +244,9 @@ public class MainActivity extends AppCompatActivity
 
         resources = getResources();
         displaySelectedScreen(R.id.home);
+        clueLocation = new Location("");
+        new HomeFragment().updateClue();
+
 
     }
     @Override
@@ -342,6 +346,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPause() {
         super.onPause();
+        // locationTracker.stopLocationService(getBaseContext());
     }
 
     @Override
@@ -616,50 +621,14 @@ public class MainActivity extends AppCompatActivity
                                                                                     NotificationManager notificationManagerforAlarm =
                                                                                             (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
                                                                                     notificationManagerforAlarm.notify(1, builderalarm.build());
-
-//                                        countDownTimer=new CountDownTimer(cooldown * 60000, 1000) {
-//                                            @Override
-//                                            public void onTick(long millisUntilFinished) {
-//
-//                                                Log.i("TIME LEFT",""+millisUntilFinished/1000);
-////                                                                                            runOnUiThread(new Runnable() {
-////                                                                                               @Override
-////                                                                                               public void run() {
-////                                                                                                   timerTextView.setText(""+millisUntilFinished/1000);
-////                                                                                               }
-////                                                                                            });
-//                                            }
-//
-//                                            @Override
-//                                            public void onFinish() {
-//
-//                                                UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-//                                                UserDatabaseReference.child("Users").child(UID).child("cooldown").setValue(0);
-//                                                UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-//                                                UserDatabaseReference.child("Users").child(UID).child("points").setValue(HomeFragment.points + 5);
-//                                                l = d.getTime();
-//                                                UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
-//                                                UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, HomeFragment.points, l));
-//                                                new HomeFragment().onResume();
-//                                                HomeFragment.beacon = true;
-//                                                timerOn=false;
-//
-//                                            }
-//                                        }.start();
-
                                                                                 }
 
                                                                             }
                                                                         }
-
-
                                                                     }
-
                                                                     beacons.remove(firstBeacon);
                                                                 }
                                                                 beacons.clear();
-
-
                                                             }
                                                         }
                                                     }
