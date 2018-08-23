@@ -1,29 +1,43 @@
 package com.techrace.spit.techrace2018;
 
 
+import android.app.AlarmManager;
+import android.app.NotificationChannel;
+import android.app.NotificationManager;
+import android.app.PendingIntent;
 import android.content.Context;
 
 
+import android.content.Intent;
 import android.content.SharedPreferences;
 
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
+import android.os.Build;
 import android.os.Bundle;
 
 
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 
+import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.view.ViewGroup;
 
+import android.widget.Button;
+import android.widget.EditText;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -40,6 +54,8 @@ import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 
+import static android.content.Context.ALARM_SERVICE;
+import static com.techrace.spit.techrace2018.MainActivity.cooldown;
 import static com.techrace.spit.techrace2018.MainActivity.points;
 //import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 //import static com.techrace.spit.techrace2018.MainActivity.pref;
@@ -47,6 +63,8 @@ import static com.techrace.spit.techrace2018.MainActivity.pref;
 import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 import static com.techrace.spit.techrace2018.MainActivity.timerOn;
 
+import java.text.DateFormat;
+import java.util.Date;
 import java.util.prefs.Preferences;
 
 
@@ -181,7 +199,101 @@ public class HomeFragment extends Fragment {
         return myView;
     }
 
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
 
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_help) {
+            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity());
+
+            TextView head = new TextView(getActivity());
+            head.setText(R.string.action_help);
+            head.setTextSize(24);
+            head.setTextColor(Color.WHITE);
+            head.setPadding(0, 0, 0, 16);
+
+            TextView textView = new TextView(getActivity());
+            textView.setText(R.string.scan_help);
+            textView.setTextSize(20);
+            textView.setPadding(0, 0, 0, 16);
+
+            Button button = new Button(getActivity());
+            button.setText(R.string.scan_manual);
+            button.setTextColor(getResources().getColor(R.color.colorAccent));
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    bottomSheetDialog.dismiss();
+
+                    final BottomSheetDialog bottomSheet = new BottomSheetDialog(getActivity());
+
+                    TextView textView = new TextView(getActivity());
+                    textView.setText(R.string.manual_desc);
+                    textView.setTextSize(20);
+
+                    final EditText codeText = new EditText(getActivity());
+
+                    Button button = new Button(getActivity());
+                    button.setText(R.string.action_confirm);
+                    button.setTextColor(getResources().getColor(R.color.colorAccent));
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String input = codeText.getText().toString();
+                            checkManualPasword(input);
+                            codeText.setText("");
+                            bottomSheet.dismiss();
+                        }
+                    });
+
+                    LinearLayout linearLayout = new LinearLayout(getActivity());
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
+                    linearLayout.setBackgroundColor(Color.DKGRAY);
+                    linearLayout.setPadding(48, 64, 48, 64);
+                    linearLayout.addView(textView);
+                    linearLayout.addView(codeText);
+                    linearLayout.addView(button);
+
+                    bottomSheetDialog.setTitle(R.string.action_help);
+                    bottomSheetDialog.setContentView(linearLayout);
+                    bottomSheetDialog.setCanceledOnTouchOutside(true);
+                    bottomSheetDialog.show();
+                }
+            });
+
+            LinearLayout linearLayout = new LinearLayout(getActivity());
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+            linearLayout.setBackgroundColor(Color.DKGRAY);
+            linearLayout.setPadding(48, 48, 48, 64);
+            linearLayout.addView(head);
+            linearLayout.addView(textView);
+            linearLayout.addView(button);
+
+            bottomSheetDialog.setTitle(R.string.action_help);
+            bottomSheetDialog.setContentView(linearLayout);
+            bottomSheetDialog.setCanceledOnTouchOutside(true);
+            bottomSheetDialog.show();
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
+
+    @Override
+    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+        super.onActivityCreated(savedInstanceState);
+        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+        toolbar.inflateMenu(R.menu.main);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                onOptionsItemSelected(item);
+                return true;
+            }
+        });
+
+    }
 
     @Override
     public void onResume() {
@@ -196,5 +308,77 @@ public class HomeFragment extends Fragment {
         //    if (MainActivity.beaconManager.isBound(this)) MainActivity.beaconManager.setBackgroundMode(false);
     }
 
+    void checkManualPasword(final String manualPassword) {
+
+        DatabaseReference pass = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("passwords");
+        pass.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String serverPass = dataSnapshot.getValue(String.class);
+                if (manualPassword.equals(serverPass)) {
+                    if (cooldown == 0) {
+                        timerOn = false;
+                        MainActivity.beacon = true;
+                        UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                        UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+                        UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
+                        long l = new Date().getTime();
+                        UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+                        UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
+                        new HomeFragment().updateClue();
+                        MainActivity.beacon = true;
+                        //break;
+                    } else {
+
+                        Log.i("IN ELSE 1", "yes");
+                        if (!timerOn) {
+                            Log.i("IN timer on false", "yes");
+                            timerOn = true;
+                            Intent intent = new Intent(getActivity(), NotificationReceiver.class);
+                            PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
+                                    getActivity(), 9999, intent, 0);
+
+                            AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(ALARM_SERVICE);
+
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+                                    + (cooldown * 60000), pendingIntentforAlarm);
+
+                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+                            Log.i("cool", "" + cooldown);
+
+
+                            NotificationCompat.Builder builderalarm =
+                                    new NotificationCompat.Builder(getActivity())
+                                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+                                            .setContentTitle("Please Wait")
+                                            .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
+                                            .setOngoing(true)
+                                            .setAutoCancel(false).setChannelId("Timer");
+                            NotificationChannel mChannel;
+                            NotificationManager notificationManagerforAlarm =
+                                    (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
+                                notificationManagerforAlarm.createNotificationChannel(mChannel);
+                            }
+
+
+                            notificationManagerforAlarm.notify(1, builderalarm.build());
+                        }
+
+                    }
+
+
+                } else {
+                    Toast.makeText(getActivity(), "Wrong Password!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
+    }
 
 }
