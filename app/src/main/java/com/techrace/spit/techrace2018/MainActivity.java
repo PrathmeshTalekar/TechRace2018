@@ -4,6 +4,7 @@ import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.Context;
@@ -149,8 +150,10 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     points = dataSnapshot.getValue(Integer.class);
-                    DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
-                    leadercooldown.child(UID).child("Points").setValue(points);
+                    if (level > 1) {
+                        DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
+                        leadercooldown.child(UID).child("Points").setValue(points);
+                    }
                     Log.i("POints updated", "" + points);
 
                     prefEditor.putInt("Points", points);
@@ -172,8 +175,10 @@ public class MainActivity extends AppCompatActivity
                         prefEditor.putInt("Cooldown", cooldown).apply();
                         localCool = cooldown;
                     }
-                    DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
-                    leadercooldown.child(UID).child("Cooldown").setValue(cooldown);
+                    if (level > 1) {
+                        DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
+                        leadercooldown.child(UID).child("Cooldown").setValue(cooldown);
+                    }
                     Log.i("COOLDOWN FOUND", "" + cooldown);
                     if (cooldown - localCool > 0) {
                         if (points >= AppConstants.reversePrice) {
@@ -484,7 +489,7 @@ public class MainActivity extends AppCompatActivity
                 beaconManager.unbind(MainActivity.this);
             }
         }
-        locationTracker.stopLocationService(getBaseContext());
+
 
 
     }
@@ -498,6 +503,7 @@ public class MainActivity extends AppCompatActivity
                                                             if (beacons.size() > 0) {
                                                                 //MainActivity.beaconManager.setForegroundBetweenScanPeriod(2000);
                                                                 Log.i(HomeFragment.TAG, "didRangeBeaconsInRegion called with beacon count:  " + beacons.size());
+                                                                abc:
                                                                 while (beacons.iterator().hasNext()) {
                                                                     Beacon b = beacons.iterator().next();
                                                                     firstBeacon = b;
@@ -559,14 +565,57 @@ public class MainActivity extends AppCompatActivity
 
                                                                                                 Toast.makeText(MainActivity.this,
                                                                                                         "Password Matched", Toast.LENGTH_SHORT).show();
-                                                                                                UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                                                                                                UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-                                                                                                UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
-                                                                                                l = d.getTime();
-                                                                                                UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
-                                                                                                UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
-                                                                                                new HomeFragment().updateClue();
-                                                                                                beacon = true;
+                                                                                                if (cooldown == 0) {
+                                                                                                    timerOn = false;
+                                                                                                    beacon = true;
+                                                                                                    UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                                                                                                    UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+                                                                                                    UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
+                                                                                                    l = d.getTime();
+                                                                                                    UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+                                                                                                    UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
+                                                                                                    new HomeFragment().updateClue();
+                                                                                                    beacon = true;
+                                                                                                    //break;
+                                                                                                } else {
+
+                                                                                                    Log.i("IN ELSE 1", "yes");
+                                                                                                    if (!timerOn) {
+                                                                                                        Log.i("IN timer on false", "yes");
+                                                                                                        timerOn = true;
+                                                                                                        Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
+                                                                                                        PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
+                                                                                                                MainActivity.this, 9999, intent, 0);
+
+                                                                                                        AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
+
+                                                                                                        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+                                                                                                                + (cooldown * 60000), pendingIntentforAlarm);
+
+                                                                                                        String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+                                                                                                        Log.i("cool", "" + cooldown);
+
+
+                                                                                                        NotificationCompat.Builder builderalarm =
+                                                                                                                new NotificationCompat.Builder(MainActivity.this)
+                                                                                                                        .setSmallIcon(R.drawable.ic_launcher_foreground)
+                                                                                                                        .setContentTitle("Please Wait")
+                                                                                                                        .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
+                                                                                                                        .setOngoing(true)
+                                                                                                                        .setAutoCancel(false).setChannelId("Timer");
+                                                                                                        NotificationChannel mChannel;
+                                                                                                        NotificationManager notificationManagerforAlarm =
+                                                                                                                (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                                                                                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                                                                            mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
+                                                                                                            notificationManagerforAlarm.createNotificationChannel(mChannel);
+                                                                                                        }
+
+
+                                                                                                        notificationManagerforAlarm.notify(1, builderalarm.build());
+                                                                                                    }
+
+                                                                                                }
 
                                                                                             } else {
                                                                                                 Toast.makeText(MainActivity.this, "Wrong Password!", Toast.LENGTH_SHORT).show();
