@@ -1,6 +1,9 @@
 package com.techrace.spit.techrace2018;
 
 public class AppConstants {
+
+    static int hintsRemaining;
+
     public static final String password = "valarmorghulis";
     public static final String PREFS = "techrace2k18_prefs";
     public static final String PREFS_UNLOCKED = "unlocked";
@@ -27,5 +30,6 @@ public class AppConstants {
     public static final int loc5level2 = 5;
     public static final int loc5level3 = 5;
     public static final int loc6level1 = 5;
+
 
 }

@@ -55,7 +55,7 @@
             </LinearLayout>
 
             <Button
-                android:id="@+id/hint"
+                android:id="@+id/hintButton"
                 android:layout_width="100sp"
                 android:layout_height="35sp"
                 android:layout_alignParentRight="true"
@@ -107,6 +107,15 @@
         android:layout_marginBottom="85dp"
         android:text="0"
         android:textSize="36sp" />
+
+    <TextView
+        android:id="@+id/hintTextView"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_alignParentTop="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="222dp"
+        android:text="TextView" />
 
 
 </RelativeLayout>

@@ -73,7 +73,7 @@ public class HomeFragment extends Fragment {
 
     static final String TAG = "MonitoringActivity";
     static View myView;
-    static TextView clueTextView, pointsTextView, timerTextView;
+    static TextView clueTextView, pointsTextView;
 
     static DatabaseReference UserDatabaseReference;
     static FirebaseDatabase firebaseDatabase;
@@ -86,7 +86,8 @@ public class HomeFragment extends Fragment {
     static String volunteerPassword;
     static String name;
     static RelativeLayout clueRelativeLayout;
-    TextView level1, level2, level3;
+    TextView level1, level2, level3, hintTextView;
+    Button hintButton;
 
     @Override
     public void onStop() {
@@ -113,38 +114,35 @@ public class HomeFragment extends Fragment {
 
                     DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
                     level = userDS.child("level").getValue(Integer.class);
-//                    if (level==1){
-//                        level1.setText(AppConstants.level1+String.valueOf(AppConstants.loc1level1)+" minutes");
-//                        level2.setText(AppConstants.level2+String.valueOf(AppConstants.loc1level2)+" minutes");
-//                        level3.setText(AppConstants.level3+String.valueOf(AppConstants.loc1level3)+" minutes");
-//                    }
-//                    else if (level==2){
-//                        level1.setText(AppConstants.level1+String.valueOf(AppConstants.loc2level1)+" minutes");
-//                        level2.setText(AppConstants.level2+String.valueOf(AppConstants.loc2level2)+" minutes");
-//                        level3.setText(AppConstants.level3+String.valueOf(AppConstants.loc2level3)+" minutes");
-//                    }else if (level==3){
-//                        level1.setText(AppConstants.level1+String.valueOf(AppConstants.loc3level1)+" minutes");
-//                        level2.setText(AppConstants.level2+String.valueOf(AppConstants.loc3level2)+" minutes");
-//                        level3.setText(AppConstants.level3+String.valueOf(AppConstants.loc3level3)+" minutes");
-//                    }
-//                    else if (level==4){
-//                        level1.setText(AppConstants.level1+String.valueOf(AppConstants.loc4level1)+" minutes");
-//                        level2.setText(AppConstants.level2+String.valueOf(AppConstants.loc4level2)+" minutes");
-//                        level3.setText(AppConstants.level3+String.valueOf(AppConstants.loc4level3)+" minutes");
-//                    }else if (level==5){
-//                        level1.setText(AppConstants.level1+String.valueOf(AppConstants.loc5level1)+" minutes");
-//                        level2.setText(AppConstants.level2+String.valueOf(AppConstants.loc5level2)+" minutes");
-//                        level3.setText(AppConstants.level3+String.valueOf(AppConstants.loc5level3)+" minutes");
-//                    }else if (level==6){
-//                        level1.setText(AppConstants.level1+String.valueOf(AppConstants.loc3level1)+" minutes");
-//                        level2.setText(AppConstants.level2+String.valueOf(AppConstants.loc3level2)+" minutes");
-//                        level3.setText(AppConstants.level3+String.valueOf(AppConstants.loc3level3)+" minutes");
-//                    }
-//                    else if (level==7){
-//                        level1.setText(AppConstants.level1+String.valueOf(AppConstants.loc4level1)+" minutes");
-//                        level2.setText(AppConstants.level2+String.valueOf(AppConstants.loc4level2)+" minutes");
-//                        level3.setText(AppConstants.level3+String.valueOf(AppConstants.loc4level3)+" minutes");
-//                    }
+                    if (level == 1) {
+                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc1level1) + " minutes");
+                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc1level2) + " minutes");
+                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc1level3) + " minutes");
+                    } else if (level == 2) {
+                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc2level1) + " minutes");
+                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc2level2) + " minutes");
+                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc2level3) + " minutes");
+                    } else if (level == 3) {
+                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc3level1) + " minutes");
+                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc3level2) + " minutes");
+                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc3level3) + " minutes");
+                    } else if (level == 4) {
+                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc4level1) + " minutes");
+                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc4level2) + " minutes");
+                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc4level3) + " minutes");
+                    } else if (level == 5) {
+                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc5level1) + " minutes");
+                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc5level2) + " minutes");
+                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc5level3) + " minutes");
+                    } else if (level == 6) {
+                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc3level1) + " minutes");
+                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc3level2) + " minutes");
+                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc3level3) + " minutes");
+                    } else if (level == 7) {
+                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc4level1) + " minutes");
+                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc4level2) + " minutes");
+                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc4level3) + " minutes");
+                    }
                     Log.i("LEVELL", String.valueOf(level));
                     prefEditor = pref.edit();
                     prefEditor.putInt("Local Level", level);
@@ -166,6 +164,7 @@ public class HomeFragment extends Fragment {
                     Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
                     clueTextView.setText(levelString);
                     clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
+                    hintTextView.setVisibility(View.INVISIBLE);
                 }
 
                 @Override
@@ -185,10 +184,35 @@ public class HomeFragment extends Fragment {
         pointsTextView = myView.findViewById(R.id.pointsTextView);
         //   timerTextView = myView.findViewById(R.id.timerTextView);
         clueRelativeLayout = myView.findViewById(R.id.clueLayout);
-
+        hintButton = myView.findViewById(R.id.hintButton);
+        hintTextView = myView.findViewById(R.id.hintTextView);
         clueTextView.setText(pref.getString("Clue", "Connect To Internet"));
         pointsTextView.setText(String.valueOf(pref.getInt("Points", 0)));
-        //pointsTextView.
+        hintButton.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                if (AppConstants.hintsRemaining == 0) {
+                    Toast.makeText(getActivity(), "No Hints Left", Toast.LENGTH_SHORT).show();
+                } else {
+                    hintTextView.setVisibility(View.VISIBLE);
+                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                    hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            String hint = dataSnapshot.getValue(String.class);
+                            AppConstants.hintsRemaining--;
+                            prefEditor = pref.edit();
+                            prefEditor.putString("Hint", hint).apply();
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
+            }
+        });
     }
 
     @Nullable
@@ -302,6 +326,7 @@ public class HomeFragment extends Fragment {
         if (pref.getInt("Local Level", -1) != level) {
             updateClue();
         }
+        hintTextView.setText(pref.getString("Hint", ""));
         //else{
         //    pointsTextView.setText(String.valueOf(MainActivity.points));
         //}

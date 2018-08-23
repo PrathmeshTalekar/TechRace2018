@@ -80,6 +80,7 @@ public class SignUpActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(SignUpActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                                    finish();
                                 } else {
                                     mAuth.createUserWithEmailAndPassword(email, password)
                                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
@@ -93,7 +94,9 @@ public class SignUpActivity extends AppCompatActivity {
                                                             @Override
                                                             public void onComplete(@NonNull Task<Void> task) {
                                                                 if (task.isSuccessful()) {
+                                                                    AppConstants.hintsRemaining = 2;
                                                                     Toast.makeText(SignUpActivity.this, "Signed Up Successfully", Toast.LENGTH_LONG).show();
+                                                                    finish();
                                                                 } else {
                                                                     Toast.makeText(SignUpActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
                                                                 }
@@ -105,7 +108,7 @@ public class SignUpActivity extends AppCompatActivity {
                                 }
                             }
                         });
-                finish();
+
             }
         } else {
             Toast.makeText(getApplicationContext(), "Invalid email address", Toast.LENGTH_SHORT).show();
