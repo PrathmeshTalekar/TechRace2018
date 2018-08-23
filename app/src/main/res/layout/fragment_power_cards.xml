@@ -46,7 +46,7 @@
                     android:layout_weight="1"
                     android:gravity="center"
                     android:text="+2"
-                    android:textSize="30dp"/>
+                    android:textSize="40dp"/>
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="0dp"
@@ -89,7 +89,7 @@
                         android:gravity="center"
                         android:text="+4"
                         android:textColor="@android:color/black"
-                        android:textSize="30dp"/>
+                        android:textSize="40dp"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
@@ -132,7 +132,7 @@
                         android:gravity="center"
                         android:text="Right Back At Ya!"
                         android:textColor="@android:color/black"
-                        android:textSize="30dp"/>
+                        android:textSize="20dp"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:layout_height="0dp"
@@ -175,7 +175,7 @@
                         android:layout_weight="1"
                         android:gravity="center"
                         android:text="Unlock a clue"
-                        android:textSize="30dp"/>
+                        android:textSize="20dp"/>
                     <TextView
                         android:layout_width="match_parent"
                         android:textColor="@android:color/black"

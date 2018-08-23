@@ -11,11 +11,9 @@ import android.widget.ListView;
 
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-
 import java.util.ArrayList;
 
 public class CluesFragment extends Fragment {
-    View myView;
     private DatabaseReference mDatabase;
     @Nullable
     @Override
