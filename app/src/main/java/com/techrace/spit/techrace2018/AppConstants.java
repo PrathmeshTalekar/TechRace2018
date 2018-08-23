@@ -9,8 +9,8 @@ public class AppConstants {
     public static final String PREFS_UNLOCKED = "unlocked";
     public static final int plusTwoPrice = 20;
     public static final int plusFourPrice = 30;
-    public static final int unlockACluePrice = 60;
-    public static final int reversePrice = 60;
+    public static final int unlockACluePrice = 40;
+    public static final int reversePrice = 35;
     public static final String level1 = "Level 1: ";
     public static final String level2 = "Level 2: ";
     public static final String level3 = "Level 3: ";

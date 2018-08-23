@@ -26,6 +26,8 @@ import java.util.concurrent.ThreadPoolExecutor;
 import static com.techrace.spit.techrace2018.AppConstants.PREFS_UNLOCKED;
 import static com.techrace.spit.techrace2018.AppConstants.password;
 import static com.techrace.spit.techrace2018.MainActivity.mAuth;
+import static com.techrace.spit.techrace2018.MainActivity.pref;
+import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 
 public class SignUpActivity extends AppCompatActivity {
 
@@ -94,7 +96,8 @@ public class SignUpActivity extends AppCompatActivity {
                                                             @Override
                                                             public void onComplete(@NonNull Task<Void> task) {
                                                                 if (task.isSuccessful()) {
-                                                                    AppConstants.hintsRemaining = 2;
+                                                                    prefEditor = pref.edit();
+                                                                    prefEditor.putInt("Hints Left", 2).apply();
                                                                     Toast.makeText(SignUpActivity.this, "Signed Up Successfully", Toast.LENGTH_LONG).show();
                                                                     finish();
                                                                 } else {

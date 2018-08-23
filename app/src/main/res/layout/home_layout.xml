@@ -91,7 +91,7 @@
                 android:textColor="@android:color/black"
                 android:textSize="20sp"/>
             <TextView
-                android:id="@+id/hint_text"
+                android:id="@+id/hintTextView"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:padding="8dp"
@@ -113,12 +113,9 @@
         android:id="@+id/textView2"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-
         android:layout_alignParentTop="true"
-
         android:layout_marginTop="212dp"
         android:text="TextView" />
-
         <TextView
         android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
@@ -141,12 +138,12 @@
         android:textSize="36sp" />
 
     <TextView
-        android:id="@+id/hintTextView"
+        android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
+        android:layout_alignParentBottom="true"
         android:layout_centerHorizontal="true"
-        android:layout_marginTop="222dp"
+        android:layout_marginBottom="201dp"
         android:text="TextView" />
 
 

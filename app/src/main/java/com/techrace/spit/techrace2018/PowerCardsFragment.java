@@ -3,6 +3,7 @@ package com.techrace.spit.techrace2018;
 import android.content.Context;
 import android.content.Intent;
 
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
@@ -30,6 +31,7 @@ import static com.techrace.spit.techrace2018.MainActivity.points;
 public class PowerCardsFragment extends Fragment {
     View myView;
     static int twoORfour = 0;
+
     LinearLayout plusTwo, plusFour, unlockClue;
     public PowerCardsFragment() {
         // Required empty public constructor
@@ -82,13 +84,39 @@ public class PowerCardsFragment extends Fragment {
             }
 
         });
-        unlockClue.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View v) {
-                if (MainActivity.points >= AppConstants.unlockACluePrice) {
+        SharedPreferences sharedPreferences = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
+        if (sharedPreferences.getString("Clue 12", "abc").equals("abc")) {
+            unlockClue.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View v) {
+                    if (MainActivity.points >= AppConstants.unlockACluePrice) {
 
+                        DatabaseReference unlockClueRef = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 12").child("Clue");
+                        unlockClueRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                String s = dataSnapshot.getValue(String.class);
+                                DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                powerReference1.child("Users").child(UID).child("points")
+                                        .setValue(MainActivity.points - AppConstants.unlockACluePrice);
+                                SharedPreferences share = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
+                                SharedPreferences.Editor edit = share.edit();
+                                edit.putString("Clue 12", s).apply();
+                                unlockClue.setClickable(false);
+                                Log.i("Clue 12", s);
+                                Toast.makeText(getActivity(), "Unlocked", Toast.LENGTH_LONG).show();
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+                    } else {
+                        Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
+                    }
                 }
-            }
-        });
+            });
+        }
     }
 }

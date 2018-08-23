@@ -9,8 +9,8 @@ import android.widget.TextView;
 
 import java.util.ArrayList;
 
-public class CluesAdapter extends ArrayAdapter<Clue> {
-    public CluesAdapter(Activity context, ArrayList<Clue> clue) {
+public class CluesAdapter extends ArrayAdapter<String> {
+    public CluesAdapter(Activity context, ArrayList<String> clue) {
         super(context, 0, clue);
     }
     @Override
@@ -19,9 +19,9 @@ public class CluesAdapter extends ArrayAdapter<Clue> {
         if (listItemView == null) {
             listItemView = LayoutInflater.from(getContext()).inflate(R.layout.clues_item, parent, false);
         }
-        Clue currentClue = getItem(position);
+        String currentString = getItem(position);
         TextView clueTextView = (TextView) listItemView.findViewById(R.id.clue_text);
-        clueTextView.setText(currentClue.getmClue());
+        clueTextView.setText(currentString);
         TextView positionTextView = (TextView) listItemView.findViewById(R.id.clue_number);
         positionTextView.setText(""+(position+1));
         return listItemView;

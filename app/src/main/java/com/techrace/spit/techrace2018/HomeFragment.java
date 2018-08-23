@@ -55,6 +55,7 @@ import org.altbeacon.beacon.BeaconManager;
 import org.altbeacon.beacon.BeaconParser;
 
 import static android.content.Context.ALARM_SERVICE;
+import static com.techrace.spit.techrace2018.MainActivity.beacon;
 import static com.techrace.spit.techrace2018.MainActivity.cooldown;
 import static com.techrace.spit.techrace2018.MainActivity.points;
 //import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
@@ -73,7 +74,7 @@ public class HomeFragment extends Fragment {
 
     static final String TAG = "MonitoringActivity";
     static View myView;
-    static TextView clueTextView, pointsTextView;
+    static TextView clueTextView, pointsTextView, hintTextView, timerTextView;
 
     static DatabaseReference UserDatabaseReference;
     static FirebaseDatabase firebaseDatabase;
@@ -86,7 +87,8 @@ public class HomeFragment extends Fragment {
     static String volunteerPassword;
     static String name;
     static RelativeLayout clueRelativeLayout;
-    TextView level1, level2, level3, hintTextView;
+    static String locName;
+    TextView level1, level2, level3;
     Button hintButton;
 
     @Override
@@ -94,7 +96,6 @@ public class HomeFragment extends Fragment {
         super.onStop();
 
     }
-
 
     public void updateClue() {
         // clueLocation = new Location("");
@@ -114,49 +115,54 @@ public class HomeFragment extends Fragment {
 
                     DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
                     level = userDS.child("level").getValue(Integer.class);
-                    if (level == 1) {
-                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc1level1) + " minutes");
-                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc1level2) + " minutes");
-                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc1level3) + " minutes");
-                    } else if (level == 2) {
-                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc2level1) + " minutes");
-                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc2level2) + " minutes");
-                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc2level3) + " minutes");
-                    } else if (level == 3) {
-                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc3level1) + " minutes");
-                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc3level2) + " minutes");
-                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc3level3) + " minutes");
-                    } else if (level == 4) {
-                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc4level1) + " minutes");
-                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc4level2) + " minutes");
-                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc4level3) + " minutes");
-                    } else if (level == 5) {
-                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc5level1) + " minutes");
-                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc5level2) + " minutes");
-                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc5level3) + " minutes");
-                    } else if (level == 6) {
-                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc3level1) + " minutes");
-                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc3level2) + " minutes");
-                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc3level3) + " minutes");
-                    } else if (level == 7) {
-                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc4level1) + " minutes");
-                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc4level2) + " minutes");
-                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc4level3) + " minutes");
-                    }
+//                    if (level == 1) {
+//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc1level1) + " minutes");
+//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc1level2) + " minutes");
+//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc1level3) + " minutes");
+//                    } else if (level == 2) {
+//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc2level1) + " minutes");
+//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc2level2) + " minutes");
+//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc2level3) + " minutes");
+//                    } else if (level == 3) {
+//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc3level1) + " minutes");
+//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc3level2) + " minutes");
+//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc3level3) + " minutes");
+//                    } else if (level == 4) {
+//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc4level1) + " minutes");
+//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc4level2) + " minutes");
+//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc4level3) + " minutes");
+//                    } else if (level == 5) {
+//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc5level1) + " minutes");
+//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc5level2) + " minutes");
+//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc5level3) + " minutes");
+//                    } else if (level == 6) {
+//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc3level1) + " minutes");
+//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc3level2) + " minutes");
+//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc3level3) + " minutes");
+//                    } else if (level == 7) {
+//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc4level1) + " minutes");
+//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc4level2) + " minutes");
+//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc4level3) + " minutes");
+//                    }
                     Log.i("LEVELL", String.valueOf(level));
                     prefEditor = pref.edit();
-                    prefEditor.putInt("Local Level", level);
+                    prefEditor.putInt("Level", level);
                     points = userDS.child("points").getValue(Integer.class);
                     prefEditor.putInt("Points", points);
                     pointsTextView.setText(String.valueOf(MainActivity.points));
                     name = (String) userDS.child("name").getValue();
-
+                    if (level > 1) {
+                        locName = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level - 1)).child("Name").getValue(String.class);
+                        // Log.i("loca firebase",locName);
+                        prefEditor = pref.edit();
+                        prefEditor.putString("Location " + (level - 1), locName).apply();
+                    }
                     DataSnapshot locationDS = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level));
                     levelString = locationDS.child("Clue").getValue(String.class);
                     prefEditor.putString("Clue", levelString).apply();
                     //  pref = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
 
-                    Log.i("LEVEL STNG", String.valueOf(level) + "  " + levelString);
+
                     NSID = locationDS.child("NSID").getValue(String.class);
                     Log.i("NSID", NSID);
                     clueLocation.setLatitude(Double.parseDouble(locationDS.child("Latitude").getValue(String.class)));
@@ -164,7 +170,13 @@ public class HomeFragment extends Fragment {
                     Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
                     clueTextView.setText(levelString);
                     clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
-                    hintTextView.setVisibility(View.INVISIBLE);
+                    if (pref.getString("Hint", "").equals("")) {
+                        hintTextView.setVisibility(View.INVISIBLE);
+                    } else {
+                        hintTextView.setVisibility(View.VISIBLE);
+                        hintTextView.setText(pref.getString("Hint", ""));
+                    }
+                    beacon = true;
                 }
 
                 @Override
@@ -182,7 +194,10 @@ public class HomeFragment extends Fragment {
 
         clueTextView = myView.findViewById(R.id.clue_text);
         pointsTextView = myView.findViewById(R.id.pointsTextView);
-        //   timerTextView = myView.findViewById(R.id.timerTextView);
+        level1 = myView.findViewById(R.id.level1);
+        level2 = myView.findViewById(R.id.level2);
+        level3 = myView.findViewById(R.id.level3);
+        timerTextView = myView.findViewById(R.id.timerTextView);
         clueRelativeLayout = myView.findViewById(R.id.clueLayout);
         hintButton = myView.findViewById(R.id.hintButton);
         hintTextView = myView.findViewById(R.id.hintTextView);
@@ -191,7 +206,7 @@ public class HomeFragment extends Fragment {
         hintButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (AppConstants.hintsRemaining == 0) {
+                if (pref.getInt("Hints Left", -1) == 0) {
                     Toast.makeText(getActivity(), "No Hints Left", Toast.LENGTH_SHORT).show();
                 } else {
                     hintTextView.setVisibility(View.VISIBLE);
@@ -199,10 +214,14 @@ public class HomeFragment extends Fragment {
                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                            powerReference1.child("Users").child(UID).child("points")
+                                    .setValue(MainActivity.points - AppConstants.unlockACluePrice);
                             String hint = dataSnapshot.getValue(String.class);
                             AppConstants.hintsRemaining--;
                             prefEditor = pref.edit();
                             prefEditor.putString("Hint", hint).apply();
+                            hintTextView.setText(hint);
                         }
 
                         @Override
@@ -323,7 +342,7 @@ public class HomeFragment extends Fragment {
     public void onResume() {
         super.onResume();
         // sharedPreferences=getActivity().getSharedPreferences("com.techrace.spit.techrace2018",Context.MODE_PRIVATE);
-        if (pref.getInt("Local Level", -1) != level) {
+        if (pref.getInt("Level", -1) != level) {
             updateClue();
         }
         hintTextView.setText(pref.getString("Hint", ""));
@@ -340,7 +359,9 @@ public class HomeFragment extends Fragment {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 String serverPass = dataSnapshot.getValue(String.class);
+                Log.i("server pass", serverPass);
                 if (manualPassword.equals(serverPass)) {
+                    Toast.makeText(getActivity(), "Updating...", Toast.LENGTH_LONG).show();
                     if (cooldown == 0) {
                         timerOn = false;
                         MainActivity.beacon = true;
@@ -350,6 +371,8 @@ public class HomeFragment extends Fragment {
                         long l = new Date().getTime();
                         UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
                         UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
+                        prefEditor = pref.edit();
+                        prefEditor.putString("Clue " + level, levelString).apply();
                         new HomeFragment().updateClue();
                         MainActivity.beacon = true;
                         //break;
@@ -357,6 +380,9 @@ public class HomeFragment extends Fragment {
 
                         Log.i("IN ELSE 1", "yes");
                         if (!timerOn) {
+                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+                            Log.i("cool", "" + cooldown);
+                            timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
                             Log.i("IN timer on false", "yes");
                             timerOn = true;
                             Intent intent = new Intent(getActivity(), NotificationReceiver.class);
@@ -367,9 +393,6 @@ public class HomeFragment extends Fragment {
 
                             alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
                                     + (cooldown * 60000), pendingIntentforAlarm);
-
-                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-                            Log.i("cool", "" + cooldown);
 
 
                             NotificationCompat.Builder builderalarm =
