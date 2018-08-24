@@ -74,6 +74,7 @@ import static com.techrace.spit.techrace2018.HomeFragment.homeFragAuth;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.HomeFragment.levelString;
 import static com.techrace.spit.techrace2018.HomeFragment.locName;
+import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
 
 
 public class MainActivity extends AppCompatActivity
@@ -89,7 +90,7 @@ public class MainActivity extends AppCompatActivity
     static boolean beacon = true;
     static int points;
     String beaconID;
-    static boolean timerOn = false;
+    static boolean timerOn = false, event = false;
     Beacon firstBeacon;
     static String selectUID = null;
     long l;
@@ -181,11 +182,11 @@ public class MainActivity extends AppCompatActivity
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                     cooldown = dataSnapshot.getValue(Integer.class);
-                    int localCool = pref.getInt("Cooldown", -1);
+                    int localCool = pref.getInt(AppConstants.cooldownPref, -1);
                     Log.i("local cool", "" + localCool);
                     if (localCool == -1) {
                         prefEditor = pref.edit();
-                        prefEditor.putInt("Cooldown", cooldown).apply();
+                        prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
                         localCool = cooldown;
                     }
                     if (level > 1) {
@@ -214,7 +215,7 @@ public class MainActivity extends AppCompatActivity
                                                             .setValue(MainActivity.points - AppConstants.reversePrice);
                                                     reverseReference1.child(mAuth.getCurrentUser().getUid()).child("cooldown").setValue(0);
                                                     prefEditor = pref.edit();
-                                                    prefEditor.putInt("Cooldown", 0).apply();
+                                                    prefEditor.putInt(AppConstants.cooldownPref, 0).apply();
                                                 }
 
                                                 @Override
@@ -228,7 +229,7 @@ public class MainActivity extends AppCompatActivity
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
                                     prefEditor = pref.edit();
-                                    prefEditor.putInt("Cooldown", cooldown).apply();
+                                    prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
 
                                 }
                             }).setCancelable(false).show();
@@ -301,13 +302,12 @@ public class MainActivity extends AppCompatActivity
 
         //wifi
         wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
-        verifyBluetooth();
+
         try {
             //    new HomeFragment().updateClue();
             locationTracker = new LocationTracker("my.action")
-                    .setInterval(10000)
+                    .setInterval(15000)
                     .setGps(true)
-                    .setNetWork(true)
                     .setNetWork(false);
             locationTracker.currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
                 @Override
@@ -319,10 +319,11 @@ public class MainActivity extends AppCompatActivity
                     // Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
 
                     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
-                        if (!timerOn) {
+                        if (!timerOn && !event) {
                             if (distanceinmetres <= 250) {
-                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
+                                verifyBluetooth();
                                 if (beacon) {
+                                    clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
                                     beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
                                     // To detect proprietary beacons, you must add a line like below corresponding to your beacon
                                     // type.  Do a web search for "setBeaconLayout" to get the proper expression.
@@ -330,14 +331,14 @@ public class MainActivity extends AppCompatActivity
                                             setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
                                     beaconManager.bind(MainActivity.this);
                                 } else {
-                                    beaconManager.unbind(MainActivity.this);
-                                    beaconManager.disableForegroundServiceScanning();
                                     beaconManager.removeAllMonitorNotifiers();
                                     beaconManager.applySettings();
+                                    beaconManager.unbind(MainActivity.this);
                                 }
 
                             } else {
                                 clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
+
                             }
                         }
                     } else {
@@ -355,7 +356,7 @@ public class MainActivity extends AppCompatActivity
                 }
             })).start(MainActivity.this, MainActivity.this);
         } catch (Exception e) {
-            Log.v("EROOR", "" + e);
+            Toast.makeText(this, "Turn On Location", Toast.LENGTH_LONG).show();
 
         }
 
@@ -405,12 +406,11 @@ public class MainActivity extends AppCompatActivity
                 builder.setTitle("Bluetooth not enabled");
                 builder.setMessage("Please enable bluetooth in settings and restart this application.");
                 builder.setPositiveButton(android.R.string.ok, null);
-
                 builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
-                        //                        finish();
-                        //                        System.exit(0);
+                        finish();
+                        System.exit(0);
                     }
                 });
 
@@ -516,10 +516,10 @@ public class MainActivity extends AppCompatActivity
                                                if (beacons.size() > 0) {
                                                    //MainActivity.beaconManager.setForegroundBetweenScanPeriod(2000);
                                                    Log.i(HomeFragment.TAG, "didRangeBeaconsInRegion called with beacon count:  " + beacons.size());
-                                                   abc:
+
                                                    while (beacons.iterator().hasNext()) {
-                                                       Beacon b = beacons.iterator().next();
-                                                       firstBeacon = b;
+                                                       firstBeacon = beacons.iterator().next();
+                                                       ;
 
                                                        beaconID = firstBeacon.toString();
                                                        Log.i("SIZE", String.valueOf(beacons.size()));
@@ -540,39 +540,24 @@ public class MainActivity extends AppCompatActivity
 //                                                                    });
 
                                                        Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
-                                                       if (beaconID.equals(s) && dist <= 0.45) {
+                                                       if (beaconID.equals(s) && dist <= 0.40) {
 
 
                                                            // locationTracker.stopLocationService(getBaseContext());
-                                                           beaconManager.unbind(MainActivity.this);
-                                                           beaconManager.removeAllRangeNotifiers();
-                                                           beaconManager.disableForegroundServiceScanning();
-                                                           beaconManager.applySettings();
-                                                           beacon = false;
+
                                                            runOnUiThread(new Runnable() {
                                                                @Override
                                                                public void run() {
                                                                    clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.confirmGreen));
                                                                }
                                                            });
-                                                           //MainActivity.beaconManager.setForegroundBetweenScanPeriod(30000);
-                                                           if (level == 3) {
-
-
-                                                               final android.support.v7.app.AlertDialog.Builder alertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
-                                                               alertDialog.setTitle("MEET THE VOLUNTEER");
-                                                               alertDialog.setMessage("Enter Password");
-                                                               alertDialog.setCancelable(false);
-                                                               alertDialog.setPositiveButton("GO!", null);
-                                                               alertDialog.show();
+                                                           if (level == 4 || level == 9 || level == 13) {
+                                                               timerTextView.setText("Meet The Volunteer To Continue");
                                                                break;
-
                                                            } else {
-
-
                                                                if (cooldown == 0) {
-                                                                   timerOn = false;
-                                                                   beacon = true;
+
+
                                                                    UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
 
@@ -583,14 +568,19 @@ public class MainActivity extends AppCompatActivity
                                                                    l = d.getTime();
                                                                    UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
                                                                    UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
+                                                                   beacon = false;
+                                                                   timerOn = false;
+                                                                   beaconManager.unbind(MainActivity.this);
+                                                                   beaconManager.removeAllRangeNotifiers();
+                                                                   beaconManager.disableForegroundServiceScanning();
+                                                                   beaconManager.applySettings();
                                                                    new HomeFragment().updateClue();
-                                                                   beacon = true;
+
                                                                    break;
                                                                } else {
 
-                                                                   Log.i("IN ELSE 1", "yes");
+
                                                                    if (!timerOn) {
-                                                                       Log.i("IN timer on false", "yes");
                                                                        timerOn = true;
                                                                        Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
                                                                        PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
@@ -651,7 +641,7 @@ public class MainActivity extends AppCompatActivity
         } catch (RemoteException e) {
         }
         try {
-            beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId", null, null, null));
+            beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId1", null, null, null));
         } catch (RemoteException e) {
         }
     }

@@ -101,7 +101,7 @@ public class SignUpActivity extends AppCompatActivity {
                                                                     Toast.makeText(SignUpActivity.this, "Signed Up Successfully", Toast.LENGTH_LONG).show();
                                                                     finish();
                                                                 } else {
-                                                                    Toast.makeText(SignUpActivity.this, task.getException().getMessage(), Toast.LENGTH_SHORT).show();
+                                                                    Toast.makeText(SignUpActivity.this, "Please Try Again.", Toast.LENGTH_SHORT).show();
                                                                 }
                                                             }
                                                         });

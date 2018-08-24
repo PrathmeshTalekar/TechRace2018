@@ -57,6 +57,7 @@ import org.altbeacon.beacon.BeaconParser;
 import static android.content.Context.ALARM_SERVICE;
 import static com.techrace.spit.techrace2018.MainActivity.beacon;
 import static com.techrace.spit.techrace2018.MainActivity.cooldown;
+import static com.techrace.spit.techrace2018.MainActivity.event;
 import static com.techrace.spit.techrace2018.MainActivity.points;
 //import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 //import static com.techrace.spit.techrace2018.MainActivity.pref;
@@ -375,6 +376,7 @@ public class HomeFragment extends Fragment {
                         prefEditor.putString("Clue " + level, levelString).apply();
                         new HomeFragment().updateClue();
                         MainActivity.beacon = true;
+                        event = false;
                         //break;
                     } else {
 
