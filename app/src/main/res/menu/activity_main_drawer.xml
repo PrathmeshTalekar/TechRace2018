@@ -54,9 +54,9 @@
             android:icon="@drawable/help"
             android:title="Help" />
         <item
-            android:id="@+id/credits"
+            android:id="@+id/about"
             android:icon="@drawable/credits"
-            android:title="Credits" />
+            android:title="About" />
     </group>
 
 </menu>
