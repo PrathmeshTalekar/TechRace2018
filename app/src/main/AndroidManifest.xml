@@ -46,12 +46,21 @@
                 <action android:name="my.action" />
             </intent-filter>
         </receiver>
-
-        <receiver android:name=".NotificationReceiver"></receiver>
+        <receiver android:name=".NotificationReceiver" />
 
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />
+
+        <activity
+            android:name=".AboutActivity"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.techrace.spit.techrace2018.MainActivity" />
+        </activity>
+        <activity android:name=".CreditsActivity" />
+        <activity android:name=".SponsorsActivity"></activity>
     </application>
 
 </manifest>

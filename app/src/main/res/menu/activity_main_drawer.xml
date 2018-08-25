@@ -55,7 +55,7 @@
             android:title="Help" />
         <item
             android:id="@+id/about"
-            android:icon="@drawable/credits"
+            android:icon="@drawable/about"
             android:title="About" />
     </group>
 

@@ -32,7 +32,7 @@ public class PowerCardsFragment extends Fragment {
     View myView;
     static int twoORfour = 0;
 
-    LinearLayout plusTwo, plusFour, unlockClue;
+    TextView plusTwo, plusFour, unlockClue;
     public PowerCardsFragment() {
         // Required empty public constructor
     }

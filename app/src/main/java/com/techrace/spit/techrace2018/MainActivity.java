@@ -202,7 +202,7 @@ public class MainActivity extends AppCompatActivity
                     if (cooldown - localCool > 0) {
                         if (points >= AppConstants.reversePrice) {
                             final android.support.v7.app.AlertDialog.Builder reverseAlertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
-                            reverseAlertDialog.setTitle("TIMER APPLIED").setMessage("Buy Right Back at Ya Card? for 60 points")
+                            reverseAlertDialog.setTitle("TIMER APPLIED").setMessage("Buy Right Back at Ya Card? for 35 points")
                                     .setPositiveButton("BUY", new DialogInterface.OnClickListener() {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
@@ -218,7 +218,7 @@ public class MainActivity extends AppCompatActivity
                                                     reverseReference1.child("Users").child(appliedBy).child("Applied By").setValue(UID);
                                                     reverseReference1.child("Users").child(UID).child("points")
                                                             .setValue(MainActivity.points - AppConstants.reversePrice);
-                                                    reverseReference1.child(UID).child("cooldown").setValue(0);
+                                                    reverseReference1.child("Users").child(UID).child("cooldown").setValue(0);
                                                     prefEditor = pref.edit();
                                                     prefEditor.putInt(AppConstants.cooldownPref, 0).apply();
                                                 }
@@ -632,7 +632,7 @@ public class MainActivity extends AppCompatActivity
                 fragment = new CluesFragment();
                 break;
             case R.id.about:
-                fragment = new CreditsFragment();
+                startActivity(new Intent(MainActivity.this, AboutActivity.class));
                 break;
             case R.id.feed:
                 fragment = new FeedFragment();
@@ -767,8 +767,13 @@ public class MainActivity extends AppCompatActivity
 
                                                                        Log.i("cool", "" + cooldown);
 
-                                                                       String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-                                                                       HomeFragment.timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+                                                                       final String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+                                                                       runOnUiThread(new Runnable() {
+                                                                           @Override
+                                                                           public void run() {
+                                                                               HomeFragment.timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+                                                                           }
+                                                                       });
 
                                                                        NotificationCompat.Builder builderalarm =
                                                                                new NotificationCompat.Builder(MainActivity.this)
