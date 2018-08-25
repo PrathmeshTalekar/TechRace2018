@@ -748,6 +748,8 @@ public class MainActivity extends AppCompatActivity
                                                                    beaconManager.disableForegroundServiceScanning();
                                                                    beaconManager.applySettings();
                                                                    hintButton.setEnabled(true);
+                                                                   prefEditor = pref.edit();
+                                                                   prefEditor.putString(AppConstants.hintPref, "").apply();
                                                                    new HomeFragment().updateClue();
 
                                                                    break;
@@ -777,7 +779,7 @@ public class MainActivity extends AppCompatActivity
 
                                                                        NotificationCompat.Builder builderalarm =
                                                                                new NotificationCompat.Builder(MainActivity.this)
-                                                                                       .setSmallIcon(R.drawable.ic_launcher_foreground)
+                                                                                       .setSmallIcon(R.drawable.ic_launcher_background)
                                                                                        .setContentTitle("Please Wait")
                                                                                        .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
                                                                                        .setOngoing(true)
