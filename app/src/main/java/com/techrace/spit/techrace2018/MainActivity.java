@@ -103,7 +103,7 @@ public class MainActivity extends AppCompatActivity
     String appliedBy = null;
     LocationTracker locationTracker;
     NetworkInfo.State wifi, mobile;
-
+    ValueEventListener levelListener, pointsListener, cooldownLiastener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -132,126 +132,131 @@ public class MainActivity extends AppCompatActivity
         }
         pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
+        levelListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                level = dataSnapshot.getValue(Integer.class);
+                if (level != pref.getInt("Level", -1)) {
+                    //  new HomeFragment().hintTextView.setVisibility(View.INVISIBLE);
+                    prefEditor = pref.edit();
+                    prefEditor.putString(AppConstants.hintPref, "").apply();
+                    prefEditor = pref.edit();
+                    prefEditor.putInt(AppConstants.levelPref, level).apply();
 
+                }
+            }
 
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        pointsListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                points = dataSnapshot.getValue(Integer.class);
+                if (level > 1) {
+                    DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
+                    leadercooldown.child(UID).child("Points").setValue(points);
+                }
+                Log.i("POints updated", "" + points);
+                prefEditor = pref.edit();
+                prefEditor.putInt(AppConstants.pointsPref, points).apply();
+                HomeFragment.pointsTextView.setText(String.valueOf(MainActivity.points));
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
+        cooldownLiastener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                cooldown = dataSnapshot.getValue(Integer.class);
+                int localCool = pref.getInt(AppConstants.cooldownPref, -1);
+                Log.i("local cool", "" + localCool);
+                if (localCool == -1) {
+                    prefEditor = pref.edit();
+                    prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
+                    localCool = cooldown;
+                }
+                if (level > 1) {
+                    DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
+                    leadercooldown.child(UID).child("Cooldown").setValue(cooldown);
+                }
+                Log.i("COOLDOWN FOUND", "" + cooldown);
+                if (cooldown - localCool > 0) {
+                    Log.i("inside1", "ues" + points);
+                    if (points >= AppConstants.reversePrice) {
+                        timerOn = false;
+                        Log.i("inside", "ues");
+                        final android.support.v7.app.AlertDialog.Builder reverseAlertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
+                        reverseAlertDialog.setTitle("TIMER APPLIED").setMessage("Buy Right Back at Ya Card? for 35 points")
+                                .setPositiveButton("BUY", new DialogInterface.OnClickListener() {
+                                    @Override
+                                    public void onClick(DialogInterface dialog, int which) {
+
+                                        DatabaseReference reverseReference = FirebaseDatabase.getInstance().getReference();
+                                        reverseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("Applied By").addListenerForSingleValueEvent(new ValueEventListener() {
+                                            @Override
+                                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                appliedBy = dataSnapshot.getValue(String.class);
+                                                Log.i("applied", appliedBy);
+                                                DatabaseReference reverseReference1 = FirebaseDatabase.getInstance().getReference();
+                                                reverseReference1.child("Users").child(appliedBy).child("cooldown").setValue(cooldown);
+                                                reverseReference1.child("Users").child(appliedBy).child("Applied By").setValue(UID);
+                                                reverseReference1.child("Users").child(UID).child("points")
+                                                        .setValue(MainActivity.points - AppConstants.reversePrice);
+                                                reverseReference1.child("Users").child(UID).child("cooldown").setValue(0);
+                                                prefEditor = pref.edit();
+                                                prefEditor.putInt(AppConstants.cooldownPref, 0).apply();
+                                            }
+
+                                            @Override
+                                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                            }
+                                        });
+
+                                    }
+                                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialog, int which) {
+                                prefEditor = pref.edit();
+                                prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
+
+                            }
+                        }).setCancelable(false).show();
+                    } else {
+                        prefEditor = pref.edit();
+                        prefEditor.putInt("Cooldown", cooldown).apply();
+                    }
+                }
+
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
         // Log.i("MAUTH",mAuth.getCurrentUser().getDisplayName());
         if (mAuth.getCurrentUser() == null) {
 
             Intent i = new Intent(MainActivity.this, SignUpActivity.class);
             startActivity(i);
         } else {
+            points = pref.getInt(AppConstants.pointsPref, 0);
             UID = mAuth.getCurrentUser().getUid();
             pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
 
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    level = dataSnapshot.getValue(Integer.class);
-                    if (level != pref.getInt("Level", -1)) {
-                        //  new HomeFragment().hintTextView.setVisibility(View.INVISIBLE);
-                        prefEditor = pref.edit();
-                        prefEditor.putString(AppConstants.hintPref, "").apply();
-                        prefEditor = pref.edit();
-                        prefEditor.putInt(AppConstants.levelPref, level).apply();
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
 
-                    }
-
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    points = dataSnapshot.getValue(Integer.class);
-                    if (level > 1) {
-                        DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
-                        leadercooldown.child(UID).child("Points").setValue(points);
-                    }
-                    Log.i("POints updated", "" + points);
-                    prefEditor = pref.edit();
-                    prefEditor.putInt(AppConstants.pointsPref, points).apply();
-                    HomeFragment.pointsTextView.setText(String.valueOf(MainActivity.points));
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(new ValueEventListener() {
-                @Override
-                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                    cooldown = dataSnapshot.getValue(Integer.class);
-                    int localCool = pref.getInt(AppConstants.cooldownPref, -1);
-                    Log.i("local cool", "" + localCool);
-                    if (localCool == -1) {
-                        prefEditor = pref.edit();
-                        prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
-                        localCool = cooldown;
-                    }
-                    if (level > 1) {
-                        DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
-                        leadercooldown.child(UID).child("Cooldown").setValue(cooldown);
-                    }
-                    Log.i("COOLDOWN FOUND", "" + cooldown);
-                    if (cooldown - localCool > 0) {
-                        if (points >= AppConstants.reversePrice) {
-                            final android.support.v7.app.AlertDialog.Builder reverseAlertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
-                            reverseAlertDialog.setTitle("TIMER APPLIED").setMessage("Buy Right Back at Ya Card? for 35 points")
-                                    .setPositiveButton("BUY", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-
-                                            DatabaseReference reverseReference = FirebaseDatabase.getInstance().getReference();
-                                            reverseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("Applied By").addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                    appliedBy = dataSnapshot.getValue(String.class);
-                                                    Log.i("applied", appliedBy);
-                                                    DatabaseReference reverseReference1 = FirebaseDatabase.getInstance().getReference();
-                                                    reverseReference1.child("Users").child(appliedBy).child("cooldown").setValue(cooldown);
-                                                    reverseReference1.child("Users").child(appliedBy).child("Applied By").setValue(UID);
-                                                    reverseReference1.child("Users").child(UID).child("points")
-                                                            .setValue(MainActivity.points - AppConstants.reversePrice);
-                                                    reverseReference1.child("Users").child(UID).child("cooldown").setValue(0);
-                                                    prefEditor = pref.edit();
-                                                    prefEditor.putInt(AppConstants.cooldownPref, 0).apply();
-                                                }
-
-                                                @Override
-                                                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                                }
-                                            });
-
-                                        }
-                                    }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                                @Override
-                                public void onClick(DialogInterface dialog, int which) {
-                                    prefEditor = pref.edit();
-                                    prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
-
-                                }
-                            }).setCancelable(false).show();
-                        } else {
-                            prefEditor = pref.edit();
-                            prefEditor.putInt("Cooldown", cooldown).apply();
-                        }
-                    }
-                    timerOn = false;
-                }
-
-                @Override
-                public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                }
-            });
         }
+
         Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.inflateMenu(R.menu.main);
@@ -470,6 +475,12 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
+
+        if (mAuth.getCurrentUser() != null) {
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownLiastener);
+        }
+
+
         ConnectivityManager conMan = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
         mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
 
@@ -538,7 +549,9 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPause() {
         super.onPause();
-        // locationTracker.stopLocationService(getBaseContext());
+        //  UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").removeEventListener(levelListener);
+        // UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").removeEventListener(pointsListener);
+        UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").removeEventListener(cooldownLiastener);
     }
 
     @Override
@@ -745,7 +758,7 @@ public class MainActivity extends AppCompatActivity
                                                                    timerOn = false;
                                                                    beaconManager.unbind(MainActivity.this);
                                                                    beaconManager.removeAllRangeNotifiers();
-                                                                   beaconManager.disableForegroundServiceScanning();
+                                                                   //beaconManager.disableForegroundServiceScanning();
                                                                    beaconManager.applySettings();
                                                                    hintButton.setEnabled(true);
                                                                    prefEditor = pref.edit();

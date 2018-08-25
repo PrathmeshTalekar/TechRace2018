@@ -116,35 +116,6 @@ public class HomeFragment extends Fragment {
 
                     DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
                     level = userDS.child("level").getValue(Integer.class);
-//                    if (level == 1) {
-//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc1level1) + " minutes");
-//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc1level2) + " minutes");
-//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc1level3) + " minutes");
-//                    } else if (level == 2) {
-//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc2level1) + " minutes");
-//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc2level2) + " minutes");
-//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc2level3) + " minutes");
-//                    } else if (level == 3) {
-//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc3level1) + " minutes");
-//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc3level2) + " minutes");
-//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc3level3) + " minutes");
-//                    } else if (level == 4) {
-//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc4level1) + " minutes");
-//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc4level2) + " minutes");
-//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc4level3) + " minutes");
-//                    } else if (level == 5) {
-//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc5level1) + " minutes");
-//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc5level2) + " minutes");
-//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc5level3) + " minutes");
-//                    } else if (level == 6) {
-//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc3level1) + " minutes");
-//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc3level2) + " minutes");
-//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc3level3) + " minutes");
-//                    } else if (level == 7) {
-//                        level1.setText(AppConstants.level1 + String.valueOf(AppConstants.loc4level1) + " minutes");
-//                        level2.setText(AppConstants.level2 + String.valueOf(AppConstants.loc4level2) + " minutes");
-//                        level3.setText(AppConstants.level3 + String.valueOf(AppConstants.loc4level3) + " minutes");
-//                    }
                     Log.i("LEVELL", String.valueOf(level));
                     prefEditor = pref.edit();
                     prefEditor.putInt(AppConstants.levelPref, level);
