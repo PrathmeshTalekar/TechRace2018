@@ -24,30 +24,5 @@ public class HelpFragment extends Fragment {
     @Override
     public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
-//        event = myView.findViewById(R.id.eventSupport);
-//        tech = myView.findViewById(R.id.techSupport);
-//        event.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(Intent.ACTION_DIAL);
-//                intent.setData(Uri.parse("tel:+917738107772"));
-//                startActivity(intent);
-//            }
-//        });
-//        tech.setOnClickListener(new View.OnClickListener() {
-//            @Override
-//            public void onClick(View v) {
-//                Intent intent = new Intent(Intent.ACTION_DIAL);
-//                intent.setData(Uri.parse("tel:+919930004241"));
-//                startActivity(intent);
-//            }
-//        });
     }
-//    public void numberClicked(View view){
-//        //if(view.getId()==R.id.eventSupport){
-//            Intent intent=new Intent(Intent.ACTION_DIAL);
-//            intent.setData(Uri.parse(view.toString()));
-//            startActivity(intent);
-//      //  }
-//    }
 }

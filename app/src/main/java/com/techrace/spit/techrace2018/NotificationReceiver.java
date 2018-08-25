@@ -36,14 +36,26 @@ public class NotificationReceiver extends BroadcastReceiver {
         UserDatabaseReference.child("Users").child(UID).child("cooldown").setValue(0);
         MainActivity.prefEditor = MainActivity.pref.edit().putInt("Cooldown", 0);
         MainActivity.prefEditor.apply();
-        // UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-        // UserDatabaseReference.child("Users").child(UID).child("points").setValue(MainActivity.points + 5);
-        Date d = new Date();
-        long l = d.getTime();
+        if (MainActivity.manualPass) {
+            UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+            // UserDatabaseReference.child("Users").child(UID).child("points").setValue(MainActivity.points + 5);
+            Date d = new Date();
+            long l = d.getTime();
+            UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+            UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, MainActivity.points, l, cooldown, UID));
+            MainActivity.beacon = true;
+            timerOn = false;
+            MainActivity.manualPass = false;
+        } else {
+            Date d = new Date();
+            long l = d.getTime();
+            MainActivity.beacon = true;
+            timerOn = false;
+        }
+
         // UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
         // UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, MainActivity.points, l, cooldown, UID));
-        MainActivity.beacon = true;
-        timerOn = false;
+
         // new HomeFragment().onResume();
 //        new HomeFragment().onResume();
     }

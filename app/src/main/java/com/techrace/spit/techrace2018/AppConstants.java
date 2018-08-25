@@ -2,17 +2,30 @@ package com.techrace.spit.techrace2018;
 
 public class AppConstants {
 
-    static int hintsRemaining;
 
     public static final String password = "valarmorghulis";
-    public static final String PREFS = "techrace2k18_prefs";
     public static final String PREFS_UNLOCKED = "unlocked";
 
+    public static final String techRacePref = "com.techrace.spit.techrace2018";
+    public static final String hintsLeftPref = "Hints Left";
+    public static final String hintPref = "Hint";
     public static final String cooldownPref = "Cooldown";
+    public static final String levelPref = "Level";
+    public static final String pointsPref = "Points";
+    public static final String cluePref = "Clue";
+    public static final String clueLevelPref = "Clue ";
+    public static final String locationLevelPref = "Location ";
+
     public static final int plusTwoPrice = 20;
     public static final int plusFourPrice = 30;
     public static final int unlockACluePrice = 40;
     public static final int reversePrice = 35;
+    public static final int hint1Price = 0;
+    public static final int hint2Price = 10;
+    public static final int hint3Price = 20;
+
+
+
     public static final String level1 = "Level 1: ";
     public static final String level2 = "Level 2: ";
     public static final String level3 = "Level 3: ";

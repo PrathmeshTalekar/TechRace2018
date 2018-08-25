@@ -13,6 +13,7 @@ import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
+import android.graphics.Color;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -20,6 +21,7 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.support.annotation.NonNull;
+import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
@@ -33,8 +35,10 @@ import android.support.v7.widget.Toolbar;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.view.View;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.LinearLayout;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.firebase.auth.FirebaseAuth;
@@ -70,6 +74,7 @@ import static com.techrace.spit.techrace2018.HomeFragment.clueRelativeLayout;
 
 import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
 
+import static com.techrace.spit.techrace2018.HomeFragment.hintButton;
 import static com.techrace.spit.techrace2018.HomeFragment.homeFragAuth;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.HomeFragment.levelString;
@@ -87,7 +92,7 @@ public class MainActivity extends AppCompatActivity
     static SharedPreferences pref;
     static SharedPreferences.Editor prefEditor;
     Date d = new Date();
-    static boolean beacon = true;
+    static boolean beacon = true, manualPass = false;
     static int points;
     String beaconID;
     static boolean timerOn = false, event = false;
@@ -125,7 +130,7 @@ public class MainActivity extends AppCompatActivity
                 builder.show();
             }
         }
-        pref = MainActivity.this.getSharedPreferences("com.techrace.spit.techrace2018", MODE_PRIVATE);
+        pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
 
 
@@ -136,7 +141,7 @@ public class MainActivity extends AppCompatActivity
             startActivity(i);
         } else {
             UID = mAuth.getCurrentUser().getUid();
-            pref = MainActivity.this.getSharedPreferences("com.techrace.spit.techrace2018", MODE_PRIVATE);
+            pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
 
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(new ValueEventListener() {
@@ -146,9 +151,9 @@ public class MainActivity extends AppCompatActivity
                     if (level != pref.getInt("Level", -1)) {
                         //  new HomeFragment().hintTextView.setVisibility(View.INVISIBLE);
                         prefEditor = pref.edit();
-                        prefEditor.putString("Hint", "").apply();
+                        prefEditor.putString(AppConstants.hintPref, "").apply();
                         prefEditor = pref.edit();
-                        prefEditor.putInt("Level", level).apply();
+                        prefEditor.putInt(AppConstants.levelPref, level).apply();
 
                     }
 
@@ -169,7 +174,7 @@ public class MainActivity extends AppCompatActivity
                     }
                     Log.i("POints updated", "" + points);
                     prefEditor = pref.edit();
-                    prefEditor.putInt("Points", points).apply();
+                    prefEditor.putInt(AppConstants.pointsPref, points).apply();
                     HomeFragment.pointsTextView.setText(String.valueOf(MainActivity.points));
                 }
 
@@ -213,7 +218,7 @@ public class MainActivity extends AppCompatActivity
                                                     reverseReference1.child("Users").child(appliedBy).child("Applied By").setValue(UID);
                                                     reverseReference1.child("Users").child(UID).child("points")
                                                             .setValue(MainActivity.points - AppConstants.reversePrice);
-                                                    reverseReference1.child(mAuth.getCurrentUser().getUid()).child("cooldown").setValue(0);
+                                                    reverseReference1.child(UID).child("cooldown").setValue(0);
                                                     prefEditor = pref.edit();
                                                     prefEditor.putInt(AppConstants.cooldownPref, 0).apply();
                                                 }
@@ -247,9 +252,16 @@ public class MainActivity extends AppCompatActivity
                 }
             });
         }
-        Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
+        Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
-
+        toolbar.inflateMenu(R.menu.main);
+        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+            @Override
+            public boolean onMenuItemClick(MenuItem item) {
+                onOptionsItemSelected(item);
+                return true;
+            }
+        });
         DrawerLayout drawer = (DrawerLayout) findViewById(R.id.drawer_layout);
         ActionBarDrawerToggle toggle = new ActionBarDrawerToggle(
                 this, drawer, toolbar, R.string.navigation_drawer_open, R.string.navigation_drawer_close);
@@ -267,6 +279,167 @@ public class MainActivity extends AppCompatActivity
         new HomeFragment().updateClue();
 
 
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_help) {
+            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+
+            TextView head = new TextView(this);
+            head.setText(R.string.action_help);
+            head.setTextSize(24);
+            head.setTextColor(Color.WHITE);
+            head.setPadding(0, 0, 0, 16);
+
+            TextView textView = new TextView(this);
+            textView.setText(R.string.scan_help);
+            textView.setTextSize(20);
+            textView.setPadding(0, 0, 0, 16);
+
+            Button button = new Button(this);
+            button.setText(R.string.scan_manual);
+            button.setTextColor(getResources().getColor(R.color.colorAccent));
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    bottomSheetDialog.dismiss();
+
+                    final BottomSheetDialog bottomSheet = new BottomSheetDialog(MainActivity.this);
+
+                    TextView textView = new TextView(MainActivity.this);
+                    textView.setText(R.string.manual_desc);
+                    textView.setTextSize(20);
+
+                    final EditText codeText = new EditText(MainActivity.this);
+
+                    Button button = new Button(MainActivity.this);
+                    button.setText(R.string.action_confirm);
+                    button.setTextColor(getResources().getColor(R.color.colorAccent));
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String input = codeText.getText().toString();
+                            checkManualPassword(input);
+                            codeText.setText("");
+                            bottomSheet.dismiss();
+                        }
+                    });
+
+                    LinearLayout linearLayout = new LinearLayout(MainActivity.this);
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
+                    linearLayout.setBackgroundColor(Color.DKGRAY);
+                    linearLayout.setPadding(48, 64, 48, 64);
+                    linearLayout.addView(textView);
+                    linearLayout.addView(codeText);
+                    linearLayout.addView(button);
+
+                    bottomSheetDialog.setTitle(R.string.action_help);
+                    bottomSheetDialog.setContentView(linearLayout);
+                    bottomSheetDialog.setCanceledOnTouchOutside(true);
+                    bottomSheetDialog.show();
+                }
+            });
+
+            LinearLayout linearLayout = new LinearLayout(MainActivity.this);
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+            linearLayout.setBackgroundColor(Color.DKGRAY);
+            linearLayout.setPadding(48, 48, 48, 64);
+            linearLayout.addView(head);
+            linearLayout.addView(textView);
+            linearLayout.addView(button);
+
+            bottomSheetDialog.setTitle(R.string.action_help);
+            bottomSheetDialog.setContentView(linearLayout);
+            bottomSheetDialog.setCanceledOnTouchOutside(true);
+            bottomSheetDialog.show();
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
+
+    void checkManualPassword(final String manualPassword) {
+
+        DatabaseReference pass = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("passwords");
+        pass.addListenerForSingleValueEvent(new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                String serverPass = dataSnapshot.getValue(String.class);
+                Log.i("server pass", serverPass);
+                if (manualPassword.equals(serverPass)) {
+
+                    Toast.makeText(MainActivity.this, "Updating...", Toast.LENGTH_LONG).show();
+                    if (cooldown == 0) {
+                        timerOn = false;
+                        MainActivity.beacon = true;
+                        UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                        UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+                        UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
+                        long l = new Date().getTime();
+                        UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+                        UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
+                        prefEditor = pref.edit();
+                        prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
+                        new HomeFragment().updateClue();
+                        MainActivity.beacon = true;
+                        event = false;
+                        //break;
+                    } else {
+
+                        Log.i("IN ELSE 1", "yes");
+                        if (!timerOn) {
+                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+                            Log.i("cool", "" + cooldown);
+                            timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+                            Log.i("IN timer on false", "yes");
+                            timerOn = true;
+                            manualPass = true;
+                            Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
+                            PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
+                                    MainActivity.this, 9999, intent, 0);
+
+                            AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
+
+                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+                                    + (cooldown * 59000), pendingIntentforAlarm);
+
+
+                            NotificationCompat.Builder builderalarm =
+                                    new NotificationCompat.Builder(MainActivity.this)
+                                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+                                            .setContentTitle("Please Wait")
+                                            .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
+                                            .setOngoing(true)
+                                            .setAutoCancel(false).setTimeoutAfter(cooldown * 58000).setChannelId("Timer");
+                            NotificationChannel mChannel;
+                            NotificationManager notificationManagerforAlarm =
+                                    (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
+                                notificationManagerforAlarm.createNotificationChannel(mChannel);
+                            }
+
+
+                            notificationManagerforAlarm.notify(1, builderalarm.build());
+                        }
+
+                    }
+
+
+                } else {
+                    Toast.makeText(MainActivity.this, "Wrong Password!", Toast.LENGTH_SHORT).show();
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        });
     }
     @Override
     public void onRequestPermissionsResult(int requestCode,
@@ -562,7 +735,7 @@ public class MainActivity extends AppCompatActivity
 
 
                                                                    prefEditor = pref.edit();
-                                                                   prefEditor.putString("Clue " + level, levelString).apply();
+                                                                   prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
                                                                    UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
                                                                    UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
                                                                    l = d.getTime();
@@ -574,6 +747,7 @@ public class MainActivity extends AppCompatActivity
                                                                    beaconManager.removeAllRangeNotifiers();
                                                                    beaconManager.disableForegroundServiceScanning();
                                                                    beaconManager.applySettings();
+                                                                   hintButton.setEnabled(true);
                                                                    new HomeFragment().updateClue();
 
                                                                    break;
@@ -602,11 +776,19 @@ public class MainActivity extends AppCompatActivity
                                                                                        .setContentTitle("Please Wait")
                                                                                        .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
                                                                                        .setOngoing(true)
-                                                                                       .setAutoCancel(false);
-
+                                                                                       .setAutoCancel(false)
+                                                                                       .setTimeoutAfter(cooldown * 58000).setChannelId("Timer");
+                                                                       NotificationChannel mChannel;
                                                                        NotificationManager notificationManagerforAlarm =
                                                                                (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                                                       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                                           mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
+                                                                           notificationManagerforAlarm.createNotificationChannel(mChannel);
+                                                                       }
+
+
                                                                        notificationManagerforAlarm.notify(1, builderalarm.build());
+
                                                                    }
 
                                                                }

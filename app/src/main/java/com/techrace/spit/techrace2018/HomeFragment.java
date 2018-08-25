@@ -90,8 +90,8 @@ public class HomeFragment extends Fragment {
     static RelativeLayout clueRelativeLayout;
     static String locName;
     TextView level1, level2, level3;
-    Button hintButton;
-
+    static Button hintButton;
+    int hintsLeft;
     @Override
     public void onStop() {
         super.onStop();
@@ -147,7 +147,7 @@ public class HomeFragment extends Fragment {
 //                    }
                     Log.i("LEVELL", String.valueOf(level));
                     prefEditor = pref.edit();
-                    prefEditor.putInt("Level", level);
+                    prefEditor.putInt(AppConstants.levelPref, level);
                     points = userDS.child("points").getValue(Integer.class);
                     prefEditor.putInt("Points", points);
                     pointsTextView.setText(String.valueOf(MainActivity.points));
@@ -156,11 +156,11 @@ public class HomeFragment extends Fragment {
                         locName = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level - 1)).child("Name").getValue(String.class);
                         // Log.i("loca firebase",locName);
                         prefEditor = pref.edit();
-                        prefEditor.putString("Location " + (level - 1), locName).apply();
+                        prefEditor.putString(AppConstants.locationLevelPref + (level - 1), locName).apply();
                     }
                     DataSnapshot locationDS = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level));
                     levelString = locationDS.child("Clue").getValue(String.class);
-                    prefEditor.putString("Clue", levelString).apply();
+                    prefEditor.putString(AppConstants.cluePref, levelString).apply();
                     //  pref = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
 
 
@@ -171,11 +171,11 @@ public class HomeFragment extends Fragment {
                     Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
                     clueTextView.setText(levelString);
                     clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
-                    if (pref.getString("Hint", "").equals("")) {
+                    if (pref.getString(AppConstants.hintPref, "").equals("")) {
                         hintTextView.setVisibility(View.INVISIBLE);
                     } else {
                         hintTextView.setVisibility(View.VISIBLE);
-                        hintTextView.setText(pref.getString("Hint", ""));
+                        hintTextView.setText(pref.getString(AppConstants.hintPref, ""));
                     }
                     beacon = true;
                 }
@@ -202,35 +202,110 @@ public class HomeFragment extends Fragment {
         clueRelativeLayout = myView.findViewById(R.id.clueLayout);
         hintButton = myView.findViewById(R.id.hintButton);
         hintTextView = myView.findViewById(R.id.hintTextView);
-        clueTextView.setText(pref.getString("Clue", "Connect To Internet"));
+        clueTextView.setText(pref.getString(AppConstants.cluePref, "Connect To Internet"));
         pointsTextView.setText(String.valueOf(pref.getInt("Points", 0)));
+
         hintButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (pref.getInt("Hints Left", -1) == 0) {
-                    Toast.makeText(getActivity(), "No Hints Left", Toast.LENGTH_SHORT).show();
-                } else {
-                    hintTextView.setVisibility(View.VISIBLE);
-                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
-                    hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                            powerReference1.child("Users").child(UID).child("points")
-                                    .setValue(MainActivity.points - AppConstants.unlockACluePrice);
-                            String hint = dataSnapshot.getValue(String.class);
-                            AppConstants.hintsRemaining--;
-                            prefEditor = pref.edit();
-                            prefEditor.putString("Hint", hint).apply();
-                            hintTextView.setText(hint);
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                DatabaseReference hintRef = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("hintsLeft");
+                hintRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                    @Override
+                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                        hintsLeft = dataSnapshot.getValue(Integer.class);
+                        if (hintsLeft <= 0) {
+                            Toast.makeText(getActivity(), "No Hints Left", Toast.LENGTH_SHORT).show();
+                        } else if (hintsLeft == 3) {
+                            if (points > AppConstants.hint1Price) {
+                                hintTextView.setVisibility(View.VISIBLE);
+                                DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                                hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        hintButton.setEnabled(false);
+                                        DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                        Log.i("point hint", "" + MainActivity.points);
+                                        powerReference1.child("Users").child(UID).child("points")
+                                                .setValue(MainActivity.points - AppConstants.hint1Price);
+                                        String hint = dataSnapshot.getValue(String.class);
+                                        powerReference1.child("Users").child(UID).child("hintsLeft").setValue(hintsLeft - 1);
+                                        prefEditor = pref.edit();
+                                        prefEditor.putString(AppConstants.hintPref, hint).apply();
+                                        hintTextView.setText(hint);
+                                    }
 
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
+                            }
+                        } else if (hintsLeft == 2) {
+                            if (points > AppConstants.hint2Price) {
+                                hintTextView.setVisibility(View.VISIBLE);
+                                DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                                hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        hintButton.setEnabled(false);
+                                        DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                        Log.i("point hint", "" + MainActivity.points);
+                                        powerReference1.child("Users").child(UID).child("points")
+                                                .setValue(MainActivity.points - AppConstants.hint2Price);
+                                        String hint = dataSnapshot.getValue(String.class);
+                                        powerReference1.child("Users").child(UID).child("hintsLeft").setValue(hintsLeft - 1);
+                                        prefEditor = pref.edit();
+                                        prefEditor.putString(AppConstants.hintPref, hint).apply();
+                                        hintTextView.setText(hint);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
+                            }
+                        } else if (hintsLeft == 1) {
+                            if (points > AppConstants.hint3Price) {
+                                hintTextView.setVisibility(View.VISIBLE);
+                                DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                                hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        hintButton.setEnabled(false);
+                                        DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                        Log.i("point hint", "" + MainActivity.points);
+                                        powerReference1.child("Users").child(UID).child("points")
+                                                .setValue(MainActivity.points - AppConstants.hint3Price);
+                                        String hint = dataSnapshot.getValue(String.class);
+                                        powerReference1.child("Users").child(UID).child("hintsLeft").setValue(hintsLeft - 1);
+                                        prefEditor = pref.edit();
+                                        prefEditor.putString(AppConstants.hintPref, hint).apply();
+                                        hintTextView.setText(hint);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
+                            } else {
+                                Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
+                            }
                         }
-                    });
-                }
+                    }
+
+                    @Override
+                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                    }
+                });
+
             }
         });
     }
@@ -243,107 +318,27 @@ public class HomeFragment extends Fragment {
         return myView;
     }
 
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
 
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_help) {
-            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(getActivity());
-
-            TextView head = new TextView(getActivity());
-            head.setText(R.string.action_help);
-            head.setTextSize(24);
-            head.setTextColor(Color.WHITE);
-            head.setPadding(0, 0, 0, 16);
-
-            TextView textView = new TextView(getActivity());
-            textView.setText(R.string.scan_help);
-            textView.setTextSize(20);
-            textView.setPadding(0, 0, 0, 16);
-
-            Button button = new Button(getActivity());
-            button.setText(R.string.scan_manual);
-            button.setTextColor(getResources().getColor(R.color.colorAccent));
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    bottomSheetDialog.dismiss();
-
-                    final BottomSheetDialog bottomSheet = new BottomSheetDialog(getActivity());
-
-                    TextView textView = new TextView(getActivity());
-                    textView.setText(R.string.manual_desc);
-                    textView.setTextSize(20);
-
-                    final EditText codeText = new EditText(getActivity());
-
-                    Button button = new Button(getActivity());
-                    button.setText(R.string.action_confirm);
-                    button.setTextColor(getResources().getColor(R.color.colorAccent));
-                    button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            String input = codeText.getText().toString();
-                            checkManualPasword(input);
-                            codeText.setText("");
-                            bottomSheet.dismiss();
-                        }
-                    });
-
-                    LinearLayout linearLayout = new LinearLayout(getActivity());
-                    linearLayout.setOrientation(LinearLayout.VERTICAL);
-                    linearLayout.setBackgroundColor(Color.DKGRAY);
-                    linearLayout.setPadding(48, 64, 48, 64);
-                    linearLayout.addView(textView);
-                    linearLayout.addView(codeText);
-                    linearLayout.addView(button);
-
-                    bottomSheetDialog.setTitle(R.string.action_help);
-                    bottomSheetDialog.setContentView(linearLayout);
-                    bottomSheetDialog.setCanceledOnTouchOutside(true);
-                    bottomSheetDialog.show();
-                }
-            });
-
-            LinearLayout linearLayout = new LinearLayout(getActivity());
-            linearLayout.setOrientation(LinearLayout.VERTICAL);
-            linearLayout.setBackgroundColor(Color.DKGRAY);
-            linearLayout.setPadding(48, 48, 48, 64);
-            linearLayout.addView(head);
-            linearLayout.addView(textView);
-            linearLayout.addView(button);
-
-            bottomSheetDialog.setTitle(R.string.action_help);
-            bottomSheetDialog.setContentView(linearLayout);
-            bottomSheetDialog.setCanceledOnTouchOutside(true);
-            bottomSheetDialog.show();
-        }
-
-        return super.onOptionsItemSelected(item);
-
-    }
-
-    @Override
-    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-        super.onActivityCreated(savedInstanceState);
-        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-        toolbar.inflateMenu(R.menu.main);
-        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-            @Override
-            public boolean onMenuItemClick(MenuItem item) {
-                onOptionsItemSelected(item);
-                return true;
-            }
-        });
-
-    }
+//    @Override
+//    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
+//        super.onActivityCreated(savedInstanceState);
+//        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
+//        toolbar.inflateMenu(R.menu.main);
+//        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
+//            @Override
+//            public boolean onMenuItemClick(MenuItem item) {
+//                onOptionsItemSelected(item);
+//                return true;
+//            }
+//        });
+//
+//    }
 
     @Override
     public void onResume() {
         super.onResume();
         // sharedPreferences=getActivity().getSharedPreferences("com.techrace.spit.techrace2018",Context.MODE_PRIVATE);
-        if (pref.getInt("Level", -1) != level) {
+        if (pref.getInt(AppConstants.levelPref, -1) != level) {
             updateClue();
         }
         hintTextView.setText(pref.getString("Hint", ""));
@@ -353,82 +348,82 @@ public class HomeFragment extends Fragment {
         //    if (MainActivity.beaconManager.isBound(this)) MainActivity.beaconManager.setBackgroundMode(false);
     }
 
-    void checkManualPasword(final String manualPassword) {
-
-        DatabaseReference pass = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("passwords");
-        pass.addListenerForSingleValueEvent(new ValueEventListener() {
-            @Override
-            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String serverPass = dataSnapshot.getValue(String.class);
-                Log.i("server pass", serverPass);
-                if (manualPassword.equals(serverPass)) {
-                    Toast.makeText(getActivity(), "Updating...", Toast.LENGTH_LONG).show();
-                    if (cooldown == 0) {
-                        timerOn = false;
-                        MainActivity.beacon = true;
-                        UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                        UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-                        UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
-                        long l = new Date().getTime();
-                        UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
-                        UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
-                        prefEditor = pref.edit();
-                        prefEditor.putString("Clue " + level, levelString).apply();
-                        new HomeFragment().updateClue();
-                        MainActivity.beacon = true;
-                        event = false;
-                        //break;
-                    } else {
-
-                        Log.i("IN ELSE 1", "yes");
-                        if (!timerOn) {
-                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-                            Log.i("cool", "" + cooldown);
-                            timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
-                            Log.i("IN timer on false", "yes");
-                            timerOn = true;
-                            Intent intent = new Intent(getActivity(), NotificationReceiver.class);
-                            PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
-                                    getActivity(), 9999, intent, 0);
-
-                            AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(ALARM_SERVICE);
-
-                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-                                    + (cooldown * 60000), pendingIntentforAlarm);
-
-
-                            NotificationCompat.Builder builderalarm =
-                                    new NotificationCompat.Builder(getActivity())
-                                            .setSmallIcon(R.drawable.ic_launcher_foreground)
-                                            .setContentTitle("Please Wait")
-                                            .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
-                                            .setOngoing(true)
-                                            .setAutoCancel(false).setChannelId("Timer");
-                            NotificationChannel mChannel;
-                            NotificationManager notificationManagerforAlarm =
-                                    (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
-                                notificationManagerforAlarm.createNotificationChannel(mChannel);
-                            }
-
-
-                            notificationManagerforAlarm.notify(1, builderalarm.build());
-                        }
-
-                    }
-
-
-                } else {
-                    Toast.makeText(getActivity(), "Wrong Password!", Toast.LENGTH_SHORT).show();
-                }
-            }
-
-            @Override
-            public void onCancelled(@NonNull DatabaseError databaseError) {
-
-            }
-        });
-    }
+//    void checkManualPassword(final String manualPassword) {
+//
+//        DatabaseReference pass = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("passwords");
+//        pass.addListenerForSingleValueEvent(new ValueEventListener() {
+//            @Override
+//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+//                String serverPass = dataSnapshot.getValue(String.class);
+//                Log.i("server pass", serverPass);
+//                if (manualPassword.equals(serverPass)) {
+//                    Toast.makeText(getActivity(), "Updating...", Toast.LENGTH_LONG).show();
+//                    if (cooldown == 0) {
+//                        timerOn = false;
+//                        MainActivity.beacon = true;
+//                        UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+//                        UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+//                        UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
+//                        long l = new Date().getTime();
+//                        UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+//                        UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
+//                        prefEditor = pref.edit();
+//                        prefEditor.putString(AppConstants.clueLevelPref+ level, levelString).apply();
+//                        new HomeFragment().updateClue();
+//                        MainActivity.beacon = true;
+//                        event = false;
+//                        //break;
+//                    } else {
+//
+//                        Log.i("IN ELSE 1", "yes");
+//                        if (!timerOn) {
+//                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+//                            Log.i("cool", "" + cooldown);
+//                            timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+//                            Log.i("IN timer on false", "yes");
+//                            timerOn = true;
+//                            Intent intent = new Intent(getActivity(), NotificationReceiver.class);
+//                            PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
+//                                    getActivity(), 9999, intent, 0);
+//
+//                            AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(ALARM_SERVICE);
+//
+//                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+//                                    + (cooldown * 60000), pendingIntentforAlarm);
+//
+//
+//                            NotificationCompat.Builder builderalarm =
+//                                    new NotificationCompat.Builder(getActivity())
+//                                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+//                                            .setContentTitle("Please Wait")
+//                                            .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
+//                                            .setOngoing(true)
+//                                            .setAutoCancel(false).setChannelId("Timer");
+//                            NotificationChannel mChannel;
+//                            NotificationManager notificationManagerforAlarm =
+//                                    (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
+//                                notificationManagerforAlarm.createNotificationChannel(mChannel);
+//                            }
+//
+//
+//                            notificationManagerforAlarm.notify(1, builderalarm.build());
+//                        }
+//
+//                    }
+//
+//
+//                } else {
+//                    Toast.makeText(H, "Wrong Password!", Toast.LENGTH_SHORT).show();
+//                }
+//            }
+//
+//            @Override
+//            public void onCancelled(@NonNull DatabaseError databaseError) {
+//
+//            }
+//        });
+//    }
 
 }

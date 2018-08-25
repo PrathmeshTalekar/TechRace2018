@@ -68,7 +68,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                     Log.i("HI", "onclick");
                     MainActivity.selectUID = uid;
                     Log.i("value of uid", MainActivity.selectUID);
-                    if (MainActivity.selectUID != null) {
+                    if (MainActivity.selectUID != null && !selectUID.equals(UID)) {
 
                         powerReference = FirebaseDatabase.getInstance().getReference();
 
@@ -81,6 +81,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                                     DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
                                     powerReference1.child("Users").child(MainActivity.selectUID).child("cooldown").setValue(PowerCardsFragment.twoORfour);
                                     if (PowerCardsFragment.twoORfour == 2) {
+
                                         powerReference1.child("Users").child(UID).child("points")
                                                 .setValue(MainActivity.points - AppConstants.plusTwoPrice);
                                         // MainActivity.prefEditor.putInt("Points",points).apply();

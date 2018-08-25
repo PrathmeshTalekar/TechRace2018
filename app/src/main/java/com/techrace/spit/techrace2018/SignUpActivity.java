@@ -97,7 +97,7 @@ public class SignUpActivity extends AppCompatActivity {
                                                             public void onComplete(@NonNull Task<Void> task) {
                                                                 if (task.isSuccessful()) {
                                                                     prefEditor = pref.edit();
-                                                                    prefEditor.putInt("Hints Left", 2).apply();
+                                                                    prefEditor.putInt(AppConstants.hintsLeftPref, 3).apply();
                                                                     Toast.makeText(SignUpActivity.this, "Signed Up Successfully", Toast.LENGTH_LONG).show();
                                                                     finish();
                                                                 } else {
