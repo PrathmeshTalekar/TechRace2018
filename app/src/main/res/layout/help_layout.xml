@@ -2,13 +2,14 @@
 <ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
+    android:background="@color/background"
     android:layout_width="match_parent"
     android:layout_height="match_parent">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="#211a23"
+        android:background="@color/background"
         android:orientation="vertical"
         tools:context=".ui.AboutActivity">
 
@@ -18,14 +19,14 @@
             android:clickable="true"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:elevation="4dp"
+            app:cardElevation="8dp"
             android:foreground="?android:attr/selectableItemBackground"
             app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/background"
+                android:background="@color/cardBackground"
                 android:orientation="vertical"
                 android:padding="@dimen/activity_horizontal_margin">
 
@@ -35,7 +36,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/contact_help"
-                    android:textColor="@color/white" />
+                    android:textColor="@android:color/black" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
@@ -116,14 +117,14 @@
             android:clickable="true"
             android:clipChildren="false"
             android:clipToPadding="false"
-            android:elevation="4dp"
+            app:cardElevation="8dp"
             android:foreground="?android:attr/selectableItemBackground"
             app:cardUseCompatPadding="true">
 
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:background="@color/background"
+                android:background="@color/cardBackground"
                 android:orientation="vertical"
                 android:padding="@dimen/activity_horizontal_margin">
 
@@ -133,7 +134,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/app_help"
-                    android:textColor="@color/white" />
+                    android:textColor="@android:color/black" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
