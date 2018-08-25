@@ -195,9 +195,6 @@ public class HomeFragment extends Fragment {
 
         clueTextView = myView.findViewById(R.id.clue_text);
         pointsTextView = myView.findViewById(R.id.pointsTextView);
-        level1 = myView.findViewById(R.id.level1);
-        level2 = myView.findViewById(R.id.level2);
-        level3 = myView.findViewById(R.id.level3);
         timerTextView = myView.findViewById(R.id.timerTextView);
         clueRelativeLayout = myView.findViewById(R.id.clueLayout);
         hintButton = myView.findViewById(R.id.hintButton);

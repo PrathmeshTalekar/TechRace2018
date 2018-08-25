@@ -2,6 +2,7 @@ package com.techrace.spit.techrace2018;
 
 import android.annotation.TargetApi;
 import android.content.Intent;
+import android.net.Uri;
 import android.os.Build;
 import android.support.v4.app.ActivityOptionsCompat;
 import android.support.v7.app.AppCompatActivity;
@@ -61,5 +62,11 @@ public class AboutActivity extends AppCompatActivity {
         slide.setDuration(300);
         getWindow().setEnterTransition(slide);
         getWindow().setReenterTransition(slide);
+    }
+
+    public void onClick(View v) {
+        Uri uri = Uri.parse((String) v.getTag());
+        Intent intent = new Intent(Intent.ACTION_VIEW, uri);
+        startActivity(intent);
     }
 }
