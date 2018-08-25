@@ -631,7 +631,7 @@ public class MainActivity extends AppCompatActivity
             case R.id.clues:
                 fragment = new CluesFragment();
                 break;
-            case R.id.credits:
+            case R.id.about:
                 fragment = new CreditsFragment();
                 break;
             case R.id.feed:
