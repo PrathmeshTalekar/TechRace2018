@@ -2,6 +2,7 @@ package com.techrace.spit.techrace2018;
 
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Color;
 import android.support.annotation.NonNull;
 import android.support.v4.content.ContextCompat;
 import android.support.v7.widget.CardView;
@@ -54,12 +55,13 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         final String uid = leaderboardItems.get(position).uid;
         final int cool = leaderboardItems.get(position).cool;
         if (cool != 0) {
-            holder.cardView.setCardBackgroundColor(ContextCompat.getColor(this.context, R.color.hotRed));
+            int colored = Color.parseColor("#e61919");
+            holder.cardView.setCardBackgroundColor(colored);
         }
-        holder.positionText.setText("" + String.valueOf(position + 1));
-        holder.nameText.setText("" + leaderboardItems.get(position).name);
-        holder.levelText.setText("" + leaderboardItems.get(position).level);
-        holder.pointsText.setText("" + leaderboardItems.get(position).points);
+        holder.positionText.setText(String.valueOf(position + 1));
+        holder.nameText.setText(name);
+        holder.levelText.setText(String.valueOf(level));
+        holder.coolText.setText(String.valueOf(cool));
         Log.i("SELECT USER BOOL", "" + selectUser);
         if (selectUser) {
             holder.cardView.setOnClickListener(new View.OnClickListener() {
@@ -123,7 +125,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
 
     public static class LeaderboardViewHolder extends RecyclerView.ViewHolder {
 
-        TextView nameText, levelText, positionText, pointsText;
+        TextView nameText, levelText, positionText, coolText;
         CardView cardView;
 
         public LeaderboardViewHolder(View itemView) {
@@ -131,7 +133,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
             nameText = (TextView) itemView.findViewById(R.id.leaderboard_item_name);
             levelText = (TextView) itemView.findViewById(R.id.leaderboard_item_clues_solved);
             positionText = (TextView) itemView.findViewById(R.id.leaderboard_item_position);
-            pointsText = (TextView) itemView.findViewById(R.id.leaderboard_item_applied);
+            coolText = (TextView) itemView.findViewById(R.id.leaderboard_item_applied);
 
             cardView = (CardView) itemView.findViewById(R.id.leaderboard_item_card);
         }

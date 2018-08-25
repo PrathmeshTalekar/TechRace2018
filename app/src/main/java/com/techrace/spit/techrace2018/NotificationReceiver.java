@@ -12,11 +12,15 @@ import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.Date;
 
+import static com.techrace.spit.techrace2018.HomeFragment.hintButton;
 import static com.techrace.spit.techrace2018.MainActivity.cooldown;
+import static com.techrace.spit.techrace2018.MainActivity.pref;
+import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 import static com.techrace.spit.techrace2018.MainActivity.timerOn;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.HomeFragment.UID;
 import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
+
 
 public class NotificationReceiver extends BroadcastReceiver {
     @Override
@@ -34,7 +38,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         mNotificationManager.notify(1, mBuilder.build());
         UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
         UserDatabaseReference.child("Users").child(UID).child("cooldown").setValue(0);
-        MainActivity.prefEditor = MainActivity.pref.edit().putInt("Cooldown", 0);
+        MainActivity.prefEditor = pref.edit().putInt("Cooldown", 0);
         MainActivity.prefEditor.apply();
         if (MainActivity.manualPass) {
             UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
@@ -45,6 +49,10 @@ public class NotificationReceiver extends BroadcastReceiver {
             UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, MainActivity.points, l, cooldown, UID));
             MainActivity.beacon = true;
             timerOn = false;
+            hintButton.setEnabled(true);
+            prefEditor = pref.edit();
+            prefEditor.putString(AppConstants.hintPref, "").apply();
+            new HomeFragment().updateClue();
             MainActivity.manualPass = false;
         } else {
             Date d = new Date();
