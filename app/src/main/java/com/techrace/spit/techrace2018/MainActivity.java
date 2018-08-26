@@ -664,7 +664,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(new Intent(MainActivity.this, AboutActivity.class));
                 break;
             case R.id.feed:
-                // startActivity(new Intent(MainActivity.this,FeedActivity.class));
+                startActivity(new Intent(MainActivity.this, FeedActivity.class));
                 break;
             case R.id.home:
                 fragment = new HomeFragment();
