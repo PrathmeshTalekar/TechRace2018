@@ -28,7 +28,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         Log.i("time done", "in recieve");
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
-                        .setSmallIcon(R.drawable.ic_launcher_foreground)
+                        .setSmallIcon(R.mipmap.ic_launcher_foreground)
                         .setContentTitle("Done!")
                         .setContentText("Timer is set off")
                         .setAutoCancel(true);

@@ -17,6 +17,7 @@ import android.graphics.Color;
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
@@ -48,6 +49,7 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
+
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
@@ -56,6 +58,7 @@ import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
+import java.io.IOException;
 import java.text.DateFormat;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -103,7 +106,7 @@ public class MainActivity extends AppCompatActivity
     String appliedBy = null;
     LocationTracker locationTracker;
     NetworkInfo.State wifi, mobile;
-    ValueEventListener levelListener, pointsListener, cooldownLiastener;
+    ValueEventListener levelListener, pointsListener, cooldownListener;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -170,7 +173,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         };
-        cooldownLiastener = new ValueEventListener() {
+        cooldownListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 cooldown = dataSnapshot.getValue(Integer.class);
@@ -256,6 +259,7 @@ public class MainActivity extends AppCompatActivity
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
 
         }
+
 
         Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
@@ -400,6 +404,7 @@ public class MainActivity extends AppCompatActivity
                             String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
                             Log.i("cool", "" + cooldown);
                             timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+
                             Log.i("IN timer on false", "yes");
                             timerOn = true;
                             manualPass = true;
@@ -415,7 +420,7 @@ public class MainActivity extends AppCompatActivity
 
                             NotificationCompat.Builder builderalarm =
                                     new NotificationCompat.Builder(MainActivity.this)
-                                            .setSmallIcon(R.drawable.ic_launcher_foreground)
+                                            .setSmallIcon(R.mipmap.ic_launcher_foreground)
                                             .setContentTitle("Please Wait")
                                             .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
                                             .setOngoing(true)
@@ -477,7 +482,7 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         if (mAuth.getCurrentUser() != null) {
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownLiastener);
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
         }
 
 
@@ -551,7 +556,7 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         //  UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").removeEventListener(levelListener);
         // UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").removeEventListener(pointsListener);
-        UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").removeEventListener(cooldownLiastener);
+        UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").removeEventListener(cooldownListener);
     }
 
     @Override

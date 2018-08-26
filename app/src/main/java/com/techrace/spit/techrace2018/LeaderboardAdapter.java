@@ -12,6 +12,7 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.RelativeLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
@@ -56,12 +57,12 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         final int cool = leaderboardItems.get(position).cool;
         if (cool != 0) {
             int colored = Color.parseColor("#e61919");
-            holder.cardView.setCardBackgroundColor(colored);
+            holder.relativeLayout.setBackgroundColor(colored);
+            holder.coolText.setText(String.valueOf(cool));
         }
         holder.positionText.setText(String.valueOf(position + 1));
         holder.nameText.setText(name);
         holder.levelText.setText(String.valueOf(level));
-        holder.coolText.setText(String.valueOf(cool));
         Log.i("SELECT USER BOOL", "" + selectUser);
         if (selectUser) {
             holder.cardView.setOnClickListener(new View.OnClickListener() {
@@ -127,6 +128,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
 
         TextView nameText, levelText, positionText, coolText;
         CardView cardView;
+        RelativeLayout relativeLayout;
 
         public LeaderboardViewHolder(View itemView) {
             super(itemView);
@@ -134,7 +136,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
             levelText = (TextView) itemView.findViewById(R.id.leaderboard_item_clues_solved);
             positionText = (TextView) itemView.findViewById(R.id.leaderboard_item_position);
             coolText = (TextView) itemView.findViewById(R.id.leaderboard_item_applied);
-
+            relativeLayout = (RelativeLayout) itemView.findViewById(R.id.leaderboardItemLayout);
             cardView = (CardView) itemView.findViewById(R.id.leaderboard_item_card);
         }
     }
