@@ -113,7 +113,7 @@
             android:layout_marginBottom="184dp"
             android:layout_marginStart="151dp"
             android:text="TextView" />
-    -->
+
         <TextView
             android:id="@+id/pointsTextView"
             android:layout_width="wrap_content"
@@ -124,7 +124,7 @@
             android:text="0"
             android:textColor="@android:color/darker_gray"
             android:textSize="36sp" />
-
+-->
         <TextView
             android:id="@+id/timerTextView"
             android:layout_width="wrap_content"

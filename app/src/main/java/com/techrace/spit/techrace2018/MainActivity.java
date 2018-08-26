@@ -103,7 +103,8 @@ public class MainActivity extends AppCompatActivity
     String appliedBy = null;
     LocationTracker locationTracker;
     NetworkInfo.State wifi, mobile;
-    ValueEventListener levelListener, pointsListener, cooldownLiastener;
+    ValueEventListener levelListener, pointsListener, cooldownListener;
+    Menu globalMenu;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -163,6 +164,8 @@ public class MainActivity extends AppCompatActivity
                 prefEditor = pref.edit();
                 prefEditor.putInt(AppConstants.pointsPref, points).apply();
                 HomeFragment.pointsTextView.setText(String.valueOf(MainActivity.points));
+                MenuItem myItem = globalMenu.findItem(R.id.pointsBox);
+                myItem.setTitle("" + points);
             }
 
             @Override
@@ -170,7 +173,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         };
-        cooldownLiastener = new ValueEventListener() {
+        cooldownListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 cooldown = dataSnapshot.getValue(Integer.class);
@@ -286,6 +289,11 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        globalMenu = menu;
+        return true;
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -477,7 +485,14 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         if (mAuth.getCurrentUser() != null) {
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownLiastener);
+            UID = mAuth.getCurrentUser().getUid();
+            pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
+            points = pref.getInt(AppConstants.pointsPref, 0);
+            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
+
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
         }
 
 
@@ -551,7 +566,9 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         //  UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").removeEventListener(levelListener);
         // UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").removeEventListener(pointsListener);
-        UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").removeEventListener(cooldownLiastener);
+        if (UserDatabaseReference != null && mAuth.getCurrentUser() != null) {
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").removeEventListener(cooldownListener);
+        }
     }
 
     @Override
