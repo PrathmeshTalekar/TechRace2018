@@ -192,7 +192,7 @@ public class HomeFragment extends Fragment {
                             if (hintsLeft <= 0) {
                                 Toast.makeText(getActivity(), "No Hints Left", Toast.LENGTH_SHORT).show();
                             } else if (hintsLeft == 3) {
-                                if (points > AppConstants.hint1Price) {
+                                if (points >= AppConstants.hint1Price) {
                                     hintTextView.setVisibility(View.VISIBLE);
                                     DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
                                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -219,7 +219,7 @@ public class HomeFragment extends Fragment {
                                     Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
                                 }
                             } else if (hintsLeft == 2) {
-                                if (points > AppConstants.hint2Price) {
+                                if (points >= AppConstants.hint2Price) {
                                     hintTextView.setVisibility(View.VISIBLE);
                                     DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
                                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -246,7 +246,7 @@ public class HomeFragment extends Fragment {
                                     Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
                                 }
                             } else if (hintsLeft == 1) {
-                                if (points > AppConstants.hint3Price) {
+                                if (points >= AppConstants.hint3Price) {
                                     hintTextView.setVisibility(View.VISIBLE);
                                     DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
                                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
