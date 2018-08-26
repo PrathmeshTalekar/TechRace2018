@@ -105,6 +105,8 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                                         // MainActivity.prefEditor.putInt("Points",points).apply();
                                     }
                                     Toast.makeText(holder.cardView.getContext(), "Power Card Applied", Toast.LENGTH_SHORT).show();
+                                    ((Activity) context).finish();
+                                    selectUser = false;
 
                                 } else {
                                     Toast.makeText(holder.cardView.getContext(), "Already Applied", Toast.LENGTH_SHORT).show();
@@ -122,7 +124,6 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                     } else {
                         Toast.makeText(holder.cardView.getContext(), "Power Card Not Applied", Toast.LENGTH_SHORT).show();
                     }
-                    ((Activity) context).finish();
                     selectUser = false;
                 }
             });

@@ -26,6 +26,8 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
+import android.text.InputType;
+import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
@@ -329,7 +331,7 @@ public class MainActivity extends AppCompatActivity
                     textView.setTextSize(20);
 
                     final EditText codeText = new EditText(MainActivity.this);
-
+                    codeText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     Button button = new Button(MainActivity.this);
                     button.setText(R.string.action_confirm);
                     button.setTextColor(getResources().getColor(R.color.colorAccent));

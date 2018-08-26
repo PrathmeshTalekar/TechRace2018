@@ -42,7 +42,7 @@ public class NotificationReceiver extends BroadcastReceiver {
         MainActivity.prefEditor.apply();
         if (MainActivity.manualPass) {
             UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-            // UserDatabaseReference.child("Users").child(UID).child("points").setValue(MainActivity.points + 5);
+            UserDatabaseReference.child("Users").child(UID).child("points").setValue(MainActivity.points + 5);
             Date d = new Date();
             long l = d.getTime();
             UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
