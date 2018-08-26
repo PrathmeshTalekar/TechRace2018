@@ -106,7 +106,7 @@ public class MainActivity extends AppCompatActivity
     LocationTracker locationTracker;
     NetworkInfo.State wifi, mobile;
     ValueEventListener levelListener, pointsListener, cooldownListener;
-    Menu globalMenu;
+    static Menu globalMenu;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -165,7 +165,6 @@ public class MainActivity extends AppCompatActivity
                 Log.i("POints updated", "" + points);
                 prefEditor = pref.edit();
                 prefEditor.putInt(AppConstants.pointsPref, points).apply();
-                HomeFragment.pointsTextView.setText(String.valueOf(MainActivity.points));
                 MenuItem myItem = globalMenu.findItem(R.id.pointsBox);
                 myItem.setTitle("" + points);
             }

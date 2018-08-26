@@ -14,7 +14,7 @@
         android:id="@+id/leaderboardItemLayout"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@drawable/leaderboard_background"
+        android:background="#000000"
         android:padding="8dp">
 
         <TextView
@@ -41,7 +41,8 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:layout_marginLeft="4dp"
-            android:layout_marginTop="2dp"
+            android:layout_marginTop="1dp"
+            android:textSize="16dp"
             android:layout_toRightOf="@id/leaderboard_item_name"
             android:textColor="@color/transparent_black" />
 

@@ -58,7 +58,16 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         if (cool != 0) {
             int colored = Color.parseColor("#e61919");
             holder.relativeLayout.setBackgroundColor(colored);
-            holder.coolText.setText(String.valueOf(cool));
+            holder.coolText.setText("+" + String.valueOf(cool));
+        }
+        if (uid.equals(UID)) {
+            holder.relativeLayout.setBackgroundColor(Color.WHITE);
+            holder.nameText.setTextColor(Color.BLACK);
+            holder.levelText.setTextColor(Color.BLACK);
+            holder.positionText.setTextColor(Color.BLACK);
+            if (cool != 0) {
+                holder.coolText.setTextColor(Color.parseColor("#e61919"));
+            }
         }
         holder.positionText.setText(String.valueOf(position + 1));
         holder.nameText.setText(name);
@@ -83,6 +92,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                                 if (c == 0) {
                                     DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
                                     powerReference1.child("Users").child(MainActivity.selectUID).child("cooldown").setValue(PowerCardsFragment.twoORfour);
+                                    powerReference1.child("Leaderboard").child(selectUID).child("Cooldown").setValue(PowerCardsFragment.twoORfour);
                                     if (PowerCardsFragment.twoORfour == 2) {
 
                                         powerReference1.child("Users").child(UID).child("points")

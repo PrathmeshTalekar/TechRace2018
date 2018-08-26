@@ -58,6 +58,7 @@ import static android.content.Context.ALARM_SERVICE;
 import static com.techrace.spit.techrace2018.MainActivity.beacon;
 import static com.techrace.spit.techrace2018.MainActivity.cooldown;
 import static com.techrace.spit.techrace2018.MainActivity.event;
+import static com.techrace.spit.techrace2018.MainActivity.globalMenu;
 import static com.techrace.spit.techrace2018.MainActivity.points;
 //import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 //import static com.techrace.spit.techrace2018.MainActivity.pref;
@@ -75,8 +76,8 @@ public class HomeFragment extends Fragment {
 
     static final String TAG = "MonitoringActivity";
     static View myView;
-    static TextView clueTextView, pointsTextView, hintTextView, timerTextView;
-
+    static TextView clueTextView, hintTextView, timerTextView;
+    MenuItem myItem;
     static DatabaseReference UserDatabaseReference;
     static FirebaseDatabase firebaseDatabase;
     static FirebaseAuth homeFragAuth = MainActivity.mAuth;
@@ -121,7 +122,10 @@ public class HomeFragment extends Fragment {
                     prefEditor.putInt(AppConstants.levelPref, level);
                     points = userDS.child("points").getValue(Integer.class);
                     prefEditor.putInt("Points", points);
-                    pointsTextView.setText(String.valueOf(MainActivity.points));
+                    if (globalMenu != null) {
+                        myItem = globalMenu.findItem(R.id.pointsBox);
+                        myItem.setTitle("" + points);
+                    }
                     name = (String) userDS.child("name").getValue();
                     if (level > 1) {
                         locName = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level - 1)).child("Name").getValue(String.class);
@@ -165,14 +169,17 @@ public class HomeFragment extends Fragment {
         super.onViewCreated(view, savedInstanceState);
 
         clueTextView = myView.findViewById(R.id.clue_text);
-        pointsTextView = myView.findViewById(R.id.pointsTextView);
+        //pointsTextView = myView.findViewById(R.id.pointsTextView);
         timerTextView = myView.findViewById(R.id.timerTextView);
         clueRelativeLayout = myView.findViewById(R.id.clueLayout);
         hintButton = myView.findViewById(R.id.hintButton);
         hintTextView = myView.findViewById(R.id.hintTextView);
         clueTextView.setText(pref.getString(AppConstants.cluePref, "Connect To Internet"));
-        pointsTextView.setText(String.valueOf(pref.getInt("Points", 0)));
-
+        if (globalMenu != null) {
+            myItem = globalMenu.findItem(R.id.pointsBox);
+            myItem.setTitle(String.valueOf(pref.getInt("Points", 0)));
+            // pointsTextView.setText(String.valueOf(pref.getInt("Points", 0)));
+        }
         hintButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
