@@ -12,8 +12,9 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ListView;
 
-import com.google.firebase.database.DatabaseReference;
-import com.google.firebase.database.FirebaseDatabase;
+import com.techrace.spit.techrace2018.CluesAdapter;
+import com.techrace.spit.techrace2018.R;
+
 import java.util.ArrayList;
 
 public class CluesFragment extends Fragment {

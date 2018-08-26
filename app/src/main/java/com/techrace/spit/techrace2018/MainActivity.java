@@ -26,7 +26,6 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.app.NotificationCompat;
-import android.text.InputType;
 import android.text.method.PasswordTransformationMethod;
 import android.util.Log;
 import android.support.design.widget.NavigationView;
@@ -50,6 +49,7 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
+import com.techrace.spit.techrace2018.LeaderboardActivity;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -59,9 +59,7 @@ import org.altbeacon.beacon.MonitorNotifier;
 import org.altbeacon.beacon.RangeNotifier;
 import org.altbeacon.beacon.Region;
 
-import java.io.IOException;
 import java.text.DateFormat;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Date;
 
@@ -79,10 +77,8 @@ import static com.techrace.spit.techrace2018.HomeFragment.clueRelativeLayout;
 import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
 
 import static com.techrace.spit.techrace2018.HomeFragment.hintButton;
-import static com.techrace.spit.techrace2018.HomeFragment.homeFragAuth;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.HomeFragment.levelString;
-import static com.techrace.spit.techrace2018.HomeFragment.locName;
 import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
 
 
@@ -668,7 +664,7 @@ public class MainActivity extends AppCompatActivity
                 startActivity(new Intent(MainActivity.this, AboutActivity.class));
                 break;
             case R.id.feed:
-                fragment = new FeedFragment();
+                // startActivity(new Intent(MainActivity.this,FeedActivity.class));
                 break;
             case R.id.home:
                 fragment = new HomeFragment();

@@ -71,6 +71,7 @@ public class SignUpActivity extends AppCompatActivity {
         final String password = passwordEditText.getText().toString().trim();
         final String contact = contactEditText.getText().toString().trim();
         String emailPattern = "[a-zA-Z0-9._-]+@[a-z]+\\.+[a-z]+";
+
         if (email.matches(emailPattern) && email.length() > 0) {
 
             if (name.equals("") || !password.equals(AppConstants.password)) {

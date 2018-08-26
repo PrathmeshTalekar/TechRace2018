@@ -7,6 +7,8 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.TextView;
 
+import com.techrace.spit.techrace2018.R;
+
 import java.util.ArrayList;
 
 public class CluesAdapter extends ArrayAdapter<String> {
