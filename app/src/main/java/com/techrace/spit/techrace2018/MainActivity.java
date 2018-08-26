@@ -138,7 +138,7 @@ public class MainActivity extends AppCompatActivity
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 level = dataSnapshot.getValue(Integer.class);
                 if (level != pref.getInt("Level", -1)) {
-                    //  new HomeFragment().hintTextView.setVisibility(View.INVISIBLE);
+                    HomeFragment.hintView.setVisibility(View.INVISIBLE);
                     prefEditor = pref.edit();
                     prefEditor.putString(AppConstants.hintPref, "").apply();
                     prefEditor = pref.edit();

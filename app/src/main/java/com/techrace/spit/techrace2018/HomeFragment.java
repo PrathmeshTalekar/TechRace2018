@@ -28,6 +28,7 @@ import android.support.v4.app.Fragment;
 
 import android.support.v4.app.NotificationCompat;
 import android.support.v7.app.AppCompatActivity;
+import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -93,6 +94,7 @@ public class HomeFragment extends Fragment {
     TextView level1, level2, level3;
     static Button hintButton;
     int hintsLeft;
+    static CardView hintView;
     @Override
     public void onStop() {
         super.onStop();
@@ -174,6 +176,7 @@ public class HomeFragment extends Fragment {
         clueRelativeLayout = myView.findViewById(R.id.clueLayout);
         hintButton = myView.findViewById(R.id.hintButton);
         hintTextView = myView.findViewById(R.id.hintTextView);
+        hintView = myView.findViewById(R.id.hint_view);
         clueTextView.setText(pref.getString(AppConstants.cluePref, "Connect To Internet"));
         if (globalMenu != null) {
             myItem = globalMenu.findItem(R.id.pointsBox);
@@ -184,7 +187,7 @@ public class HomeFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 if (pref.getString(AppConstants.hintPref, "abc").equals("")) {
-                    DatabaseReference hintRef = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("hintsLeft");
+                    final DatabaseReference hintRef = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("hintsLeft");
                     hintRef.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -193,6 +196,7 @@ public class HomeFragment extends Fragment {
                                 Toast.makeText(getActivity(), "No Hints Left", Toast.LENGTH_SHORT).show();
                             } else if (hintsLeft == 3) {
                                 if (points >= AppConstants.hint1Price) {
+                                    hintView.setVisibility(View.VISIBLE);
                                     hintTextView.setVisibility(View.VISIBLE);
                                     DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
                                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -220,6 +224,7 @@ public class HomeFragment extends Fragment {
                                 }
                             } else if (hintsLeft == 2) {
                                 if (points >= AppConstants.hint2Price) {
+                                    hintView.setVisibility(View.VISIBLE);
                                     hintTextView.setVisibility(View.VISIBLE);
                                     DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
                                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -247,6 +252,8 @@ public class HomeFragment extends Fragment {
                                 }
                             } else if (hintsLeft == 1) {
                                 if (points >= AppConstants.hint3Price) {
+
+                                    hintView.setVisibility(View.VISIBLE);
                                     hintTextView.setVisibility(View.VISIBLE);
                                     DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
                                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
