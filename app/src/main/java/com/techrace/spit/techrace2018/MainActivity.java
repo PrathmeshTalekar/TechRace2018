@@ -49,7 +49,6 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 
-
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
 import org.altbeacon.beacon.BeaconManager;
@@ -107,6 +106,7 @@ public class MainActivity extends AppCompatActivity
     LocationTracker locationTracker;
     NetworkInfo.State wifi, mobile;
     ValueEventListener levelListener, pointsListener, cooldownListener;
+    Menu globalMenu;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -166,6 +166,8 @@ public class MainActivity extends AppCompatActivity
                 prefEditor = pref.edit();
                 prefEditor.putInt(AppConstants.pointsPref, points).apply();
                 HomeFragment.pointsTextView.setText(String.valueOf(MainActivity.points));
+                MenuItem myItem = globalMenu.findItem(R.id.pointsBox);
+                myItem.setTitle("" + points);
             }
 
             @Override
@@ -260,7 +262,6 @@ public class MainActivity extends AppCompatActivity
 
         }
 
-
         Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.inflateMenu(R.menu.main);
@@ -290,6 +291,11 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        globalMenu = menu;
+        return true;
+    }
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -404,7 +410,6 @@ public class MainActivity extends AppCompatActivity
                             String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
                             Log.i("cool", "" + cooldown);
                             timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
-
                             Log.i("IN timer on false", "yes");
                             timerOn = true;
                             manualPass = true;
@@ -482,7 +487,14 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
 
         if (mAuth.getCurrentUser() != null) {
+            UID = mAuth.getCurrentUser().getUid();
+            pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
+            points = pref.getInt(AppConstants.pointsPref, 0);
+            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
+
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
         }
 
 
@@ -556,7 +568,9 @@ public class MainActivity extends AppCompatActivity
         super.onPause();
         //  UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").removeEventListener(levelListener);
         // UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").removeEventListener(pointsListener);
-        UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").removeEventListener(cooldownListener);
+        if (UserDatabaseReference != null && mAuth.getCurrentUser() != null) {
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").removeEventListener(cooldownListener);
+        }
     }
 
     @Override
