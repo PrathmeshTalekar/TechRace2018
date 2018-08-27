@@ -39,7 +39,14 @@
         <activity
             android:name=".SignUpActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".LeaderboardActivity" />
+        <activity
+            android:name=".LeaderboardActivity"
+            android:label="Leaderboard"
+            android:parentActivityName=".MainActivity">
+            <meta-data
+                android:name="android.support.PARENT_ACTIVITY"
+                android:value="com.techrace.spit.techrace2018.MainActivity" />
+        </activity>
 
         <receiver android:name=".LocationReceiver">
             <intent-filter>

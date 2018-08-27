@@ -54,7 +54,7 @@ public class LeaderboardActivity extends AppCompatActivity {
         swipeRefreshLayout = (SwipeRefreshLayout) findViewById(R.id.leaderboard_swiperefresh);
         leaderboardItems = new ArrayList<LBUpdate>();
         recyclerView = (RecyclerView) findViewById(R.id.leaderboard_recycler);
-        recyclerView.setHasFixedSize(true);
+        // recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         //leaderboardItems.add(new LeaderboardItem("Name","Clues solved"));
         new back().execute();

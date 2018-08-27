@@ -8,6 +8,7 @@ import android.app.PendingIntent;
 import android.content.Context;
 
 
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.SharedPreferences;
 
@@ -27,6 +28,7 @@ import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
 
 import android.support.v4.app.NotificationCompat;
+import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.CardView;
 import android.support.v7.widget.Toolbar;
@@ -196,86 +198,117 @@ public class HomeFragment extends Fragment {
                                 Toast.makeText(getActivity(), "No Hints Left", Toast.LENGTH_SHORT).show();
                             } else if (hintsLeft == 3) {
                                 if (points >= AppConstants.hint1Price) {
-                                    hintView.setVisibility(View.VISIBLE);
-                                    hintTextView.setVisibility(View.VISIBLE);
-                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
-                                    hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            hintButton.setEnabled(false);
-                                            DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                                            Log.i("point hint", "" + MainActivity.points);
-                                            powerReference1.child("Users").child(UID).child("points")
-                                                    .setValue(MainActivity.points - AppConstants.hint1Price);
-                                            String hint = dataSnapshot.getValue(String.class);
-                                            powerReference1.child("Users").child(UID).child("hintsLeft").setValue(hintsLeft - 1);
-                                            prefEditor = pref.edit();
-                                            prefEditor.putString(AppConstants.hintPref, hint).apply();
-                                            hintTextView.setText(hint);
-                                        }
+                                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                                    alertDialogBuilder.setCancelable(false)
+                                            .setTitle("Are you sure?")
+                                            .setMessage("Do you want to buy a HINT for " + AppConstants.hint1Price + " points?")
+                                            .setNegativeButton("No", null)
+                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    hintView.setVisibility(View.VISIBLE);
+                                                    hintTextView.setVisibility(View.VISIBLE);
+                                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                                                    hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            hintButton.setEnabled(false);
+                                                            DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                                            Log.i("point hint", "" + MainActivity.points);
+                                                            powerReference1.child("Users").child(UID).child("points")
+                                                                    .setValue(MainActivity.points - AppConstants.hint1Price);
+                                                            String hint = dataSnapshot.getValue(String.class);
+                                                            powerReference1.child("Users").child(UID).child("hintsLeft").setValue(hintsLeft - 1);
+                                                            prefEditor = pref.edit();
+                                                            prefEditor.putString(AppConstants.hintPref, hint).apply();
+                                                            hintTextView.setText(hint);
+                                                        }
 
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                        }
-                                    });
+                                                        }
+                                                    });
+                                                }
+                                            }).show();
+
                                 } else {
                                     Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
                                 }
                             } else if (hintsLeft == 2) {
                                 if (points >= AppConstants.hint2Price) {
-                                    hintView.setVisibility(View.VISIBLE);
-                                    hintTextView.setVisibility(View.VISIBLE);
-                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
-                                    hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            hintButton.setEnabled(false);
-                                            DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                                            Log.i("point hint", "" + MainActivity.points);
-                                            powerReference1.child("Users").child(UID).child("points")
-                                                    .setValue(MainActivity.points - AppConstants.hint2Price);
-                                            String hint = dataSnapshot.getValue(String.class);
-                                            powerReference1.child("Users").child(UID).child("hintsLeft").setValue(hintsLeft - 1);
-                                            prefEditor = pref.edit();
-                                            prefEditor.putString(AppConstants.hintPref, hint).apply();
-                                            hintTextView.setText(hint);
-                                        }
+                                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                                    alertDialogBuilder.setCancelable(false)
+                                            .setTitle("Are you sure?")
+                                            .setMessage("Do you want to buy a HINT for " + AppConstants.hint2Price + " points?")
+                                            .setNegativeButton("No", null)
+                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    hintView.setVisibility(View.VISIBLE);
+                                                    hintTextView.setVisibility(View.VISIBLE);
+                                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                                                    hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            hintButton.setEnabled(false);
+                                                            DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                                            Log.i("point hint", "" + MainActivity.points);
+                                                            powerReference1.child("Users").child(UID).child("points")
+                                                                    .setValue(MainActivity.points - AppConstants.hint2Price);
+                                                            String hint = dataSnapshot.getValue(String.class);
+                                                            powerReference1.child("Users").child(UID).child("hintsLeft").setValue(hintsLeft - 1);
+                                                            prefEditor = pref.edit();
+                                                            prefEditor.putString(AppConstants.hintPref, hint).apply();
+                                                            hintTextView.setText(hint);
+                                                        }
 
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                        }
-                                    });
+                                                        }
+                                                    });
+                                                }
+                                            }).show();
+
                                 } else {
                                     Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
                                 }
                             } else if (hintsLeft == 1) {
                                 if (points >= AppConstants.hint3Price) {
+                                    AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
+                                    alertDialogBuilder.setCancelable(false)
+                                            .setTitle("Are you sure?")
+                                            .setMessage("Do you want to buy a HINT for " + AppConstants.hint3Price + " points?")
+                                            .setNegativeButton("No", null)
+                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    hintView.setVisibility(View.VISIBLE);
+                                                    hintTextView.setVisibility(View.VISIBLE);
+                                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                                                    hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                        @Override
+                                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                            hintButton.setEnabled(false);
+                                                            DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                                            Log.i("point hint", "" + MainActivity.points);
+                                                            powerReference1.child("Users").child(UID).child("points")
+                                                                    .setValue(MainActivity.points - AppConstants.hint3Price);
+                                                            String hint = dataSnapshot.getValue(String.class);
+                                                            powerReference1.child("Users").child(UID).child("hintsLeft").setValue(hintsLeft - 1);
+                                                            prefEditor = pref.edit();
+                                                            prefEditor.putString(AppConstants.hintPref, hint).apply();
+                                                            hintTextView.setText(hint);
+                                                        }
 
-                                    hintView.setVisibility(View.VISIBLE);
-                                    hintTextView.setVisibility(View.VISIBLE);
-                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
-                                    hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
-                                        @Override
-                                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                            hintButton.setEnabled(false);
-                                            DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                                            Log.i("point hint", "" + MainActivity.points);
-                                            powerReference1.child("Users").child(UID).child("points")
-                                                    .setValue(MainActivity.points - AppConstants.hint3Price);
-                                            String hint = dataSnapshot.getValue(String.class);
-                                            powerReference1.child("Users").child(UID).child("hintsLeft").setValue(hintsLeft - 1);
-                                            prefEditor = pref.edit();
-                                            prefEditor.putString(AppConstants.hintPref, hint).apply();
-                                            hintTextView.setText(hint);
-                                        }
+                                                        @Override
+                                                        public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                        @Override
-                                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                        }
-                                    });
+                                                        }
+                                                    });
+                                                }
+                                            }).show();
                                 } else {
                                     Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
                                 }
