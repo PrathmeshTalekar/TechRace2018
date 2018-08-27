@@ -14,6 +14,7 @@ import java.util.Date;
 
 import static com.techrace.spit.techrace2018.HomeFragment.hintButton;
 import static com.techrace.spit.techrace2018.MainActivity.cooldown;
+import static com.techrace.spit.techrace2018.MainActivity.event;
 import static com.techrace.spit.techrace2018.MainActivity.pref;
 import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
 import static com.techrace.spit.techrace2018.MainActivity.timerOn;
@@ -39,7 +40,9 @@ public class NotificationReceiver extends BroadcastReceiver {
         UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
         UserDatabaseReference.child("Users").child(UID).child("cooldown").setValue(0);
         MainActivity.prefEditor = pref.edit().putInt("Cooldown", 0);
-        MainActivity.prefEditor.apply();
+        MainActivity.prefEditor.putString("Note", "").apply();
+        event = false;
+        HomeFragment.timerTextView.setText("");
         if (MainActivity.manualPass) {
             UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
             UserDatabaseReference.child("Users").child(UID).child("points").setValue(MainActivity.points + 5);

@@ -407,6 +407,8 @@ public class MainActivity extends AppCompatActivity
                             String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
                             Log.i("cool", "" + cooldown);
                             timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+                            prefEditor = pref.edit();
+                            prefEditor.putString("Hint", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
                             Log.i("IN timer on false", "yes");
                             timerOn = true;
                             manualPass = true;
@@ -504,7 +506,7 @@ public class MainActivity extends AppCompatActivity
         try {
             //    new HomeFragment().updateClue();
             locationTracker = new LocationTracker("my.action")
-                    .setInterval(15000)
+                    .setInterval(5000)
                     .setGps(true)
                     .setNetWork(false);
             locationTracker.currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
@@ -611,8 +613,8 @@ public class MainActivity extends AppCompatActivity
                 builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
-                        finish();
-                        System.exit(0);
+//                        finish();
+//                        System.exit(0);
                     }
                 });
 
@@ -754,6 +756,7 @@ public class MainActivity extends AppCompatActivity
                                                                }
                                                            });
                                                            if (level == 4 || level == 9 || level == 13) {
+                                                               event = true;
                                                                timerTextView.setText("Meet The Volunteer To Continue");
                                                                break;
                                                            } else {
@@ -778,7 +781,8 @@ public class MainActivity extends AppCompatActivity
                                                                    beaconManager.applySettings();
                                                                    hintButton.setEnabled(true);
                                                                    prefEditor = pref.edit();
-                                                                   prefEditor.putString(AppConstants.hintPref, "").apply();
+                                                                   prefEditor.putString(AppConstants.hintPref, "");
+                                                                   prefEditor.putString("Note", "").apply();
                                                                    new HomeFragment().updateClue();
 
                                                                    break;
@@ -805,10 +809,12 @@ public class MainActivity extends AppCompatActivity
                                                                                HomeFragment.timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
                                                                            }
                                                                        });
+                                                                       prefEditor = pref.edit();
+                                                                       prefEditor.putString("Note", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
 
                                                                        NotificationCompat.Builder builderalarm =
                                                                                new NotificationCompat.Builder(MainActivity.this)
-                                                                                       .setSmallIcon(R.drawable.ic_launcher_background)
+                                                                                       .setSmallIcon(R.mipmap.ic_launcher)
                                                                                        .setContentTitle("Please Wait")
                                                                                        .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
                                                                                        .setOngoing(true)

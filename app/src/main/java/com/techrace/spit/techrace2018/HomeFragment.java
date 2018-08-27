@@ -96,7 +96,7 @@ public class HomeFragment extends Fragment {
     TextView level1, level2, level3;
     static Button hintButton;
     int hintsLeft;
-    static CardView hintView;
+    static CardView hintView, noteView;
     @Override
     public void onStop() {
         super.onStop();
@@ -179,6 +179,12 @@ public class HomeFragment extends Fragment {
         hintButton = myView.findViewById(R.id.hintButton);
         hintTextView = myView.findViewById(R.id.hintTextView);
         hintView = myView.findViewById(R.id.hint_view);
+        noteView = myView.findViewById(R.id.noteView);
+        if (!pref.getString("Hint", "").equals("")) {
+            hintTextView.setText(pref.getString("Hint", ""));
+        } else {
+            hintView.setVisibility(View.INVISIBLE);
+        }
         clueTextView.setText(pref.getString(AppConstants.cluePref, "Connect To Internet"));
         if (globalMenu != null) {
             myItem = globalMenu.findItem(R.id.pointsBox);
