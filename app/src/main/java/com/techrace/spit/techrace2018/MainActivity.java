@@ -14,6 +14,7 @@ import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.graphics.Color;
+
 import android.location.Location;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
@@ -49,7 +50,6 @@ import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.techrace.spit.techrace2018.LeaderboardActivity;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -87,7 +87,7 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     //static BeaconManager beaconManager;
     static FirebaseAuth mAuth;
-    static int cooldown;
+    static int cooldown, maxWait;
     public static Resources resources;
     static SharedPreferences pref;
     static SharedPreferences.Editor prefEditor;
@@ -110,7 +110,10 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_main);
-
+//        ActionBar actionBar;
+//        actionBar=getActionBar();
+//        ColorDrawable colorDrawable=new ColorDrawable(Color.parseColor("#88000000"));
+//        actionBar.setBackgroundDrawable(colorDrawable);
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             // Android M Permission check
             if (this.checkSelfPermission(android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
@@ -145,6 +148,11 @@ public class MainActivity extends AppCompatActivity
                     prefEditor.putInt(AppConstants.levelPref, level).apply();
 
                 }
+                if (level == 11) {
+                    Log.i("In", "11");
+                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid()).child("waited");
+                    databaseReference.setValue(0);
+                }
             }
 
             @Override
@@ -160,7 +168,7 @@ public class MainActivity extends AppCompatActivity
                     DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
                     leadercooldown.child(UID).child("Points").setValue(points);
                 }
-                Log.i("POints updated", "" + points);
+                Log.i("Points updated", "" + points);
                 prefEditor = pref.edit();
                 prefEditor.putInt(AppConstants.pointsPref, points).apply();
                 MenuItem myItem = globalMenu.findItem(R.id.pointsBox);
@@ -194,7 +202,7 @@ public class MainActivity extends AppCompatActivity
                         timerOn = false;
                         Log.i("inside", "ues");
                         final android.support.v7.app.AlertDialog.Builder reverseAlertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
-                        reverseAlertDialog.setTitle("TIMER APPLIED").setMessage("Buy Right Back at Ya Card? for 35 points")
+                        reverseAlertDialog.setTitle("Timer Of " + cooldown + " Minutes Applied").setMessage("Buy Right Back at Ya Card? for 35 points")
                                 .setPositiveButton("BUY", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
@@ -225,12 +233,38 @@ public class MainActivity extends AppCompatActivity
                                 }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                             @Override
                             public void onClick(DialogInterface dialog, int which) {
+                                final DatabaseReference waited = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("waited");
+                                waited.addListenerForSingleValueEvent(new ValueEventListener() {
+                                    @Override
+                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                        int w = dataSnapshot.getValue(Integer.class);
+                                        waited.setValue(w + 1);
+                                    }
+
+                                    @Override
+                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                    }
+                                });
                                 prefEditor = pref.edit();
                                 prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
 
                             }
                         }).setCancelable(false).show();
                     } else {
+                        final DatabaseReference waited = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("waited");
+                        waited.addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                int w = dataSnapshot.getValue(Integer.class);
+                                waited.setValue(w + 1);
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
                         prefEditor = pref.edit();
                         prefEditor.putInt("Cooldown", cooldown).apply();
                     }
@@ -278,8 +312,11 @@ public class MainActivity extends AppCompatActivity
         NavigationView navigationView = (NavigationView) findViewById(R.id.nav_view);
         navigationView.setNavigationItemSelectedListener(this);
         // displaySelectedScreen(R.id.home);
-
-
+        if (level <= 11) {
+            maxWait = 2;
+        } else {
+            maxWait = 1;
+        }
         resources = getResources();
         displaySelectedScreen(R.id.home);
         clueLocation = new Location("");
@@ -308,11 +345,13 @@ public class MainActivity extends AppCompatActivity
             head.setPadding(0, 0, 0, 16);
 
             TextView textView = new TextView(this);
+            textView.setTextColor(Color.WHITE);
             textView.setText(R.string.scan_help);
-            textView.setTextSize(20);
+            textView.setTextSize(18);
             textView.setPadding(0, 0, 0, 16);
 
             Button button = new Button(this);
+            button.setBackgroundColor(Color.parseColor("#88000000"));
             button.setText(R.string.scan_manual);
             button.setTextColor(getResources().getColor(R.color.colorAccent));
             button.setOnClickListener(new View.OnClickListener() {
@@ -325,10 +364,12 @@ public class MainActivity extends AppCompatActivity
                     TextView textView = new TextView(MainActivity.this);
                     textView.setText(R.string.manual_desc);
                     textView.setTextSize(20);
+                    textView.setTextColor(Color.WHITE);
 
                     final EditText codeText = new EditText(MainActivity.this);
                     codeText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     Button button = new Button(MainActivity.this);
+                    button.setBackgroundColor(Color.parseColor("#88000000"));
                     button.setText(R.string.action_confirm);
                     button.setTextColor(getResources().getColor(R.color.colorAccent));
                     button.setOnClickListener(new View.OnClickListener() {
@@ -385,7 +426,7 @@ public class MainActivity extends AppCompatActivity
                 if (manualPassword.equals(serverPass)) {
 
                     Toast.makeText(MainActivity.this, "Updating...", Toast.LENGTH_LONG).show();
-                    if (cooldown == 0) {
+                    // if (cooldown == 0) {
                         timerOn = false;
                         MainActivity.beacon = true;
                         UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -399,49 +440,49 @@ public class MainActivity extends AppCompatActivity
                         new HomeFragment().updateClue();
                         MainActivity.beacon = true;
                         event = false;
-                        //break;
-                    } else {
 
-                        Log.i("IN ELSE 1", "yes");
-                        if (!timerOn) {
-                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-                            Log.i("cool", "" + cooldown);
-                            timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
-                            prefEditor = pref.edit();
-                            prefEditor.putString("Hint", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
-                            Log.i("IN timer on false", "yes");
-                            timerOn = true;
-                            manualPass = true;
-                            Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
-                            PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
-                                    MainActivity.this, 9999, intent, 0);
+                    // } else {
 
-                            AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
+//                        Log.i("IN ELSE 1", "yes");
+//                        if (!timerOn) {
+//                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+//                            Log.i("cool", "" + cooldown);
+//                            timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+//                            prefEditor = pref.edit();
+//                            prefEditor.putString("Hint", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
+//                            Log.i("IN timer on false", "yes");
+//                            timerOn = true;
+//                            manualPass = true;
+//                            Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
+//                            PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
+//                                    MainActivity.this, 9999, intent, 0);
+//
+//                            AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
+//
+//                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+//                                    + (cooldown * 59000), pendingIntentforAlarm);
+//
+//
+//                            NotificationCompat.Builder builderalarm =
+//                                    new NotificationCompat.Builder(MainActivity.this)
+//                                            .setSmallIcon(R.mipmap.ic_launcher_foreground)
+//                                            .setContentTitle("Please Wait")
+//                                            .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
+//                                            .setOngoing(true)
+//                                            .setAutoCancel(false).setTimeoutAfter(cooldown * 58000).setChannelId("Timer");
+//                            NotificationChannel mChannel;
+//                            NotificationManager notificationManagerforAlarm =
+//                                    (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
+//                                notificationManagerforAlarm.createNotificationChannel(mChannel);
+//                            }
+//
+//
+//                            notificationManagerforAlarm.notify(1, builderalarm.build());
+//                        }
 
-                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-                                    + (cooldown * 59000), pendingIntentforAlarm);
-
-
-                            NotificationCompat.Builder builderalarm =
-                                    new NotificationCompat.Builder(MainActivity.this)
-                                            .setSmallIcon(R.mipmap.ic_launcher_foreground)
-                                            .setContentTitle("Please Wait")
-                                            .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
-                                            .setOngoing(true)
-                                            .setAutoCancel(false).setTimeoutAfter(cooldown * 58000).setChannelId("Timer");
-                            NotificationChannel mChannel;
-                            NotificationManager notificationManagerforAlarm =
-                                    (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
-                                notificationManagerforAlarm.createNotificationChannel(mChannel);
-                            }
-
-
-                            notificationManagerforAlarm.notify(1, builderalarm.build());
-                        }
-
-                    }
+                    //    }
 
 
                 } else {
@@ -613,8 +654,8 @@ public class MainActivity extends AppCompatActivity
                 builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
                     @Override
                     public void onDismiss(DialogInterface dialog) {
-//                        finish();
-//                        System.exit(0);
+                        finish();
+                        System.exit(0);
                     }
                 });
 
@@ -757,8 +798,54 @@ public class MainActivity extends AppCompatActivity
                                                            });
                                                            if (level == 4 || level == 9 || level == 13) {
                                                                event = true;
-                                                               timerTextView.setText("Meet The Volunteer To Continue");
-                                                               break;
+                                                               if (cooldown == 0) {
+                                                                   timerTextView.setText("Meet The Volunteer To Continue");
+                                                                   break;
+                                                               } else {
+                                                                   if (!timerOn) {
+                                                                       timerOn = true;
+                                                                       Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
+                                                                       PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
+                                                                               MainActivity.this, 9999, intent, 0);
+
+                                                                       AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
+
+                                                                       alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+                                                                               + (cooldown * 59000), pendingIntentforAlarm);
+
+                                                                       Log.i("cool", "" + cooldown);
+
+                                                                       final String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+                                                                       runOnUiThread(new Runnable() {
+                                                                           @Override
+                                                                           public void run() {
+                                                                               HomeFragment.timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+                                                                           }
+                                                                       });
+                                                                       prefEditor = pref.edit();
+                                                                       prefEditor.putString("Note", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
+
+                                                                       NotificationCompat.Builder builderalarm =
+                                                                               new NotificationCompat.Builder(MainActivity.this)
+                                                                                       .setSmallIcon(R.mipmap.ic_launcher)
+                                                                                       .setContentTitle("Please Wait")
+                                                                                       .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
+                                                                                       .setOngoing(true)
+                                                                                       .setAutoCancel(false)
+                                                                                       .setTimeoutAfter(cooldown * 60000).setChannelId("Timer");
+                                                                       NotificationChannel mChannel;
+                                                                       NotificationManager notificationManagerforAlarm =
+                                                                               (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+                                                                       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                                                           mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
+                                                                           notificationManagerforAlarm.createNotificationChannel(mChannel);
+                                                                       }
+
+
+                                                                       notificationManagerforAlarm.notify(1, builderalarm.build());
+
+                                                                   }
+                                                               }
                                                            } else {
                                                                if (cooldown == 0) {
 
@@ -798,7 +885,7 @@ public class MainActivity extends AppCompatActivity
                                                                        AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
 
                                                                        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-                                                                               + (cooldown * 58000), pendingIntentforAlarm);
+                                                                               + (cooldown * 59000), pendingIntentforAlarm);
 
                                                                        Log.i("cool", "" + cooldown);
 
@@ -819,7 +906,7 @@ public class MainActivity extends AppCompatActivity
                                                                                        .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
                                                                                        .setOngoing(true)
                                                                                        .setAutoCancel(false)
-                                                                                       .setTimeoutAfter(cooldown * 58000).setChannelId("Timer");
+                                                                                       .setTimeoutAfter(cooldown * 60000).setChannelId("Timer");
                                                                        NotificationChannel mChannel;
                                                                        NotificationManager notificationManagerforAlarm =
                                                                                (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);

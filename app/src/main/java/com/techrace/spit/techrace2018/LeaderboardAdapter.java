@@ -81,34 +81,39 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
 
                         powerReference = FirebaseDatabase.getInstance().getReference();
 
-                        powerReference.child("Users").child(MainActivity.selectUID).child("cooldown").addListenerForSingleValueEvent(new ValueEventListener() {
+                        powerReference.child("Users").child(MainActivity.selectUID).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                c = dataSnapshot.getValue(Integer.class);
+                                c = dataSnapshot.child("cooldown").getValue(Integer.class);
+                                int w = dataSnapshot.child("waited").getValue(Integer.class);
                                 Log.i("value of points", "" + MainActivity.points);
-                                if (c == 0) {
-                                    DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                                    powerReference1.child("Users").child(MainActivity.selectUID).child("cooldown").setValue(PowerCardsFragment.twoORfour);
-                                    powerReference1.child("Leaderboard").child(selectUID).child("Cooldown").setValue(PowerCardsFragment.twoORfour);
-                                    if (PowerCardsFragment.twoORfour == 2) {
+                                if (w < MainActivity.maxWait) {
+                                    if (c == 0) {
+                                        DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                        powerReference1.child("Users").child(MainActivity.selectUID).child("cooldown").setValue(PowerCardsFragment.twoORfour);
+                                        powerReference1.child("Leaderboard").child(selectUID).child("Cooldown").setValue(PowerCardsFragment.twoORfour);
+                                        if (PowerCardsFragment.twoORfour == 2) {
 
-                                        powerReference1.child("Users").child(UID).child("points")
-                                                .setValue(MainActivity.points - AppConstants.plusTwoPrice);
-                                        // MainActivity.prefEditor.putInt("Points",points).apply();
-                                        powerReference1.child("Users").child(selectUID).child("Applied By").setValue(UID);
-                                    } else if (PowerCardsFragment.twoORfour == 4) {
-                                        powerReference1.child("Users").child(UID).child("points")
-                                                .setValue(MainActivity.points - AppConstants.plusFourPrice);
-                                        // MainActivity.prefEditor.putInt("Points",points).apply();
+                                            powerReference1.child("Users").child(UID).child("points")
+                                                    .setValue(MainActivity.points - AppConstants.plusTwoPrice);
+                                            // MainActivity.prefEditor.putInt("Points",points).apply();
+                                            powerReference1.child("Users").child(selectUID).child("Applied By").setValue(UID);
+                                        } else if (PowerCardsFragment.twoORfour == 4) {
+                                            powerReference1.child("Users").child(UID).child("points")
+                                                    .setValue(MainActivity.points - AppConstants.plusFourPrice);
+                                            // MainActivity.prefEditor.putInt("Points",points).apply();
+                                        }
+                                        Toast.makeText(holder.cardView.getContext(), "Power Card Applied", Toast.LENGTH_SHORT).show();
+                                        ((Activity) context).finish();
+                                        selectUser = false;
+
+                                    } else {
+                                        Toast.makeText(holder.cardView.getContext(), "Already Applied", Toast.LENGTH_SHORT).show();
                                     }
-                                    Toast.makeText(holder.cardView.getContext(), "Power Card Applied", Toast.LENGTH_SHORT).show();
-                                    ((Activity) context).finish();
-                                    selectUser = false;
-
+                                    MainActivity.selectUID = null;
                                 } else {
-                                    Toast.makeText(holder.cardView.getContext(), "Already Applied", Toast.LENGTH_SHORT).show();
+                                    Toast.makeText(holder.cardView.getContext(), "Already Applied " + MainActivity.maxWait + " Times", Toast.LENGTH_SHORT).show();
                                 }
-                                MainActivity.selectUID = null;
                             }
 
                             @Override

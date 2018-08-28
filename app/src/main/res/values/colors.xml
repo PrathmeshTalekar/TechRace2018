@@ -18,6 +18,7 @@
     <color name="transparent_black">#88000000</color>
     <color name="white">#ffffffff</color>
     <color name="grey">#ff999999</color>
+    <color name="black">#000000</color>
 
     <color name="confirmRed">#FF1919</color>
 

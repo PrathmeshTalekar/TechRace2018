@@ -23,7 +23,6 @@ import com.google.firebase.database.ValueEventListener;
 
 import java.util.concurrent.ThreadPoolExecutor;
 
-import static com.techrace.spit.techrace2018.AppConstants.PREFS_UNLOCKED;
 import static com.techrace.spit.techrace2018.AppConstants.password;
 import static com.techrace.spit.techrace2018.MainActivity.mAuth;
 import static com.techrace.spit.techrace2018.MainActivity.pref;
@@ -77,6 +76,7 @@ public class SignUpActivity extends AppCompatActivity {
             if (name.equals("") || !password.equals(AppConstants.password)) {
                 Toast.makeText(this, "Please Enter Correct Details", Toast.LENGTH_SHORT).show();
             } else {
+                Toast.makeText(SignUpActivity.this, "Please Wait", Toast.LENGTH_SHORT).show();
                 mAuth.signInWithEmailAndPassword(email, password)
                         .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                             @Override
@@ -89,6 +89,7 @@ public class SignUpActivity extends AppCompatActivity {
                                             .addOnCompleteListener(new OnCompleteListener<AuthResult>() {
                                                 @Override
                                                 public void onComplete(@NonNull Task<AuthResult> task) {
+
                                                     if (task.isSuccessful()) {
                                                         Log.i("UNAME", name);
                                                         User user = new User(name, password, email, contact);

@@ -2,7 +2,7 @@ package com.techrace.spit.techrace2018;
 
 public class User {
     public String name, password, email, contact;
-    public int level, cooldown, points, hintsLeft;
+    public int level, cooldown, points, hintsLeft, waited;
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
@@ -16,6 +16,7 @@ public class User {
         this.points = 0;
         this.contact = contact;
         this.hintsLeft = 3;
+        this.waited = 0;
     }
 
 }

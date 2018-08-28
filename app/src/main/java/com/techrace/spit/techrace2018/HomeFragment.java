@@ -93,7 +93,6 @@ public class HomeFragment extends Fragment {
     static String name;
     static RelativeLayout clueRelativeLayout;
     static String locName;
-    TextView level1, level2, level3;
     static Button hintButton;
     int hintsLeft;
     static CardView hintView, noteView;
@@ -114,51 +113,55 @@ public class HomeFragment extends Fragment {
             Log.i("UID", UID);
 
 
-            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            UserDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(UID);
             UserDatabaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                    DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
-                    level = userDS.child("level").getValue(Integer.class);
+                    // DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
+                    level = dataSnapshot.child("level").getValue(Integer.class);
                     Log.i("LEVELL", String.valueOf(level));
                     prefEditor = pref.edit();
                     prefEditor.putInt(AppConstants.levelPref, level);
-                    points = userDS.child("points").getValue(Integer.class);
+                    points = dataSnapshot.child("points").getValue(Integer.class);
                     prefEditor.putInt("Points", points);
                     if (globalMenu != null) {
                         myItem = globalMenu.findItem(R.id.pointsBox);
                         myItem.setTitle("" + points);
                     }
-                    name = (String) userDS.child("name").getValue();
-                    if (level > 1) {
-                        locName = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level - 1)).child("Name").getValue(String.class);
-                        // Log.i("loca firebase",locName);
-                        prefEditor = pref.edit();
-                        prefEditor.putString(AppConstants.locationLevelPref + (level - 1), locName).apply();
-                    }
-                    DataSnapshot locationDS = dataSnapshot.child("Route 2").child("Location " + String.valueOf(level));
-                    levelString = locationDS.child("Clue").getValue(String.class);
-                    prefEditor.putString(AppConstants.cluePref, levelString).apply();
-                    //  pref = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
+                    name = (String) dataSnapshot.child("name").getValue();
+                    DatabaseReference UserDatabaseReference1 = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + level);
+                    UserDatabaseReference1.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                            levelString = dataSnapshot.child("Clue").getValue(String.class);
+                            prefEditor = pref.edit();
+                            prefEditor.putString(AppConstants.cluePref, levelString).apply();
 
 
-                    NSID = locationDS.child("NSID").getValue(String.class);
-                    Log.i("NSID", NSID);
-                    clueLocation.setLatitude(Double.parseDouble(locationDS.child("Latitude").getValue(String.class)));
-                    clueLocation.setLongitude(Double.parseDouble(locationDS.child("Longitude").getValue(String.class)));
-                    Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
-                    clueTextView.setText(levelString);
-                    clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
-                    if (pref.getString(AppConstants.hintPref, "").equals("")) {
-                        hintTextView.setVisibility(View.INVISIBLE);
-                    } else {
-                        hintTextView.setVisibility(View.VISIBLE);
-                        hintTextView.setText(pref.getString(AppConstants.hintPref, ""));
-                    }
-                    beacon = true;
+                            NSID = dataSnapshot.child("NSID").getValue(String.class);
+                            Log.i("NSID", NSID);
+                            clueLocation.setLatitude(Double.parseDouble(dataSnapshot.child("Latitude").getValue(String.class)));
+                            clueLocation.setLongitude(Double.parseDouble(dataSnapshot.child("Longitude").getValue(String.class)));
+                            Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
+                            clueTextView.setText(levelString);
+                            clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
+                            if (pref.getString(AppConstants.hintPref, "").equals("")) {
+                                hintTextView.setVisibility(View.INVISIBLE);
+                            } else {
+                                hintTextView.setVisibility(View.VISIBLE);
+                                hintTextView.setText(pref.getString(AppConstants.hintPref, ""));
+                            }
+                            beacon = true;
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                 }
-
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
 
@@ -341,22 +344,6 @@ public class HomeFragment extends Fragment {
         return myView;
     }
 
-
-//    @Override
-//    public void onActivityCreated(@Nullable Bundle savedInstanceState) {
-//        super.onActivityCreated(savedInstanceState);
-//        Toolbar toolbar = (Toolbar) getActivity().findViewById(R.id.toolbar);
-//        toolbar.inflateMenu(R.menu.main);
-//        toolbar.setOnMenuItemClickListener(new Toolbar.OnMenuItemClickListener() {
-//            @Override
-//            public boolean onMenuItemClick(MenuItem item) {
-//                onOptionsItemSelected(item);
-//                return true;
-//            }
-//        });
-//
-//    }
-
     @Override
     public void onResume() {
         super.onResume();
@@ -371,82 +358,5 @@ public class HomeFragment extends Fragment {
         //    if (MainActivity.beaconManager.isBound(this)) MainActivity.beaconManager.setBackgroundMode(false);
     }
 
-//    void checkManualPassword(final String manualPassword) {
-//
-//        DatabaseReference pass = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("passwords");
-//        pass.addListenerForSingleValueEvent(new ValueEventListener() {
-//            @Override
-//            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-//                String serverPass = dataSnapshot.getValue(String.class);
-//                Log.i("server pass", serverPass);
-//                if (manualPassword.equals(serverPass)) {
-//                    Toast.makeText(getActivity(), "Updating...", Toast.LENGTH_LONG).show();
-//                    if (cooldown == 0) {
-//                        timerOn = false;
-//                        MainActivity.beacon = true;
-//                        UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-//                        UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-//                        UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
-//                        long l = new Date().getTime();
-//                        UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
-//                        UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
-//                        prefEditor = pref.edit();
-//                        prefEditor.putString(AppConstants.clueLevelPref+ level, levelString).apply();
-//                        new HomeFragment().updateClue();
-//                        MainActivity.beacon = true;
-//                        event = false;
-//                        //break;
-//                    } else {
-//
-//                        Log.i("IN ELSE 1", "yes");
-//                        if (!timerOn) {
-//                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-//                            Log.i("cool", "" + cooldown);
-//                            timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
-//                            Log.i("IN timer on false", "yes");
-//                            timerOn = true;
-//                            Intent intent = new Intent(getActivity(), NotificationReceiver.class);
-//                            PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
-//                                    getActivity(), 9999, intent, 0);
-//
-//                            AlarmManager alarmManager = (AlarmManager) getActivity().getSystemService(ALARM_SERVICE);
-//
-//                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-//                                    + (cooldown * 60000), pendingIntentforAlarm);
-//
-//
-//                            NotificationCompat.Builder builderalarm =
-//                                    new NotificationCompat.Builder(getActivity())
-//                                            .setSmallIcon(R.drawable.ic_launcher_foreground)
-//                                            .setContentTitle("Please Wait")
-//                                            .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
-//                                            .setOngoing(true)
-//                                            .setAutoCancel(false).setChannelId("Timer");
-//                            NotificationChannel mChannel;
-//                            NotificationManager notificationManagerforAlarm =
-//                                    (NotificationManager) getActivity().getSystemService(Context.NOTIFICATION_SERVICE);
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                                mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
-//                                notificationManagerforAlarm.createNotificationChannel(mChannel);
-//                            }
-//
-//
-//                            notificationManagerforAlarm.notify(1, builderalarm.build());
-//                        }
-//
-//                    }
-//
-//
-//                } else {
-//                    Toast.makeText(H, "Wrong Password!", Toast.LENGTH_SHORT).show();
-//                }
-//            }
-//
-//            @Override
-//            public void onCancelled(@NonNull DatabaseError databaseError) {
-//
-//            }
-//        });
-//    }
 
 }
