@@ -20,7 +20,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             app:cardCornerRadius="5dp"
             app:cardElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -30,7 +30,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/cardBackground"
+                    android:background="#524d54"
                     android:orientation="vertical"
                     android:paddingTop="16dp">
 
@@ -41,7 +41,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="Aman Agrawal"
-                        android:textColor="#000" />
+                        android:textColor="@color/white" />
 
                     <TextView
                         style="@style/TextAppearance.AppCompat.Small"
@@ -49,6 +49,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
+                        android:textColor="@color/white"
                         android:text="Technical Head" />
 
                     <LinearLayout
@@ -87,7 +88,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             app:cardCornerRadius="5dp"
             app:cardElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -97,7 +98,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/cardBackground"
+                    android:background="#413c43"
                     android:orientation="vertical"
                     android:paddingTop="16dp">
 
@@ -108,7 +109,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="Prathmesh Talekar"
-                        android:textColor="#000" />
+                        android:textColor="@color/white" />
 
                     <TextView
                         style="@style/TextAppearance.AppCompat.Small"
@@ -116,6 +117,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
+                        android:textColor="@color/white"
                         android:text="Executive Head" />
 
                     <LinearLayout
@@ -154,7 +156,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             app:cardCornerRadius="5dp"
             app:cardElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -164,7 +166,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/cardBackground"
+                    android:background="#413c43"
                     android:orientation="vertical"
                     android:paddingTop="16dp">
 
@@ -175,7 +177,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="Yashvi Desai"
-                        android:textColor="#000" />
+                        android:textColor="@color/white" />
 
                     <TextView
                         style="@style/TextAppearance.AppCompat.Small"
@@ -183,6 +185,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
+                        android:textColor="@color/white"
                         android:text="Head Of Events" />
 
                     <LinearLayout
@@ -221,7 +224,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             app:cardCornerRadius="5dp"
             app:cardElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -231,7 +234,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/cardBackground"
+                    android:background="#413c43"
                     android:orientation="vertical"
                     android:paddingTop="16dp">
 
@@ -242,7 +245,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="Raksha Jain"
-                        android:textColor="#000" />
+                        android:textColor="@color/white" />
 
                     <TextView
                         style="@style/TextAppearance.AppCompat.Small"
@@ -250,6 +253,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
+                        android:textColor="@color/white"
                         android:text="Creative Head" />
 
                     <LinearLayout
@@ -288,7 +292,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             app:cardCornerRadius="5dp"
             app:cardElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -298,7 +302,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/cardBackground"
+                    android:background="#413c43"
                     android:orientation="vertical"
                     android:paddingTop="16dp">
 
@@ -309,7 +313,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="Sahil Sheth"
-                        android:textColor="#000" />
+                        android:textColor="@color/white" />
 
                     <TextView
                         style="@style/TextAppearance.AppCompat.Small"
@@ -317,6 +321,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
+                        android:textColor="@color/white"
                         android:text="Head Of Marketing" />
 
                     <LinearLayout
@@ -355,7 +360,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             app:cardCornerRadius="5dp"
             app:cardElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -365,7 +370,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/cardBackground"
+                    android:background="#413c43"
                     android:orientation="vertical"
                     android:paddingTop="16dp">
 
@@ -376,7 +381,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="Sarah Hawa"
-                        android:textColor="#000" />
+                        android:textColor="@color/white" />
 
                     <TextView
                         style="@style/TextAppearance.AppCompat.Small"
@@ -384,6 +389,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
+                        android:textColor="@color/white"
                         android:text="Head Of Operations" />
 
                     <LinearLayout
@@ -422,7 +428,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             app:cardCornerRadius="5dp"
             app:cardElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -432,7 +438,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/cardBackground"
+                    android:background="#413c43"
                     android:orientation="vertical"
                     android:paddingTop="16dp">
 
@@ -443,7 +449,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="Sunit Vaidya"
-                        android:textColor="#000" />
+                        android:textColor="@color/white" />
 
                     <TextView
                         style="@style/TextAppearance.AppCompat.Small"
@@ -451,6 +457,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
+                        android:textColor="@color/white"
                         android:text="Head Of Public Relations" />
 
                     <LinearLayout
@@ -489,7 +496,7 @@
             android:foreground="?android:attr/selectableItemBackground"
             app:cardCornerRadius="5dp"
             app:cardElevation="8dp"
-            app:cardUseCompatPadding="true">
+            android:layout_marginBottom="8dp">
 
             <LinearLayout
                 android:layout_width="match_parent"
@@ -499,7 +506,7 @@
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
-                    android:background="@color/cardBackground"
+                    android:background="#413c43"
                     android:orientation="vertical"
                     android:paddingTop="16dp">
 
@@ -510,7 +517,7 @@
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
                         android:text="Taksh Soni"
-                        android:textColor="#000" />
+                        android:textColor="@color/white" />
 
                     <TextView
                         style="@style/TextAppearance.AppCompat.Small"
@@ -518,6 +525,7 @@
                         android:layout_height="wrap_content"
                         android:paddingLeft="16dp"
                         android:paddingRight="16dp"
+                        android:textColor="@color/white"
                         android:text="Admin and Finance Head" />
 
                     <LinearLayout

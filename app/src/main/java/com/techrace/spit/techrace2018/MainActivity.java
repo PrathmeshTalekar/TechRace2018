@@ -136,6 +136,7 @@ public class MainActivity extends AppCompatActivity
         }
         pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
+
         levelListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -148,10 +149,39 @@ public class MainActivity extends AppCompatActivity
                     prefEditor.putInt(AppConstants.levelPref, level).apply();
 
                 }
+                if (level == 7) {
+
+                    DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 7").child("Count");
+                    db.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            int cnt = dataSnapshot.getValue(Integer.class);
+                            FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 7").child("Count").setValue(++cnt);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+                }
                 if (level == 11) {
                     Log.i("In", "11");
                     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid()).child("waited");
                     databaseReference.setValue(0);
+                    DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 11").child("Count");
+                    db.addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            int cnt = dataSnapshot.getValue(Integer.class);
+                            FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 11").child("Count").setValue(++cnt);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                 }
             }
 
@@ -288,11 +318,11 @@ public class MainActivity extends AppCompatActivity
             pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
 
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
+//            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
+//            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
 
         }
-
+        verifyBluetooth();
         Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.inflateMenu(R.menu.main);
@@ -430,6 +460,7 @@ public class MainActivity extends AppCompatActivity
                         timerOn = false;
                         MainActivity.beacon = true;
                         UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+
                         UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
                         UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
                         long l = new Date().getTime();
@@ -562,7 +593,7 @@ public class MainActivity extends AppCompatActivity
                     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
                         if (!timerOn && !event) {
                             if (distanceinmetres <= 250) {
-                                verifyBluetooth();
+
                                 if (beacon) {
                                     clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
                                     beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
@@ -647,19 +678,7 @@ public class MainActivity extends AppCompatActivity
 
         try {
             if (!BeaconManager.getInstanceForApplication(this).checkAvailability()) {
-                final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                builder.setTitle("Bluetooth not enabled");
-                builder.setMessage("Please enable bluetooth in settings and restart this application.");
-                builder.setPositiveButton(android.R.string.ok, null);
-                builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                    @Override
-                    public void onDismiss(DialogInterface dialog) {
-                        finish();
-                        System.exit(0);
-                    }
-                });
-
-                builder.show();
+                Toast.makeText(MainActivity.this, "Turn On Bluetooth In Hot Region", Toast.LENGTH_LONG).show();
             }
         }
         catch (RuntimeException e) {
@@ -796,6 +815,51 @@ public class MainActivity extends AppCompatActivity
                                                                    clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.confirmGreen));
                                                                }
                                                            });
+                                                           if (level <= 7) {
+                                                               DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 7").child("Count");
+                                                               databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                   @Override
+                                                                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                       int cnt = dataSnapshot.getValue(Integer.class);
+                                                                       if (cnt >= 50) {
+                                                                           DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("points");
+                                                                           db.setValue(0);
+                                                                           Toast.makeText(MainActivity.this, "You Have Been Eliminated. Reset Points to 0.", Toast.LENGTH_LONG).show();
+                                                                           if (level == 7) {
+                                                                               db = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("level");
+                                                                               db.setValue(1);
+                                                                           }
+                                                                       }
+                                                                   }
+
+                                                                   @Override
+                                                                   public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                   }
+                                                               });
+                                                           } else if (level > 7 && level <= 11) {
+                                                               DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 11").child("Count");
+                                                               databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                   @Override
+                                                                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                       int cnt = dataSnapshot.getValue(Integer.class);
+                                                                       if (cnt >= 20) {
+                                                                           DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("points");
+                                                                           db.setValue(0);
+                                                                           Toast.makeText(MainActivity.this, "You Have Been Eliminated. Reset Points to 0.", Toast.LENGTH_LONG).show();
+                                                                           if (level == 11) {
+                                                                               db = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("level");
+                                                                               db.setValue(1);
+                                                                           }
+                                                                       }
+                                                                   }
+
+                                                                   @Override
+                                                                   public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                   }
+                                                               });
+                                                           }
                                                            if (level == 4 || level == 9 || level == 13) {
                                                                event = true;
                                                                if (cooldown == 0) {

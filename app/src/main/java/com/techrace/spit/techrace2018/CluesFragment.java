@@ -35,10 +35,16 @@ public class CluesFragment extends Fragment {
         //SharedPreferences.Editor editor=sharedPreferences.edit();
         ArrayList<String> clueList = new ArrayList<>();
         int i;
-        for (i = 1; i <= 16; i++) {
+        for (i = 1; i < HomeFragment.level; i++) {
             Log.i("clueList", sharedPreferences.getString("Clue " + i, "Not Found"));
             clueList.add(sharedPreferences.getString("Clue " + i, ""));
 
+        }
+        if (HomeFragment.level < 12 && !sharedPreferences.getString("Clue 12", "abc").equals("abc")) {
+            for (int j = 12; j > HomeFragment.level - 1; j--) {
+                clueList.add("");
+            }
+            clueList.add(sharedPreferences.getString("Clue 12", "abc"));
         }
 //        String clue12=sharedPreferences.getString("Clue 12","abc");
 //        if (i<12 && !clue12.equals("abc")){

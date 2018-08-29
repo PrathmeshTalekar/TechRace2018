@@ -84,6 +84,7 @@ public class PowerCardsFragment extends Fragment {
 
         });
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
+        Log.i("clue12", sharedPreferences.getString("Clue 12", "abc"));
         if (sharedPreferences.getString("Clue 12", "abc").equals("abc")) {
             unlockClue.setOnClickListener(new View.OnClickListener() {
                 @Override

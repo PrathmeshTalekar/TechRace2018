@@ -42,7 +42,7 @@
                     android:layout_centerHorizontal="true"
                     android:paddingBottom="8dp"
                     android:text="@string/app_name"
-                    android:textColor="@android:color/black"
+                    android:textColor="@android:color/white"
                     android:textSize="20sp" />
 
                 <TextView
@@ -53,7 +53,7 @@
                     android:layout_centerHorizontal="true"
                     android:paddingBottom="8dp"
                     android:text="The official SPIT TechRace 2018 app"
-                    android:textColor="@color/transparent_black"
+                    android:textColor="@color/white"
                     android:textSize="16sp" />
 
                 <LinearLayout
@@ -103,6 +103,7 @@
                     style="@style/TextAppearance.AppCompat.Large"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/white"
                     android:text="Team" />
 
                 <TextView
@@ -111,6 +112,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp"
+                    android:textColor="@color/white"
                     android:text="The people behind SPIT TechRace 2018" />
 
                 <Button
@@ -142,6 +144,7 @@
                     style="@style/TextAppearance.AppCompat.Large"
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
+                    android:textColor="@color/white"
                     android:text="Sponsors" />
 
                 <TextView
@@ -150,6 +153,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginBottom="8dp"
                     android:layout_marginTop="8dp"
+                    android:textColor="@color/white"
                     android:text="Check out our cool sponsors who made this event possible!" />
 
                 <Button

@@ -27,7 +27,7 @@ public class LocationsFragment extends Fragment {
         final ArrayList<Location> location = new ArrayList<Location>();
         int i;
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
-        for (i = 1; i <= 16; i++) {
+        for (i = 1; i < HomeFragment.level; i++) {
             Log.i("locationList", sharedPreferences.getString("Location " + i, "not found"));
             location.add(new Location(sharedPreferences.getString("Location " + i, "")));
 

@@ -130,20 +130,23 @@ public class HomeFragment extends Fragment {
                         myItem.setTitle("" + points);
                     }
                     name = (String) dataSnapshot.child("name").getValue();
-                    DatabaseReference UserDatabaseReference1 = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + level);
+                    DatabaseReference UserDatabaseReference1 = FirebaseDatabase.getInstance().getReference().child("Route 2");
                     UserDatabaseReference1.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                            levelString = dataSnapshot.child("Clue").getValue(String.class);
+                            levelString = dataSnapshot.child("Location " + level).child("Clue").getValue(String.class);
+                            Log.i("lvlstrnh", levelString);
                             prefEditor = pref.edit();
                             prefEditor.putString(AppConstants.cluePref, levelString).apply();
+                            String locName = dataSnapshot.child("Location " + (level - 1)).child("Name").getValue(String.class);
+                            prefEditor = pref.edit();
+                            prefEditor.putString("Location " + (level - 1), locName).apply();
 
-
-                            NSID = dataSnapshot.child("NSID").getValue(String.class);
+                            NSID = dataSnapshot.child("Location " + level).child("NSID").getValue(String.class);
                             Log.i("NSID", NSID);
-                            clueLocation.setLatitude(Double.parseDouble(dataSnapshot.child("Latitude").getValue(String.class)));
-                            clueLocation.setLongitude(Double.parseDouble(dataSnapshot.child("Longitude").getValue(String.class)));
+                            clueLocation.setLatitude(Double.parseDouble(dataSnapshot.child("Location " + String.valueOf(level)).child("Latitude").getValue(String.class)));
+                            clueLocation.setLongitude(Double.parseDouble(dataSnapshot.child("Location " + level).child("Longitude").getValue(String.class)));
                             Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
                             clueTextView.setText(levelString);
                             clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
