@@ -41,7 +41,7 @@ public class CluesFragment extends Fragment {
 
         }
         if (HomeFragment.level < 12 && !sharedPreferences.getString("Clue 12", "abc").equals("abc")) {
-            for (int j = 12; j > HomeFragment.level - 1; j--) {
+            for (int j = 12; j > HomeFragment.level; j--) {
                 clueList.add("");
             }
             clueList.add(sharedPreferences.getString("Clue 12", "abc"));

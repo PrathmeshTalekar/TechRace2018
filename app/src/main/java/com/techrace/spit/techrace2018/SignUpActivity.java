@@ -92,6 +92,18 @@ public class SignUpActivity extends AppCompatActivity {
 
                                                     if (task.isSuccessful()) {
                                                         Log.i("UNAME", name);
+                                                        SharedPreferences sharedPreferences = getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
+                                                        SharedPreferences.Editor editor = sharedPreferences.edit();
+                                                        editor.putString("NAME", name).apply();
+//                                                        String name1=sharedPreferences.getString("NAME","999");
+//                                                        int a1=(int) name1.charAt(0);
+//                                                        int a2=(int)name1.charAt(1);
+                                                        int a3 = (int) name.charAt(2);
+                                                        if (a3 % 2 == 0) {
+                                                            editor.putInt("Route", 2).apply();
+                                                        } else {
+                                                            editor.putInt("Route", 1).apply();
+                                                        }
                                                         User user = new User(name, password, email, contact);
                                                         FirebaseDatabase.getInstance().getReference("Users")
                                                                 .child(mAuth.getCurrentUser().getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {

@@ -79,6 +79,7 @@ import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
 import static com.techrace.spit.techrace2018.HomeFragment.hintButton;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.HomeFragment.levelString;
+import static com.techrace.spit.techrace2018.HomeFragment.name;
 import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
 
 
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     //static BeaconManager beaconManager;
     static FirebaseAuth mAuth;
-    static int cooldown, maxWait;
+    static int cooldown, maxWait, routeNo;
     public static Resources resources;
     static SharedPreferences pref;
     static SharedPreferences.Editor prefEditor;
@@ -136,7 +137,7 @@ public class MainActivity extends AppCompatActivity
         }
         pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
-
+        routeNo = pref.getInt("Route", 1);
         levelListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -151,12 +152,17 @@ public class MainActivity extends AppCompatActivity
                 }
                 if (level == 7) {
 
-                    DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 7").child("Count");
+                    DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 7").child("Count");
                     db.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             int cnt = dataSnapshot.getValue(Integer.class);
-                            FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 7").child("Count").setValue(++cnt);
+                            FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 7").child("Count").setValue(cnt + 1);
+                            if (routeNo == 1) {
+                                FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 7").child("Count").setValue(cnt + 1);
+                            } else {
+                                FirebaseDatabase.getInstance().getReference().child("Route 1").child("Location 7").child("Count").setValue(cnt + 1);
+                            }
                         }
 
                         @Override
@@ -169,12 +175,26 @@ public class MainActivity extends AppCompatActivity
                     Log.i("In", "11");
                     DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid()).child("waited");
                     databaseReference.setValue(0);
-                    DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 11").child("Count");
+                    DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 11").child("Count");
                     db.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                             int cnt = dataSnapshot.getValue(Integer.class);
-                            FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 11").child("Count").setValue(++cnt);
+                            FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 11").child("Count").setValue(cnt + 1);
+                            if (routeNo == 1) {
+                                FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 11").child("Count").setValue(cnt + 1);
+                            } else {
+                                FirebaseDatabase.getInstance().getReference().child("Route 1").child("Location 11").child("Count").setValue(cnt + 1);
+                            }
+                            if (cnt % 2 == 0) {
+                                routeNo = 2;
+                                prefEditor = pref.edit();
+                                prefEditor.putInt("Route", 2).apply();
+                            } else {
+                                routeNo = 1;
+                                prefEditor = pref.edit();
+                                prefEditor.putInt("Route", 1).apply();
+                            }
                         }
 
                         @Override
@@ -447,7 +467,7 @@ public class MainActivity extends AppCompatActivity
 
     void checkManualPassword(final String manualPassword) {
 
-        DatabaseReference pass = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("passwords");
+        DatabaseReference pass = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + String.valueOf(level)).child("passwords");
         pass.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -816,7 +836,7 @@ public class MainActivity extends AppCompatActivity
                                                                }
                                                            });
                                                            if (level <= 7) {
-                                                               DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 7").child("Count");
+                                                               DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 7").child("Count");
                                                                databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                    @Override
                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -838,7 +858,7 @@ public class MainActivity extends AppCompatActivity
                                                                    }
                                                                });
                                                            } else if (level > 7 && level <= 11) {
-                                                               DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 11").child("Count");
+                                                               DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 11").child("Count");
                                                                databaseReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                                    @Override
                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -1020,5 +1040,18 @@ public class MainActivity extends AppCompatActivity
         } catch (RemoteException e) {
         }
     }
-
+//    void chooseRoute(){
+//        SharedPreferences preferences=getSharedPreferences(AppConstants.techRacePref,MODE_PRIVATE);
+//        SharedPreferences.Editor editor=preferences.edit();
+//        String name1=preferences.getString("NAME","999");
+//        int a1=(int) name1.charAt(0);
+//        int a2=(int)name1.charAt(1);
+//        int a3=(int)name1.charAt(2);
+//        if(a3%2==0){
+//            editor.putInt("Route",2).apply();
+//        }
+//        else{
+//            editor.putInt("Route",1).apply();
+//        }
+//    }
 }

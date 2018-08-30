@@ -130,7 +130,7 @@ public class HomeFragment extends Fragment {
                         myItem.setTitle("" + points);
                     }
                     name = (String) dataSnapshot.child("name").getValue();
-                    DatabaseReference UserDatabaseReference1 = FirebaseDatabase.getInstance().getReference().child("Route 2");
+                    DatabaseReference UserDatabaseReference1 = FirebaseDatabase.getInstance().getReference().child("Route " + MainActivity.routeNo);
                     UserDatabaseReference1.addListenerForSingleValueEvent(new ValueEventListener() {
                         @Override
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -220,7 +220,7 @@ public class HomeFragment extends Fragment {
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     hintView.setVisibility(View.VISIBLE);
                                                     hintTextView.setVisibility(View.VISIBLE);
-                                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route " + MainActivity.routeNo).child("Location " + String.valueOf(level)).child("Hint");
                                                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -259,7 +259,7 @@ public class HomeFragment extends Fragment {
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     hintView.setVisibility(View.VISIBLE);
                                                     hintTextView.setVisibility(View.VISIBLE);
-                                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route " + MainActivity.routeNo).child("Location " + String.valueOf(level)).child("Hint");
                                                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -298,7 +298,7 @@ public class HomeFragment extends Fragment {
                                                 public void onClick(DialogInterface dialog, int which) {
                                                     hintView.setVisibility(View.VISIBLE);
                                                     hintTextView.setVisibility(View.VISIBLE);
-                                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location " + String.valueOf(level)).child("Hint");
+                                                    DatabaseReference hintReference = FirebaseDatabase.getInstance().getReference().child("Route " + MainActivity.routeNo).child("Location " + String.valueOf(level)).child("Hint");
                                                     hintReference.addListenerForSingleValueEvent(new ValueEventListener() {
                                                         @Override
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {

@@ -133,16 +133,20 @@ public class LeaderboardActivity extends AppCompatActivity {
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                     for (DataSnapshot d : dataSnapshot.getChildren()) {
-                        Log.i("DDDDDD", d.toString());
-                        String uid = d.getKey();
-                        int cool = d.child("Cooldown").getValue(Integer.class);
-                        String name = (String) d.child("Name").getValue();
-                        int level = d.child("Level").getValue(Integer.class);
-                        int points = d.child("Points").getValue(Integer.class);
-                        long timeInMil = d.child("Time").getValue(Long.class);
-                        items.add(new LBUpdate(name, points, level, timeInMil, uid, cool));
-                    }
+                        try {
+                            Log.i("DDDDDD", d.toString());
+                            String uid = d.getKey();
+                            int cool = d.child("Cooldown").getValue(Integer.class);
+                            String name = (String) d.child("Name").getValue();
+                            int level = d.child("Level").getValue(Integer.class);
+                            int points = d.child("Points").getValue(Integer.class);
+                            long timeInMil = d.child("Time").getValue(Long.class);
+                            items.add(new LBUpdate(name, points, level, timeInMil, uid, cool));
+                        } catch (Exception e) {
 
+                        }
+
+                    }
                     int maxLevel = 0;
                     for (int i = 0; i < items.size(); i++) {
                         int current = items.get(i).level;
