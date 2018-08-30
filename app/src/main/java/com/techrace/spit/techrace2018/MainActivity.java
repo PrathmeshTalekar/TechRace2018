@@ -883,7 +883,13 @@ public class MainActivity extends AppCompatActivity
                                                            if (level == 4 || level == 9 || level == 13) {
                                                                event = true;
                                                                if (cooldown == 0) {
-                                                                   timerTextView.setText("Meet The Volunteer To Continue");
+                                                                   runOnUiThread(new Runnable() {
+                                                                       @Override
+                                                                       public void run() {
+                                                                           timerTextView.setText("Meet The Volunteer To Continue");
+                                                                       }
+                                                                   });
+
                                                                    break;
                                                                } else {
                                                                    if (!timerOn) {
