@@ -101,8 +101,10 @@ public class SignUpActivity extends AppCompatActivity {
                                                         int a3 = (int) name.charAt(2);
                                                         if (a3 % 2 == 0) {
                                                             editor.putInt("Route", 2).apply();
+                                                            MainActivity.routeNo = 2;
                                                         } else {
                                                             editor.putInt("Route", 1).apply();
+                                                            MainActivity.routeNo = 1;
                                                         }
                                                         User user = new User(name, password, email, contact);
                                                         FirebaseDatabase.getInstance().getReference("Users")

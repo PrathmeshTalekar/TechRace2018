@@ -22,6 +22,8 @@ import android.net.NetworkInfo;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
@@ -49,6 +51,7 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
 
 import org.altbeacon.beacon.Beacon;
@@ -62,6 +65,7 @@ import org.altbeacon.beacon.Region;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
+import java.util.Map;
 
 import br.com.safety.locationlistenerhelper.core.CurrentLocationListener;
 import br.com.safety.locationlistenerhelper.core.CurrentLocationReceiver;
@@ -104,8 +108,102 @@ public class MainActivity extends AppCompatActivity
     String appliedBy = null;
     LocationTracker locationTracker;
     NetworkInfo.State wifi, mobile;
+    static boolean coolAttached = false;
     ValueEventListener levelListener, pointsListener, cooldownListener;
     static Menu globalMenu;
+    long ts;
+
+    @Override
+    public boolean onPrepareOptionsMenu(Menu menu) {
+        globalMenu = menu;
+        return true;
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        int id = item.getItemId();
+
+        //noinspection SimplifiableIfStatement
+        if (id == R.id.action_help) {
+            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
+
+            TextView head = new TextView(this);
+            head.setText(R.string.action_help);
+            head.setTextSize(24);
+            head.setTextColor(Color.WHITE);
+            head.setPadding(0, 0, 0, 16);
+
+            TextView textView = new TextView(this);
+            textView.setTextColor(Color.WHITE);
+            textView.setText(R.string.scan_help);
+            textView.setTextSize(18);
+            textView.setPadding(0, 0, 0, 16);
+
+            Button button = new Button(this);
+            button.setBackgroundColor(Color.parseColor("#88000000"));
+            button.setText(R.string.scan_manual);
+            button.setTextColor(getResources().getColor(R.color.colorAccent));
+            button.setOnClickListener(new View.OnClickListener() {
+                @Override
+                public void onClick(View view) {
+                    bottomSheetDialog.dismiss();
+
+                    final BottomSheetDialog bottomSheet = new BottomSheetDialog(MainActivity.this);
+
+                    TextView textView = new TextView(MainActivity.this);
+                    textView.setText(R.string.manual_desc);
+                    textView.setTextSize(20);
+                    textView.setTextColor(Color.WHITE);
+
+                    final EditText codeText = new EditText(MainActivity.this);
+                    codeText.setTransformationMethod(PasswordTransformationMethod.getInstance());
+                    Button button = new Button(MainActivity.this);
+                    button.setBackgroundColor(Color.parseColor("#88000000"));
+                    button.setText(R.string.action_confirm);
+                    button.setTextColor(getResources().getColor(R.color.colorAccent));
+                    button.setOnClickListener(new View.OnClickListener() {
+                        @Override
+                        public void onClick(View view) {
+                            String input = codeText.getText().toString();
+                            checkManualPassword(input);
+                            codeText.setText("");
+                            bottomSheet.dismiss();
+                        }
+                    });
+
+                    LinearLayout linearLayout = new LinearLayout(MainActivity.this);
+                    linearLayout.setOrientation(LinearLayout.VERTICAL);
+                    linearLayout.setBackgroundColor(Color.DKGRAY);
+                    linearLayout.setPadding(48, 64, 48, 64);
+                    linearLayout.addView(textView);
+                    linearLayout.addView(codeText);
+                    linearLayout.addView(button);
+
+                    bottomSheetDialog.setTitle(R.string.action_help);
+                    bottomSheetDialog.setContentView(linearLayout);
+                    bottomSheetDialog.setCanceledOnTouchOutside(true);
+                    bottomSheetDialog.show();
+                }
+            });
+
+            LinearLayout linearLayout = new LinearLayout(MainActivity.this);
+            linearLayout.setOrientation(LinearLayout.VERTICAL);
+            linearLayout.setBackgroundColor(Color.DKGRAY);
+            linearLayout.setPadding(48, 48, 48, 64);
+            linearLayout.addView(head);
+            linearLayout.addView(textView);
+            linearLayout.addView(button);
+
+            bottomSheetDialog.setTitle(R.string.action_help);
+            bottomSheetDialog.setContentView(linearLayout);
+            bottomSheetDialog.setCanceledOnTouchOutside(true);
+            bottomSheetDialog.show();
+        }
+
+        return super.onOptionsItemSelected(item);
+
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -138,6 +236,11 @@ public class MainActivity extends AppCompatActivity
         pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
         mAuth = FirebaseAuth.getInstance();
         routeNo = pref.getInt("Route", 1);
+        ConnectivityManager conMan = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
+
+        //wifi
+        wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
         levelListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
@@ -249,6 +352,12 @@ public class MainActivity extends AppCompatActivity
                 if (cooldown - localCool > 0) {
                     Log.i("inside1", "ues" + points);
                     if (points >= AppConstants.reversePrice) {
+//                        Vibrator v=(Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
+//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                            v.vibrate(VibrationEffect.createOneShot(500,VibrationEffect.DEFAULT_AMPLITUDE));
+//                        }else{
+//                            v.vibrate(500);
+//                        }
                         timerOn = false;
                         Log.i("inside", "ues");
                         final android.support.v7.app.AlertDialog.Builder reverseAlertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
@@ -370,98 +479,9 @@ public class MainActivity extends AppCompatActivity
         resources = getResources();
         displaySelectedScreen(R.id.home);
         clueLocation = new Location("");
+
         new HomeFragment().updateClue();
 
-
-    }
-
-    @Override
-    public boolean onPrepareOptionsMenu(Menu menu) {
-        globalMenu = menu;
-        return true;
-    }
-    @Override
-    public boolean onOptionsItemSelected(MenuItem item) {
-        int id = item.getItemId();
-
-        //noinspection SimplifiableIfStatement
-        if (id == R.id.action_help) {
-            final BottomSheetDialog bottomSheetDialog = new BottomSheetDialog(this);
-
-            TextView head = new TextView(this);
-            head.setText(R.string.action_help);
-            head.setTextSize(24);
-            head.setTextColor(Color.WHITE);
-            head.setPadding(0, 0, 0, 16);
-
-            TextView textView = new TextView(this);
-            textView.setTextColor(Color.WHITE);
-            textView.setText(R.string.scan_help);
-            textView.setTextSize(18);
-            textView.setPadding(0, 0, 0, 16);
-
-            Button button = new Button(this);
-            button.setBackgroundColor(Color.parseColor("#88000000"));
-            button.setText(R.string.scan_manual);
-            button.setTextColor(getResources().getColor(R.color.colorAccent));
-            button.setOnClickListener(new View.OnClickListener() {
-                @Override
-                public void onClick(View view) {
-                    bottomSheetDialog.dismiss();
-
-                    final BottomSheetDialog bottomSheet = new BottomSheetDialog(MainActivity.this);
-
-                    TextView textView = new TextView(MainActivity.this);
-                    textView.setText(R.string.manual_desc);
-                    textView.setTextSize(20);
-                    textView.setTextColor(Color.WHITE);
-
-                    final EditText codeText = new EditText(MainActivity.this);
-                    codeText.setTransformationMethod(PasswordTransformationMethod.getInstance());
-                    Button button = new Button(MainActivity.this);
-                    button.setBackgroundColor(Color.parseColor("#88000000"));
-                    button.setText(R.string.action_confirm);
-                    button.setTextColor(getResources().getColor(R.color.colorAccent));
-                    button.setOnClickListener(new View.OnClickListener() {
-                        @Override
-                        public void onClick(View view) {
-                            String input = codeText.getText().toString();
-                            checkManualPassword(input);
-                            codeText.setText("");
-                            bottomSheet.dismiss();
-                        }
-                    });
-
-                    LinearLayout linearLayout = new LinearLayout(MainActivity.this);
-                    linearLayout.setOrientation(LinearLayout.VERTICAL);
-                    linearLayout.setBackgroundColor(Color.DKGRAY);
-                    linearLayout.setPadding(48, 64, 48, 64);
-                    linearLayout.addView(textView);
-                    linearLayout.addView(codeText);
-                    linearLayout.addView(button);
-
-                    bottomSheetDialog.setTitle(R.string.action_help);
-                    bottomSheetDialog.setContentView(linearLayout);
-                    bottomSheetDialog.setCanceledOnTouchOutside(true);
-                    bottomSheetDialog.show();
-                }
-            });
-
-            LinearLayout linearLayout = new LinearLayout(MainActivity.this);
-            linearLayout.setOrientation(LinearLayout.VERTICAL);
-            linearLayout.setBackgroundColor(Color.DKGRAY);
-            linearLayout.setPadding(48, 48, 48, 64);
-            linearLayout.addView(head);
-            linearLayout.addView(textView);
-            linearLayout.addView(button);
-
-            bottomSheetDialog.setTitle(R.string.action_help);
-            bottomSheetDialog.setContentView(linearLayout);
-            bottomSheetDialog.setCanceledOnTouchOutside(true);
-            bottomSheetDialog.show();
-        }
-
-        return super.onOptionsItemSelected(item);
 
     }
 
@@ -481,16 +501,33 @@ public class MainActivity extends AppCompatActivity
                         MainActivity.beacon = true;
                         UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
 
-                        UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
                         UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
-                        long l = new Date().getTime();
-                        UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
-                        UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
-                        prefEditor = pref.edit();
-                        prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
-                        new HomeFragment().updateClue();
-                        MainActivity.beacon = true;
-                        event = false;
+                    UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(ServerValue.TIMESTAMP);
+
+                    FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("Time" + String.valueOf(level)).addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            ts = dataSnapshot.getValue(Long.class);
+                            Log.i("ts", String.valueOf(ts));
+                            DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
+                            UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, ts, cooldown, UID));
+                            UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
+
+                            prefEditor = pref.edit();
+                            prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
+                            new HomeFragment().updateClue();
+                            prefEditor = pref.edit();
+                            prefEditor.putString("Note", "").apply();
+                            MainActivity.beacon = true;
+                            event = false;
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
+
 
                     // } else {
 
@@ -582,21 +619,19 @@ public class MainActivity extends AppCompatActivity
             pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
             points = pref.getInt(AppConstants.pointsPref, 0);
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
-
+            if (pref.getBoolean("CoolAttached", false) == false) {
+                UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
+                prefEditor = pref.edit();
+                prefEditor.putBoolean("CoolAttached", true).commit();
+            }
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
         }
 
 
-        ConnectivityManager conMan = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
-        mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
 
-        //wifi
-        wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
 
         try {
-            //    new HomeFragment().updateClue();
             locationTracker = new LocationTracker("my.action")
                     .setInterval(5000)
                     .setGps(true)
@@ -633,22 +668,17 @@ public class MainActivity extends AppCompatActivity
 
                             }
                         }
-                    } else {
-                        Toast.makeText(MainActivity.this, "No Internet", Toast.LENGTH_LONG).show();
-                        // clueTextView.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
-
                     }
 
                 }
 
                 @Override
                 public void onPermissionDiened() {
-
-                    // hotcoldtext.setText("Location OFF");
                 }
-            })).start(MainActivity.this, MainActivity.this);
+            })).start(getBaseContext(), MainActivity.this);
         } catch (Exception e) {
-            Toast.makeText(this, "Turn On Location", Toast.LENGTH_LONG).show();
+            Log.i("EROOR", "" + e);
+
 
         }
 
@@ -660,7 +690,11 @@ public class MainActivity extends AppCompatActivity
         //  UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").removeEventListener(levelListener);
         // UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").removeEventListener(pointsListener);
         if (UserDatabaseReference != null && mAuth.getCurrentUser() != null) {
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").removeEventListener(cooldownListener);
+            if (pref.getBoolean("CoolAttached", true) == true) {
+                UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").removeEventListener(cooldownListener);
+                prefEditor = pref.edit();
+                prefEditor.putBoolean("CoolAttached", false).commit();
+            }
         }
     }
 
@@ -922,6 +956,7 @@ public class MainActivity extends AppCompatActivity
                                                                                        .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
                                                                                        .setOngoing(true)
                                                                                        .setAutoCancel(false)
+
                                                                                        .setTimeoutAfter(cooldown * 60000).setChannelId("Timer");
                                                                        NotificationChannel mChannel;
                                                                        NotificationManager notificationManagerforAlarm =

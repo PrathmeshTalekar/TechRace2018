@@ -22,6 +22,7 @@ import android.os.Build;
 import android.os.Bundle;
 
 
+import android.os.SystemClock;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
@@ -67,6 +68,7 @@ import static com.techrace.spit.techrace2018.MainActivity.points;
 //import static com.techrace.spit.techrace2018.MainActivity.pref;
 import static com.techrace.spit.techrace2018.MainActivity.pref;
 import static com.techrace.spit.techrace2018.MainActivity.prefEditor;
+import static com.techrace.spit.techrace2018.MainActivity.routeNo;
 import static com.techrace.spit.techrace2018.MainActivity.timerOn;
 
 import java.text.DateFormat;
@@ -95,6 +97,8 @@ public class HomeFragment extends Fragment {
     static String locName;
     static Button hintButton;
     int hintsLeft;
+    long lastClickTime;
+    ;
     static CardView hintView, noteView;
     @Override
     public void onStop() {
@@ -106,6 +110,7 @@ public class HomeFragment extends Fragment {
         // clueLocation = new Location("");
 
         firebaseDatabase = FirebaseDatabase.getInstance();
+        routeNo = pref.getInt("Route", 1);
         if (homeFragAuth.getCurrentUser() != null) {
 
 
@@ -118,7 +123,7 @@ public class HomeFragment extends Fragment {
                 @Override
                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                    // DataSnapshot userDS = dataSnapshot.child("Users").child(UID);
+
                     level = dataSnapshot.child("level").getValue(Integer.class);
                     Log.i("LEVELL", String.valueOf(level));
                     prefEditor = pref.edit();
@@ -197,9 +202,14 @@ public class HomeFragment extends Fragment {
             myItem.setTitle(String.valueOf(pref.getInt("Points", 0)));
             // pointsTextView.setText(String.valueOf(pref.getInt("Points", 0)));
         }
+
         hintButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
+                    return;
+                }
+                lastClickTime = SystemClock.elapsedRealtime();
                 if (pref.getString(AppConstants.hintPref, "abc").equals("")) {
                     final DatabaseReference hintRef = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("hintsLeft");
                     hintRef.addListenerForSingleValueEvent(new ValueEventListener() {

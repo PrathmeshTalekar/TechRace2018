@@ -53,12 +53,8 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         final String name = leaderboardItems.get(position).name;
         final int points = leaderboardItems.get(position).points;
         final String uid = leaderboardItems.get(position).uid;
+        Log.i("uid", uid);
         final int cool = leaderboardItems.get(position).cool;
-        if (cool != 0) {
-            int colored = Color.parseColor("#e61919");
-            holder.relativeLayout.setBackgroundColor(colored);
-            holder.coolText.setText("+" + String.valueOf(cool));
-        }
         if (uid.equals(UID)) {
             holder.relativeLayout.setBackgroundColor(Color.WHITE);
             holder.nameText.setTextColor(Color.BLACK);
@@ -66,6 +62,16 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
             holder.positionText.setTextColor(Color.BLACK);
             if (cool != 0) {
                 holder.coolText.setTextColor(Color.parseColor("#e61919"));
+            }
+        } else {
+            holder.relativeLayout.setBackgroundColor(Color.BLACK);
+            holder.nameText.setTextColor(Color.WHITE);
+            holder.levelText.setTextColor(Color.WHITE);
+            holder.positionText.setTextColor(Color.WHITE);
+            if (cool != 0) {
+                int colored = Color.parseColor("#e61919");
+                holder.relativeLayout.setBackgroundColor(colored);
+                holder.coolText.setText("+" + String.valueOf(cool));
             }
         }
         holder.positionText.setText(String.valueOf(position + 1));

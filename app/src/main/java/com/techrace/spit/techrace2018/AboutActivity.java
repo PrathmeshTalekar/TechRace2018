@@ -11,18 +11,20 @@ import android.transition.Slide;
 import android.view.MenuItem;
 import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
 
 public class AboutActivity extends AppCompatActivity {
 
     Button button_people;
     Button button_sponsors;
-
+    TextView uidTextView;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_about);
         button_sponsors = (Button) findViewById(R.id.sponsors);
         button_people = (Button) findViewById(R.id.credits);
+        uidTextView = findViewById(R.id.uidTextView);
         if (Build.VERSION.SDK_INT >= 21)
             setupWindowAnimations();
         button_people.setOnClickListener(new View.OnClickListener() {
@@ -39,6 +41,8 @@ public class AboutActivity extends AppCompatActivity {
                 startActivity(new Intent(AboutActivity.this, SponsorsActivity.class), options.toBundle());
             }
         });
+
+        uidTextView.setText("UID: " + HomeFragment.UID);
     }
 
     @Override

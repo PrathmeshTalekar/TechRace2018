@@ -164,5 +164,34 @@
                     android:text="Show sponsors" />
             </LinearLayout>
         </android.support.v7.widget.CardView>
+
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            app:cardElevation="8dp"
+            app:cardUseCompatPadding="true">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/cardBackground"
+                android:orientation="vertical"
+                android:padding="@dimen/activity_horizontal_margin">
+
+
+                <TextView
+                    android:id="@+id/uidTextView"
+                    style="@style/TextAppearance.AppCompat.Medium"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:layout_marginBottom="8dp"
+                    android:layout_marginTop="8dp"
+                    android:text=""
+                    android:textColor="@color/white" />
+
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
     </LinearLayout>
 </ScrollView>

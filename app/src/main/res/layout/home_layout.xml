@@ -75,7 +75,7 @@
                     android:fontFamily="@font/capriola"
                     android:padding="8dp"
                     android:text="Hint"
-                    android:textColor="@android:color/black"
+                    android:textColor="@android:color/white"
                     android:textSize="20sp" />
 
                 <TextView
