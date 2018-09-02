@@ -147,7 +147,12 @@ public class HomeFragment extends Fragment {
                             prefEditor.putString(AppConstants.cluePref, levelString).apply();
                             String locName = dataSnapshot.child("Location " + (level - 1)).child("Name").getValue(String.class);
                             prefEditor = pref.edit();
-                            prefEditor.putString("Location " + (level - 1), locName).apply();
+                            prefEditor.putString("Location " + (level - 1), locName);
+                            int level1 = dataSnapshot.child("Location " + level).child("Level 1").getValue(Integer.class);
+                            int level2 = dataSnapshot.child("Location " + level).child("Level 2").getValue(Integer.class);
+
+                            prefEditor.putInt("Level 1", level1);
+                            prefEditor.putInt("Level 2", level2).apply();
 
                             NSID = dataSnapshot.child("Location " + level).child("NSID").getValue(String.class);
                             Log.i("NSID", NSID);

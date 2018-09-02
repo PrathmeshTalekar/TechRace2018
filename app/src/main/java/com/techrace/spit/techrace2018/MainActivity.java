@@ -47,6 +47,8 @@ import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -89,28 +91,26 @@ import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, BeaconConsumer {
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
-    //static BeaconManager beaconManager;
     static FirebaseAuth mAuth;
     static int cooldown, maxWait, routeNo;
     public static Resources resources;
     static SharedPreferences pref;
     static SharedPreferences.Editor prefEditor;
-    Date d = new Date();
+
     static boolean beacon = true, manualPass = false;
     static int points;
     String beaconID;
     static boolean timerOn = false, event = false;
     Beacon firstBeacon;
     static String selectUID = null;
-    long l;
+    int lvlManual, addPointsManual;
     BeaconManager beaconManager;
     String appliedBy = null;
     LocationTracker locationTracker;
     NetworkInfo.State wifi, mobile;
-    static boolean coolAttached = false;
     ValueEventListener levelListener, pointsListener, cooldownListener;
     static Menu globalMenu;
-    long ts;
+    int lvl;
     AlertDialog reverseDialog;
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -505,9 +505,13 @@ public class MainActivity extends AppCompatActivity
         pass.addListenerForSingleValueEvent(new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                String serverPass = dataSnapshot.getValue(String.class);
-                Log.i("server pass", serverPass);
-                if (manualPassword.equals(serverPass)) {
+                String skipPass, highPass, mediumPass, lowPass;
+                skipPass = dataSnapshot.child("Skip").getValue(String.class);
+                highPass = dataSnapshot.child("High").getValue(String.class);
+                mediumPass = dataSnapshot.child("Medium").getValue(String.class);
+                lowPass = dataSnapshot.child("Low").getValue(String.class);
+
+                if (manualPassword.equals(skipPass)) {
 
                     Toast.makeText(MainActivity.this, "Updating...", Toast.LENGTH_LONG).show();
                     // if (cooldown == 0) {
@@ -516,100 +520,214 @@ public class MainActivity extends AppCompatActivity
                     UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
                     prefEditor = pref.edit();
                     prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
+                    lvlManual = level;
                     UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
-                    UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(ServerValue.TIMESTAMP);
-
-                    FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("Time" + String.valueOf(level)).addListenerForSingleValueEvent(new ValueEventListener() {
+                    UserDatabaseReference.child("Users").child(UID).child("Time " + String.valueOf(lvlManual)).setValue(ServerValue.TIMESTAMP).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            ts = dataSnapshot.getValue(Long.class);
-                            Log.i("ts", String.valueOf(ts));
-                            DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
-                            UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, ts, cooldown, UID));
+                        public void onComplete(@NonNull Task<Void> task) {
+                            FirebaseDatabase.getInstance().getReference().child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    long ts = dataSnapshot.child("Time " + String.valueOf(lvlManual)).getValue(Long.class);
+                                    Log.i("ts", String.valueOf(ts));
+                                    DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
+                                    UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvlManual, points, ts, cooldown, UID));
 
 
-                            UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
-                            prefEditor = pref.edit();
-                            prefEditor.putString("Note", "").apply();
-                            timerTextView.setText("");
-                            beacon = false;
-                            beaconManager.unbind(MainActivity.this);
-                            beaconManager.removeAllRangeNotifiers();
-                            beaconManager.applySettings();
-                            hintButton.setEnabled(true);
-                            prefEditor = pref.edit();
-                            prefEditor.putString(AppConstants.hintPref, "");
-                            new HomeFragment().updateClue();
-                            event = false;
-                        }
+                                    UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
+                                    prefEditor = pref.edit();
+                                    prefEditor.putString("Note", "").apply();
+                                    timerTextView.setText("");
+                                    beacon = false;
+                                    if (beaconManager != null) {
+                                        beaconManager.unbind(MainActivity.this);
+                                        beaconManager.removeAllRangeNotifiers();
+                                        beaconManager.applySettings();
+                                    }
+                                    hintButton.setEnabled(true);
+                                    prefEditor = pref.edit();
+                                    prefEditor.putString(AppConstants.hintPref, "");
+                                    new HomeFragment().updateClue();
+                                    event = false;
+                                }
 
-                        //
-//                                                                   UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-//                                                                   UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
-//                        l = d.getTime();
-//                                                                   UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
-//                                                                   UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
-//                        beacon = false;
-//                        timerOn = false;
-//                                                                   beaconManager.unbind(MainActivity.this);
-//                                                                   beaconManager.removeAllRangeNotifiers();
-//                        //beaconManager.disableForegroundServiceScanning();
-//                                                                   beaconManager.applySettings();
-//                                                                   hintButton.setEnabled(true);
-//                        prefEditor = pref.edit();
-//                                                                   prefEditor.putString(AppConstants.hintPref, "");
-//                                                                   prefEditor.putString("Note", "").apply();
-//                                                                   new HomeFragment().updateClue();
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
 
+                                }
+                            });
                         }
                     });
 
 
-                    // } else {
+                } else if (manualPassword.equals(highPass)) {
+                    Toast.makeText(MainActivity.this, "Updating...", Toast.LENGTH_LONG).show();
+                    // if (cooldown == 0) {
+                    timerOn = false;
+                    MainActivity.beacon = true;
+                    UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                    prefEditor = pref.edit();
+                    prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
+                    lvlManual = level;
+                    if (lvlManual == 4 || lvlManual == 13) {
+                        addPointsManual = 5;
+                    } else if (lvlManual == 9) {
+                        addPointsManual = 4;
+                    } else {
+                        addPointsManual = 0;
+                    }
 
-//                        Log.i("IN ELSE 1", "yes");
-//                        if (!timerOn) {
-//                            String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
-//                            Log.i("cool", "" + cooldown);
-//                            timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
-//                            prefEditor = pref.edit();
-//                            prefEditor.putString("Hint", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
-//                            Log.i("IN timer on false", "yes");
-//                            timerOn = true;
-//                            manualPass = true;
-//                            Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
-//                            PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
-//                                    MainActivity.this, 9999, intent, 0);
-//
-//                            AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
-//
-//                            alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-//                                    + (cooldown * 59000), pendingIntentforAlarm);
-//
-//
-//                            NotificationCompat.Builder builderalarm =
-//                                    new NotificationCompat.Builder(MainActivity.this)
-//                                            .setSmallIcon(R.mipmap.ic_launcher_foreground)
-//                                            .setContentTitle("Please Wait")
-//                                            .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
-//                                            .setOngoing(true)
-//                                            .setAutoCancel(false).setTimeoutAfter(cooldown * 58000).setChannelId("Timer");
-//                            NotificationChannel mChannel;
-//                            NotificationManager notificationManagerforAlarm =
-//                                    (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-//                            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                                mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
-//                                notificationManagerforAlarm.createNotificationChannel(mChannel);
-//                            }
-//
-//
-//                            notificationManagerforAlarm.notify(1, builderalarm.build());
-//                        }
+                    UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5 + addPointsManual);
+                    UserDatabaseReference.child("Users").child(UID).child("Time " + String.valueOf(lvlManual)).setValue(ServerValue.TIMESTAMP).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            FirebaseDatabase.getInstance().getReference().child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    long ts = dataSnapshot.child("Time " + String.valueOf(lvlManual)).getValue(Long.class);
+                                    Log.i("ts", String.valueOf(ts));
+                                    DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
+                                    UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvlManual, points, ts, cooldown, UID));
 
-                    //    }
 
+                                    UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
+                                    prefEditor = pref.edit();
+                                    prefEditor.putString("Note", "").apply();
+                                    timerTextView.setText("");
+                                    beacon = false;
+                                    if (beaconManager != null) {
+                                        beaconManager.unbind(MainActivity.this);
+                                        beaconManager.removeAllRangeNotifiers();
+                                        beaconManager.applySettings();
+                                    }
+                                    hintButton.setEnabled(true);
+                                    prefEditor = pref.edit();
+                                    prefEditor.putString(AppConstants.hintPref, "");
+                                    new HomeFragment().updateClue();
+                                    event = false;
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    });
+
+
+                } else if (manualPassword.equals(mediumPass)) {
+                    Toast.makeText(MainActivity.this, "Updating...", Toast.LENGTH_LONG).show();
+                    // if (cooldown == 0) {
+                    timerOn = false;
+                    MainActivity.beacon = true;
+                    UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                    prefEditor = pref.edit();
+                    prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
+                    lvlManual = level;
+                    if (lvlManual == 4 || lvlManual == 13) {
+                        addPointsManual = 5;
+                    } else if (lvlManual == 9) {
+                        addPointsManual = 2;
+                    } else {
+                        addPointsManual = 0;
+                    }
+
+                    UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5 + addPointsManual);
+                    UserDatabaseReference.child("Users").child(UID).child("Time " + String.valueOf(lvlManual)).setValue(ServerValue.TIMESTAMP).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            FirebaseDatabase.getInstance().getReference().child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    long ts = dataSnapshot.child("Time " + String.valueOf(lvlManual)).getValue(Long.class);
+                                    Log.i("ts", String.valueOf(ts));
+                                    DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
+                                    UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvlManual, points, ts, cooldown, UID));
+
+
+                                    UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
+                                    prefEditor = pref.edit();
+                                    prefEditor.putString("Note", "").apply();
+                                    timerTextView.setText("");
+                                    beacon = false;
+                                    if (beaconManager != null) {
+                                        beaconManager.unbind(MainActivity.this);
+                                        beaconManager.removeAllRangeNotifiers();
+                                        beaconManager.applySettings();
+                                    }
+                                    hintButton.setEnabled(true);
+                                    prefEditor = pref.edit();
+                                    prefEditor.putString(AppConstants.hintPref, "");
+                                    new HomeFragment().updateClue();
+                                    event = false;
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    });
+
+
+                } else if (manualPassword.equals(lowPass)) {
+                    Toast.makeText(MainActivity.this, "Updating...", Toast.LENGTH_LONG).show();
+                    // if (cooldown == 0) {
+                    timerOn = false;
+                    MainActivity.beacon = true;
+                    UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                    prefEditor = pref.edit();
+                    prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
+                    lvlManual = level;
+                    if (lvlManual == 4) {
+                        addPointsManual = -5;
+                    } else if (lvlManual == 9) {
+                        addPointsManual = -4;
+                    } else if (lvlManual == 13) {
+                        addPointsManual = 5;
+                    } else {
+                        addPointsManual = 0;
+                    }
+
+                    UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5 + addPointsManual);
+                    UserDatabaseReference.child("Users").child(UID).child("Time " + String.valueOf(lvlManual)).setValue(ServerValue.TIMESTAMP).addOnCompleteListener(new OnCompleteListener<Void>() {
+                        @Override
+                        public void onComplete(@NonNull Task<Void> task) {
+                            FirebaseDatabase.getInstance().getReference().child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                @Override
+                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                    long ts = dataSnapshot.child("Time " + String.valueOf(lvlManual)).getValue(Long.class);
+                                    Log.i("ts", String.valueOf(ts));
+                                    DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
+                                    UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvlManual, points, ts, cooldown, UID));
+
+
+                                    UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
+                                    prefEditor = pref.edit();
+                                    prefEditor.putString("Note", "").apply();
+                                    timerTextView.setText("");
+                                    beacon = false;
+                                    if (beaconManager != null) {
+                                        beaconManager.unbind(MainActivity.this);
+                                        beaconManager.removeAllRangeNotifiers();
+                                        beaconManager.applySettings();
+                                    }
+                                    hintButton.setEnabled(true);
+                                    prefEditor = pref.edit();
+                                    prefEditor.putString(AppConstants.hintPref, "");
+                                    new HomeFragment().updateClue();
+                                    event = false;
+                                }
+
+                                @Override
+                                public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                }
+                            });
+                        }
+                    });
 
                 } else {
                     Toast.makeText(MainActivity.this, "Wrong Password!", Toast.LENGTH_SHORT).show();
@@ -1023,29 +1141,100 @@ public class MainActivity extends AppCompatActivity
                                                                if (cooldown == 0) {
 
 
-                                                                   UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-
-
                                                                    prefEditor = pref.edit();
                                                                    prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
-                                                                   UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
-                                                                   l = d.getTime();
-                                                                   UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
-                                                                   UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
-                                                                   UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
-                                                                   beacon = false;
-                                                                   timerOn = false;
-                                                                   beaconManager.unbind(MainActivity.this);
-                                                                   beaconManager.removeAllRangeNotifiers();
-                                                                   //beaconManager.disableForegroundServiceScanning();
-                                                                   beaconManager.applySettings();
-                                                                   hintButton.setEnabled(true);
-                                                                   prefEditor = pref.edit();
-                                                                   prefEditor.putString(AppConstants.hintPref, "");
-                                                                   prefEditor.putString("Note", "").apply();
-                                                                   new HomeFragment().updateClue();
+                                                                   UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                                                                   lvl = level;
+
+
+                                                                   UserDatabaseReference.child("Users").child(UID).child("Time " + String.valueOf(level)).setValue(ServerValue.TIMESTAMP).addOnCompleteListener(new OnCompleteListener<Void>() {
+                                                                       @Override
+                                                                       public void onComplete(@NonNull Task<Void> task) {
+                                                                           if (level > 1) {
+
+                                                                               FirebaseDatabase.getInstance().getReference().child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                   @Override
+                                                                                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                                                                       long prevTime = dataSnapshot.child("Time " + (lvl - 1)).getValue(Long.class);
+                                                                                       Log.i("prevTime", "" + prevTime);
+                                                                                       long currentTime = dataSnapshot.child("Time " + lvl).getValue(Long.class);
+                                                                                       Log.i("currentTime", "" + currentTime);
+                                                                                       Log.i("System currentTime", "" + System.currentTimeMillis());
+                                                                                       long diff = currentTime - prevTime;
+                                                                                       Log.i("dddiffff", "" + diff);
+
+                                                                                       DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+                                                                                       ref.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvl, points, currentTime, cooldown, UID));
+                                                                                       int l1 = pref.getInt("Level 1", 0);
+                                                                                       l1 = l1 * 60000;
+                                                                                       int l2 = pref.getInt("Level 2", 0);
+                                                                                       l2 = l2 * 60000;
+
+                                                                                       if (diff <= l1) {
+                                                                                           ref.child("Users").child(UID).child("points").setValue(points + 7);
+                                                                                       } else if (diff > l1 && diff <= l2) {
+                                                                                           ref.child("Users").child(UID).child("points").setValue(points + 5);
+                                                                                       } else if (diff > l2) {
+                                                                                           ref.child("Users").child(UID).child("points").setValue(points + 3);
+                                                                                       }
+                                                                                       ref.child("Users").child(UID).child("level").setValue(level + 1);
+                                                                                       beacon = false;
+                                                                                       timerOn = false;
+                                                                                       beaconManager.unbind(MainActivity.this);
+                                                                                       beaconManager.removeAllRangeNotifiers();
+                                                                                       //beaconManager.disableForegroundServiceScanning();
+                                                                                       beaconManager.applySettings();
+                                                                                       hintButton.setEnabled(true);
+                                                                                       prefEditor = pref.edit();
+                                                                                       prefEditor.putString(AppConstants.hintPref, "");
+                                                                                       prefEditor.putString("Note", "").apply();
+                                                                                       new HomeFragment().updateClue();
+
+                                                                                   }
+
+                                                                                   @Override
+                                                                                   public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                   }
+                                                                               });
+                                                                           } else {
+                                                                               FirebaseDatabase.getInstance().getReference().child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                   @Override
+                                                                                   public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+
+                                                                                       long currentTime = dataSnapshot.child("Time " + lvl).getValue(Long.class);
+                                                                                       Log.i("currentTime", "" + currentTime);
+                                                                                       DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
+                                                                                       ref.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvl, points, currentTime, cooldown, UID));
+                                                                                       ref.child("Users").child(UID).child("points").setValue(points + 7);
+                                                                                       ref.child("Users").child(UID).child("level").setValue(level + 1);
+                                                                                       beacon = false;
+                                                                                       timerOn = false;
+                                                                                       beaconManager.unbind(MainActivity.this);
+                                                                                       beaconManager.removeAllRangeNotifiers();
+                                                                                       //beaconManager.disableForegroundServiceScanning();
+                                                                                       beaconManager.applySettings();
+                                                                                       hintButton.setEnabled(true);
+                                                                                       prefEditor = pref.edit();
+                                                                                       prefEditor.putString(AppConstants.hintPref, "");
+                                                                                       prefEditor.putString("Note", "").apply();
+                                                                                       new HomeFragment().updateClue();
+                                                                                   }
+
+                                                                                   @Override
+                                                                                   public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                   }
+                                                                               });
+                                                                           }
+
+                                                                       }
+                                                                   });
 
                                                                    break;
+
+
                                                                } else {
 
 
