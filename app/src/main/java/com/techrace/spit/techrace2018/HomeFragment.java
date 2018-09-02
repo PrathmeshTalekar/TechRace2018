@@ -206,7 +206,7 @@ public class HomeFragment extends Fragment {
         hintButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if (SystemClock.elapsedRealtime() - lastClickTime < 1000) {
+                if (SystemClock.elapsedRealtime() - lastClickTime < 1500) {
                     return;
                 }
                 lastClickTime = SystemClock.elapsedRealtime();
@@ -221,7 +221,7 @@ public class HomeFragment extends Fragment {
                             } else if (hintsLeft == 3) {
                                 if (points >= AppConstants.hint1Price) {
                                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
-                                    alertDialogBuilder.setCancelable(false)
+                                    alertDialogBuilder.setCancelable(true)
                                             .setTitle("Are you sure?")
                                             .setMessage("Do you want to buy a HINT for " + AppConstants.hint1Price + " points?")
                                             .setNegativeButton("No", null)

@@ -61,7 +61,10 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
             holder.levelText.setTextColor(Color.BLACK);
             holder.positionText.setTextColor(Color.BLACK);
             if (cool != 0) {
+                holder.coolText.setText("+" + String.valueOf(cool));
                 holder.coolText.setTextColor(Color.parseColor("#e61919"));
+            } else {
+                holder.coolText.setText("");
             }
         } else {
             holder.relativeLayout.setBackgroundColor(Color.BLACK);
@@ -72,6 +75,8 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                 int colored = Color.parseColor("#e61919");
                 holder.relativeLayout.setBackgroundColor(colored);
                 holder.coolText.setText("+" + String.valueOf(cool));
+            } else {
+                holder.coolText.setText("");
             }
         }
         holder.positionText.setText(String.valueOf(position + 1));

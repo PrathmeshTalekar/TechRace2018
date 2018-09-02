@@ -36,7 +36,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/contact_help"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@android:color/white" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
@@ -46,7 +46,7 @@
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:gravity="center"
                     android:text="@string/contact_help_desc"
-                    android:textColor="@color/transparent_black"
+                    android:textColor="@android:color/white"
                     android:textStyle="italic" />
 
                 <TextView
@@ -57,7 +57,7 @@
                     android:autoLink="phone"
                     android:gravity="center"
                     android:text="@string/helpline_2"
-                    android:textColor="@color/transparent_black" />
+                    android:textColor="@android:color/white" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
@@ -67,7 +67,7 @@
                     android:autoLink="phone"
                     android:gravity="center"
                     android:text="@string/helpline_3"
-                    android:textColor="@color/transparent_black" />
+                    android:textColor="@android:color/white" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
@@ -77,7 +77,7 @@
                     android:autoLink="phone"
                     android:gravity="center"
                     android:text="@string/helpline_5"
-                    android:textColor="@color/transparent_black" />
+                    android:textColor="@android:color/white" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
@@ -87,7 +87,7 @@
                     android:autoLink="phone"
                     android:gravity="center"
                     android:text="@string/helpline_4"
-                    android:textColor="@color/transparent_black" />
+                    android:textColor="@android:color/white" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
@@ -97,7 +97,7 @@
                     android:autoLink="phone"
                     android:gravity="center"
                     android:text="@string/helpline_1"
-                    android:textColor="@color/transparent_black" />
+                    android:textColor="@android:color/white" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
@@ -107,7 +107,7 @@
                     android:autoLink="phone"
                     android:gravity="center"
                     android:text="@string/helpline_6"
-                    android:textColor="@color/transparent_black" />
+                    android:textColor="@android:color/white" />
             </LinearLayout>
         </android.support.v7.widget.CardView>
 
@@ -134,7 +134,7 @@
                     android:layout_height="wrap_content"
                     android:gravity="center"
                     android:text="@string/app_help"
-                    android:textColor="@android:color/black" />
+                    android:textColor="@android:color/white" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
@@ -144,7 +144,7 @@
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:gravity="center"
                     android:text="@string/app_help_desc"
-                    android:textColor="@color/transparent_black"
+                    android:textColor="@android:color/white"
                     android:textStyle="italic" />
 
                 <TextView
@@ -155,7 +155,7 @@
                     android:autoLink="phone"
                     android:gravity="center"
                     android:text="@string/app_helpline_1"
-                    android:textColor="@color/transparent_black" />
+                    android:textColor="@android:color/white" />
 
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
@@ -165,7 +165,7 @@
                     android:autoLink="phone"
                     android:gravity="center"
                     android:text="@string/app_helpline_2"
-                    android:textColor="@color/transparent_black" />
+                    android:textColor="@android:color/white" />
             </LinearLayout>
         </android.support.v7.widget.CardView>
     </LinearLayout>

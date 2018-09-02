@@ -2,6 +2,7 @@ package com.techrace.spit.techrace2018;
 
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -28,6 +29,7 @@ public class FeedActivity extends AppCompatActivity {
     ArrayList<Feed> feedItems;
     ProgressDialog progressDialog;
     SwipeRefreshLayout swipeRefreshLayout;
+    backgroungFeed ob;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -40,7 +42,8 @@ public class FeedActivity extends AppCompatActivity {
         recyclerView = (RecyclerView) findViewById(R.id.feed_recycler);
         recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
-        new backgroungFeed().execute();
+        ob = new backgroungFeed();
+        ob.execute();
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
@@ -93,7 +96,14 @@ public class FeedActivity extends AppCompatActivity {
         protected void onPreExecute() {
             progressDialog = new ProgressDialog(FeedActivity.this);
             progressDialog.setMessage("Refreshing...");
-            progressDialog.setCancelable(false);
+            progressDialog.setCancelable(true);
+            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    ob.cancel(true);
+                    finish();
+                }
+            });
             progressDialog.show();
             super.onPreExecute();
         }

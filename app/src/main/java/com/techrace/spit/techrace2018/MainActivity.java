@@ -7,6 +7,7 @@ import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
@@ -84,6 +85,7 @@ import static com.techrace.spit.techrace2018.HomeFragment.hintButton;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.HomeFragment.levelString;
 import static com.techrace.spit.techrace2018.HomeFragment.name;
+import static com.techrace.spit.techrace2018.HomeFragment.noteView;
 import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
 
 
@@ -352,34 +354,55 @@ public class MainActivity extends AppCompatActivity
                 if (cooldown - localCool > 0) {
                     Log.i("inside1", "ues" + points);
                     if (points >= AppConstants.reversePrice) {
-//                        Vibrator v=(Vibrator)getSystemService(Context.VIBRATOR_SERVICE);
-//                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-//                            v.vibrate(VibrationEffect.createOneShot(500,VibrationEffect.DEFAULT_AMPLITUDE));
-//                        }else{
-//                            v.vibrate(500);
-//                        }
+                        Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
+                        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                            v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+                        } else {
+                            v.vibrate(500);
+                        }
                         timerOn = false;
                         Log.i("inside", "ues");
-                        final android.support.v7.app.AlertDialog.Builder reverseAlertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
-                        reverseAlertDialog.setTitle("Timer Of " + cooldown + " Minutes Applied").setMessage("Buy Right Back at Ya Card? for 35 points")
-                                .setPositiveButton("BUY", new DialogInterface.OnClickListener() {
+                        runOnUiThread(new Runnable() {
+                            @Override
+                            public void run() {
+                                android.support.v7.app.AlertDialog.Builder reverseAlertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
+                                reverseAlertDialog.setTitle("Timer Of " + cooldown + " Minutes Applied").setMessage("Buy Right Back at Ya Card? for 35 points")
+                                        .setPositiveButton("BUY", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+
+                                                DatabaseReference reverseReference = FirebaseDatabase.getInstance().getReference();
+                                                reverseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("Applied By").addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        appliedBy = dataSnapshot.getValue(String.class);
+                                                        Log.i("applied", appliedBy);
+                                                        DatabaseReference reverseReference1 = FirebaseDatabase.getInstance().getReference();
+                                                        reverseReference1.child("Users").child(appliedBy).child("cooldown").setValue(cooldown);
+                                                        reverseReference1.child("Users").child(appliedBy).child("Applied By").setValue(UID);
+                                                        reverseReference1.child("Users").child(UID).child("points")
+                                                                .setValue(MainActivity.points - AppConstants.reversePrice);
+                                                        reverseReference1.child("Users").child(UID).child("cooldown").setValue(0);
+                                                        prefEditor = pref.edit();
+                                                        prefEditor.putInt(AppConstants.cooldownPref, 0).apply();
+                                                    }
+
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                    }
+                                                });
+
+                                            }
+                                        }).setNegativeButton("No", new DialogInterface.OnClickListener() {
                                     @Override
                                     public void onClick(DialogInterface dialog, int which) {
-
-                                        DatabaseReference reverseReference = FirebaseDatabase.getInstance().getReference();
-                                        reverseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("Applied By").addListenerForSingleValueEvent(new ValueEventListener() {
+                                        final DatabaseReference waited = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("waited");
+                                        waited.addListenerForSingleValueEvent(new ValueEventListener() {
                                             @Override
                                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                appliedBy = dataSnapshot.getValue(String.class);
-                                                Log.i("applied", appliedBy);
-                                                DatabaseReference reverseReference1 = FirebaseDatabase.getInstance().getReference();
-                                                reverseReference1.child("Users").child(appliedBy).child("cooldown").setValue(cooldown);
-                                                reverseReference1.child("Users").child(appliedBy).child("Applied By").setValue(UID);
-                                                reverseReference1.child("Users").child(UID).child("points")
-                                                        .setValue(MainActivity.points - AppConstants.reversePrice);
-                                                reverseReference1.child("Users").child(UID).child("cooldown").setValue(0);
-                                                prefEditor = pref.edit();
-                                                prefEditor.putInt(AppConstants.cooldownPref, 0).apply();
+                                                int w = dataSnapshot.getValue(Integer.class);
+                                                waited.setValue(w + 1);
                                             }
 
                                             @Override
@@ -387,29 +410,13 @@ public class MainActivity extends AppCompatActivity
 
                                             }
                                         });
+                                        prefEditor = pref.edit();
+                                        prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
 
                                     }
-                                }).setNegativeButton("No", new DialogInterface.OnClickListener() {
-                            @Override
-                            public void onClick(DialogInterface dialog, int which) {
-                                final DatabaseReference waited = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("waited");
-                                waited.addListenerForSingleValueEvent(new ValueEventListener() {
-                                    @Override
-                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                        int w = dataSnapshot.getValue(Integer.class);
-                                        waited.setValue(w + 1);
-                                    }
-
-                                    @Override
-                                    public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                                    }
-                                });
-                                prefEditor = pref.edit();
-                                prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
-
+                                }).setCancelable(false).show();
                             }
-                        }).setCancelable(false).show();
+                        });
                     } else {
                         final DatabaseReference waited = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("waited");
                         waited.addListenerForSingleValueEvent(new ValueEventListener() {
@@ -451,7 +458,6 @@ public class MainActivity extends AppCompatActivity
 //            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
 
         }
-        verifyBluetooth();
         Toolbar toolbar = (Toolbar) this.findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
         toolbar.inflateMenu(R.menu.main);
@@ -497,11 +503,12 @@ public class MainActivity extends AppCompatActivity
 
                     Toast.makeText(MainActivity.this, "Updating...", Toast.LENGTH_LONG).show();
                     // if (cooldown == 0) {
-                        timerOn = false;
-                        MainActivity.beacon = true;
-                        UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-
-                        UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
+                    timerOn = false;
+                    MainActivity.beacon = true;
+                    UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                    prefEditor = pref.edit();
+                    prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
+                    UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
                     UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(ServerValue.TIMESTAMP);
 
                     FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("Time" + String.valueOf(level)).addListenerForSingleValueEvent(new ValueEventListener() {
@@ -511,17 +518,40 @@ public class MainActivity extends AppCompatActivity
                             Log.i("ts", String.valueOf(ts));
                             DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
                             UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, ts, cooldown, UID));
-                            UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
 
-                            prefEditor = pref.edit();
-                            prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
-                            new HomeFragment().updateClue();
+
+                            UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
                             prefEditor = pref.edit();
                             prefEditor.putString("Note", "").apply();
-                            MainActivity.beacon = true;
+                            timerTextView.setText("");
+                            beacon = false;
+                            beaconManager.unbind(MainActivity.this);
+                            beaconManager.removeAllRangeNotifiers();
+                            beaconManager.applySettings();
+                            hintButton.setEnabled(true);
+                            prefEditor = pref.edit();
+                            prefEditor.putString(AppConstants.hintPref, "");
+                            new HomeFragment().updateClue();
                             event = false;
                         }
 
+                        //
+//                                                                   UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
+//                                                                   UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
+//                        l = d.getTime();
+//                                                                   UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
+//                                                                   UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
+//                        beacon = false;
+//                        timerOn = false;
+//                                                                   beaconManager.unbind(MainActivity.this);
+//                                                                   beaconManager.removeAllRangeNotifiers();
+//                        //beaconManager.disableForegroundServiceScanning();
+//                                                                   beaconManager.applySettings();
+//                                                                   hintButton.setEnabled(true);
+//                        prefEditor = pref.edit();
+//                                                                   prefEditor.putString(AppConstants.hintPref, "");
+//                                                                   prefEditor.putString("Note", "").apply();
+//                                                                   new HomeFragment().updateClue();
                         @Override
                         public void onCancelled(@NonNull DatabaseError databaseError) {
 
@@ -613,16 +643,18 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onResume() {
         super.onResume();
-
+        Log.i("Resume", "RESUMED");
         if (mAuth.getCurrentUser() != null) {
             UID = mAuth.getCurrentUser().getUid();
             pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
             points = pref.getInt(AppConstants.pointsPref, 0);
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
             if (pref.getBoolean("CoolAttached", false) == false) {
-                UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
+                Log.i("coolatt", "" + pref.getBoolean("CoolAttached", false));
                 prefEditor = pref.edit();
                 prefEditor.putBoolean("CoolAttached", true).commit();
+                UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
+                prefEditor = pref.edit();
             }
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
@@ -648,7 +680,10 @@ public class MainActivity extends AppCompatActivity
                     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
                         if (!timerOn && !event) {
                             if (distanceinmetres <= 250) {
-
+                                BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                                if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                                    Toast.makeText(MainActivity.this, "Turn On Bluetooth", Toast.LENGTH_SHORT).show();
+                                }
                                 if (beacon) {
                                     clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
                                     beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
@@ -728,34 +763,34 @@ public class MainActivity extends AppCompatActivity
 //
 //        return super.onOptionsItemSelected(item);
 //    }
-    private void verifyBluetooth() {
-
-        try {
-            if (!BeaconManager.getInstanceForApplication(this).checkAvailability()) {
-                Toast.makeText(MainActivity.this, "Turn On Bluetooth In Hot Region", Toast.LENGTH_LONG).show();
-            }
-        }
-        catch (RuntimeException e) {
-            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-            builder.setTitle("Bluetooth LE not available");
-            builder.setMessage("Sorry, this device does not support Bluetooth LE.");
-            builder.setPositiveButton(android.R.string.ok, null);
-
-            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-
-                @Override
-                public void onDismiss(DialogInterface dialog) {
-                    finish();
-                    System.exit(0);
-                }
-
-            });
-
-            builder.show();
-
-        }
-
-    }
+//    private void verifyBluetooth() {
+//
+//        try {
+//            if (!BeaconManager.getInstanceForApplication(this).checkAvailability()) {
+//                Toast.makeText(MainActivity.this, "Turn On Bluetooth In Hot Region", Toast.LENGTH_LONG).show();
+//            }
+//        }
+//        catch (RuntimeException e) {
+//            final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+//            builder.setTitle("Bluetooth LE not available");
+//            builder.setMessage("Sorry, this device does not support Bluetooth LE.");
+//            builder.setPositiveButton(android.R.string.ok, null);
+//
+//            builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+//
+//                @Override
+//                public void onDismiss(DialogInterface dialog) {
+//                    finish();
+//                    System.exit(0);
+//                }
+//
+//            });
+//
+//            builder.show();
+//
+//        }
+//
+//    }
     @SuppressWarnings("StatementWithEmptyBody")
     @Override
     public boolean onNavigationItemSelected(MenuItem item) {
@@ -955,6 +990,7 @@ public class MainActivity extends AppCompatActivity
                                                                                        .setContentTitle("Please Wait")
                                                                                        .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
                                                                                        .setOngoing(true)
+
                                                                                        .setAutoCancel(false)
 
                                                                                        .setTimeoutAfter(cooldown * 60000).setChannelId("Timer");
@@ -980,11 +1016,11 @@ public class MainActivity extends AppCompatActivity
 
                                                                    prefEditor = pref.edit();
                                                                    prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
-                                                                   UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
                                                                    UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
                                                                    l = d.getTime();
                                                                    UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);
                                                                    UserDatabaseReference.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, level, points, l, cooldown, UID));
+                                                                   UserDatabaseReference.child("Users").child(UID).child("level").setValue(level + 1);
                                                                    beacon = false;
                                                                    timerOn = false;
                                                                    beaconManager.unbind(MainActivity.this);

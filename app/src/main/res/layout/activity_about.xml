@@ -89,7 +89,7 @@
             android:layout_height="wrap_content"
             android:layout_margin="8dp"
             android:clickable="true"
-            android:elevation="8dp"
+            app:cardElevation="8dp"
             android:foreground="?android:attr/selectableItemBackground">
 
             <LinearLayout

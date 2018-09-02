@@ -2,7 +2,10 @@ package com.techrace.spit.techrace2018;
 
 import android.annotation.TargetApi;
 import android.app.ProgressDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.AsyncTask;
 import android.os.Build;
 import android.support.annotation.NonNull;
@@ -14,6 +17,7 @@ import android.support.v7.widget.RecyclerView;
 import android.transition.Slide;
 import android.util.Log;
 import android.view.MenuItem;
+import android.widget.Toast;
 
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
@@ -34,6 +38,7 @@ public class LeaderboardActivity extends AppCompatActivity {
     ArrayList<LBUpdate> leaderboardItems;
     ProgressDialog progressDialog;
     SwipeRefreshLayout swipeRefreshLayout;
+    back ob;
     public static boolean selectUser = false;
     static ArrayList<LBUpdate> finalList = new ArrayList<>();
     @Override
@@ -57,15 +62,35 @@ public class LeaderboardActivity extends AppCompatActivity {
         // recyclerView.setHasFixedSize(true);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         //leaderboardItems.add(new LeaderboardItem("Name","Clues solved"));
-        new back().execute();
+//        ConnectivityManager connectivityManager=(ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+//        NetworkInfo networkInfo= connectivityManager.getActiveNetworkInfo();
 
-
+//        if (networkInfo!=null && networkInfo.isConnected()){
+        try {
+            ob = new back();
+            ob.execute();
+        } catch (Exception e) {
+        }
+//        }else{
+//            Toast.makeText(LeaderboardActivity.this,"No Internet",Toast.LENGTH_SHORT).show();
+//        }
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
                 leaderboardItems.clear();
                 //leaderboardItems.add(new LeaderboardItem("Name","Clues solved"));
-                new back().execute();
+//                ConnectivityManager connectivityManager=(ConnectivityManager)getSystemService(CONNECTIVITY_SERVICE);
+//                NetworkInfo networkInfo= connectivityManager.getActiveNetworkInfo();
+//                if (networkInfo!=null && networkInfo.isConnected()){
+                try {
+                    ob = new back();
+                    ob.execute();
+                } catch (Exception e) {
+                }
+//                }else{
+//                    Toast.makeText(LeaderboardActivity.this,"No Internet",Toast.LENGTH_SHORT).show();
+//                }
+
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -104,7 +129,9 @@ public class LeaderboardActivity extends AppCompatActivity {
     @Override
     protected void onPause() {
         super.onPause();
-        progressDialog.dismiss();
+        if (progressDialog != null) {
+            progressDialog.dismiss();
+        }
     }
 
     class back extends AsyncTask<Void, Void, Void> {
@@ -117,7 +144,14 @@ public class LeaderboardActivity extends AppCompatActivity {
             Log.i("LOADING", "True");
             progressDialog = new ProgressDialog(LeaderboardActivity.this);
             progressDialog.setMessage("Populating Leaderboard...");
-            progressDialog.setCancelable(false);
+            progressDialog.setCancelable(true);
+            progressDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+                @Override
+                public void onCancel(DialogInterface dialog) {
+                    ob.cancel(true);
+                    finish();
+                }
+            });
             progressDialog.show();
             super.onPreExecute();
         }
@@ -184,6 +218,7 @@ public class LeaderboardActivity extends AppCompatActivity {
 
                 @Override
                 public void onCancelled(@NonNull DatabaseError databaseError) {
+                    Toast.makeText(LeaderboardActivity.this, "Check Internet", Toast.LENGTH_SHORT).show();
 
                 }
             });
