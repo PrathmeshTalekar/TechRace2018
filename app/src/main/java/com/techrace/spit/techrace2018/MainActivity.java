@@ -66,7 +66,6 @@ import org.altbeacon.beacon.Region;
 import java.text.DateFormat;
 import java.util.Collection;
 import java.util.Date;
-import java.util.Map;
 
 import br.com.safety.locationlistenerhelper.core.CurrentLocationListener;
 import br.com.safety.locationlistenerhelper.core.CurrentLocationReceiver;
@@ -84,8 +83,6 @@ import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
 import static com.techrace.spit.techrace2018.HomeFragment.hintButton;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.HomeFragment.levelString;
-import static com.techrace.spit.techrace2018.HomeFragment.name;
-import static com.techrace.spit.techrace2018.HomeFragment.noteView;
 import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
 
 
@@ -114,7 +111,7 @@ public class MainActivity extends AppCompatActivity
     ValueEventListener levelListener, pointsListener, cooldownListener;
     static Menu globalMenu;
     long ts;
-
+    AlertDialog reverseDialog;
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         globalMenu = menu;
@@ -365,7 +362,7 @@ public class MainActivity extends AppCompatActivity
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
-                                android.support.v7.app.AlertDialog.Builder reverseAlertDialog = new android.support.v7.app.AlertDialog.Builder(MainActivity.this);
+                                AlertDialog.Builder reverseAlertDialog = new AlertDialog.Builder(MainActivity.this);
                                 reverseAlertDialog.setTitle("Timer Of " + cooldown + " Minutes Applied").setMessage("Buy Right Back at Ya Card? for 35 points")
                                         .setPositiveButton("BUY", new DialogInterface.OnClickListener() {
                                             @Override
@@ -414,7 +411,18 @@ public class MainActivity extends AppCompatActivity
                                         prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
 
                                     }
-                                }).setCancelable(false).show();
+
+                                }).setCancelable(false);
+//
+                                if (reverseDialog != null) {
+                                    if (!reverseDialog.isShowing()) {
+
+                                        reverseDialog.show();
+                                    }
+                                } else {
+                                    reverseDialog = reverseAlertDialog.create();
+                                    reverseDialog.show();
+                                }
                             }
                         });
                     } else {
@@ -649,6 +657,7 @@ public class MainActivity extends AppCompatActivity
             pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
             points = pref.getInt(AppConstants.pointsPref, 0);
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            Log.i("coolatt111", "" + pref.getBoolean("CoolAttached", false));
             if (pref.getBoolean("CoolAttached", false) == false) {
                 Log.i("coolatt", "" + pref.getBoolean("CoolAttached", false));
                 prefEditor = pref.edit();
@@ -730,6 +739,9 @@ public class MainActivity extends AppCompatActivity
                 prefEditor = pref.edit();
                 prefEditor.putBoolean("CoolAttached", false).commit();
             }
+        }
+        if (reverseDialog != null && reverseDialog.isShowing()) {
+            reverseDialog.cancel();
         }
     }
 
