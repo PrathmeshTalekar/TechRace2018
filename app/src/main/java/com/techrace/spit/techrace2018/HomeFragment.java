@@ -83,6 +83,7 @@ public class HomeFragment extends Fragment {
     static View myView;
     static TextView clueTextView, hintTextView, timerTextView;
     MenuItem myItem;
+    AlertDialog hintDialog;
     static DatabaseReference UserDatabaseReference;
     static FirebaseDatabase firebaseDatabase;
     static FirebaseAuth homeFragAuth = MainActivity.mAuth;
@@ -252,7 +253,10 @@ public class HomeFragment extends Fragment {
                                                         }
                                                     });
                                                 }
-                                            }).show();
+                                            });
+                                    hintDialog = alertDialogBuilder.create();
+                                    hintDialog.show();
+
 
                                 } else {
                                     Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
@@ -355,6 +359,14 @@ public class HomeFragment extends Fragment {
         myView = inflater.inflate(R.layout.home_layout, container, false);
 
         return myView;
+    }
+
+    @Override
+    public void onPause() {
+        if (hintDialog != null && hintDialog.isShowing()) {
+            hintDialog.cancel();
+        }
+        super.onPause();
     }
 
     @Override

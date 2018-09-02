@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@color/transparent_black"
+    android:background="@color/white"
     tools:context=".PowerCardsFragment">
 
     <GridLayout
@@ -31,13 +31,13 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#D50000">
+                android:background="@color/black">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="16dp"
-                    android:background="#FFFF00"
+                    android:background="@color/white"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:weightSum="2">
@@ -49,10 +49,10 @@
                         android:layout_marginRight="8dp"
                         android:layout_marginTop="8dp"
                         android:layout_weight="1"
-                        android:background="#D50000"
+                        android:background="@color/black"
                         android:gravity="center"
                         android:text="+2"
-                        android:textColor="@android:color/black"
+                        android:textColor="@android:color/white"
                         android:textSize="40dp" />
 
                     <TextView
@@ -77,11 +77,11 @@
                             android:layout_width="wrap_content"
                             android:layout_height="wrap_content"
                             android:layout_gravity="center_horizontal"
-                            android:background="@color/white"
+                            android:background="@color/black"
                             android:fontFamily="@font/capriola"
                             android:padding="4dp"
                             android:text="Buy!"
-                            android:textColor="@android:color/black" />
+                            android:textColor="@android:color/white" />
                     </android.support.v7.widget.CardView>
                 </LinearLayout>
             </LinearLayout>
@@ -108,7 +108,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="16dp"
-                    android:background="#64DD17"
+                    android:background="@color/white"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:weightSum="2">
@@ -181,7 +181,7 @@
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="16dp"
-                    android:background="#01579B"
+                    android:background="@color/white"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:weightSum="2">
@@ -196,7 +196,7 @@
                         android:background="#311B92"
                         android:gravity="center"
                         android:text="Right Back At Ya!"
-                        android:textColor="@android:color/black"
+                        android:textColor="@android:color/white"
                         android:textSize="20dp" />
 
                     <TextView
@@ -246,13 +246,13 @@
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:background="#4A148C">
+                android:background="#4A1451">
 
                 <LinearLayout
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:layout_margin="16dp"
-                    android:background="#CE93D8"
+                    android:background="@color/white"
                     android:gravity="center"
                     android:orientation="vertical"
                     android:weightSum="2">
@@ -267,7 +267,7 @@
                         android:background="#4A148C"
                         android:gravity="center"
                         android:text="Unlock a clue"
-                        android:textColor="@android:color/black"
+                        android:textColor="@android:color/white"
                         android:textSize="20dp" />
 
                     <TextView
