@@ -26,6 +26,7 @@ import com.techrace.spit.techrace2018.LeaderboardActivity;
 
 import static com.techrace.spit.techrace2018.HomeFragment.UID;
 
+import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.MainActivity.points;
 
 
@@ -91,47 +92,51 @@ public class PowerCardsFragment extends Fragment {
         unlockClue.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (sharedPreferences.getString("Clue 12", "abc").equals("abc")) {
-                        if (MainActivity.points >= AppConstants.unlockACluePrice) {
-                            AlertDialog.Builder alert = new AlertDialog.Builder(getActivity())
-                                    .setCancelable(false)
-                                    .setMessage("Do you want to unlock a clue?")
-                                    .setTitle("Are you sure?")
-                                    .setNegativeButton("No", null)
-                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                        @Override
-                                        public void onClick(DialogInterface dialog, int which) {
-                                            DatabaseReference unlockClueRef = FirebaseDatabase.getInstance().getReference().child("Route " + MainActivity.routeNo).child("Location 12").child("Clue");
-                                            unlockClueRef.addListenerForSingleValueEvent(new ValueEventListener() {
-                                                @Override
-                                                public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                    String s = dataSnapshot.getValue(String.class);
-                                                    DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                                                    powerReference1.child("Users").child(UID).child("points")
-                                                            .setValue(MainActivity.points - AppConstants.unlockACluePrice);
-                                                    SharedPreferences share = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
-                                                    SharedPreferences.Editor edit = share.edit();
-                                                    edit.putString("Clue 12", s).apply();
-                                                    unlockClue.setClickable(false);
-                                                    Log.i("Clue 12", s);
-                                                    Toast.makeText(getActivity(), "Unlocked", Toast.LENGTH_LONG).show();
-                                                }
+                    if (level >= 7 && level <= 12){
+                        if (sharedPreferences.getString("Clue 12", "abc").equals("abc")) {
+                            if (MainActivity.points >= AppConstants.unlockACluePrice) {
+                                AlertDialog.Builder alert = new AlertDialog.Builder(getActivity())
+                                        .setCancelable(false)
+                                        .setMessage("Do you want to unlock a clue?")
+                                        .setTitle("Are you sure?")
+                                        .setNegativeButton("No", null)
+                                        .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                            @Override
+                                            public void onClick(DialogInterface dialog, int which) {
+                                                DatabaseReference unlockClueRef = FirebaseDatabase.getInstance().getReference().child("Route " + MainActivity.routeNo).child("Location 12").child("Clue");
+                                                unlockClueRef.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                    @Override
+                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                        String s = dataSnapshot.getValue(String.class);
+                                                        DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                                        powerReference1.child("Users").child(UID).child("points")
+                                                                .setValue(MainActivity.points - AppConstants.unlockACluePrice);
+                                                        SharedPreferences share = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
+                                                        SharedPreferences.Editor edit = share.edit();
+                                                        edit.putString("Clue 12", s).apply();
+                                                        unlockClue.setClickable(false);
+                                                        Log.i("Clue 12", s);
+                                                        Toast.makeText(getActivity(), "Unlocked", Toast.LENGTH_LONG).show();
+                                                    }
 
-                                                @Override
-                                                public void onCancelled(@NonNull DatabaseError databaseError) {
+                                                    @Override
+                                                    public void onCancelled(@NonNull DatabaseError databaseError) {
 
-                                                }
-                                            });
-                                        }
-                                    });
-                            alert.show();
+                                                    }
+                                                });
+                                            }
+                                        });
+                                alert.show();
 
 
+                            } else {
+                                Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
+                            }
                         } else {
-                            Toast.makeText(getActivity(), "Not Enough Points", Toast.LENGTH_SHORT).show();
+                            Toast.makeText(getActivity(), "Already Unlocked", Toast.LENGTH_SHORT).show();
                         }
-                    } else {
-                        Toast.makeText(getActivity(), "Already Unlocked", Toast.LENGTH_SHORT).show();
+                    }else{
+                        Toast.makeText(getActivity(), "Unavailable Now", Toast.LENGTH_SHORT).show();
                     }
                 }
             });

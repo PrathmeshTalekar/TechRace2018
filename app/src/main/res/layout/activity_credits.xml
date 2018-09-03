@@ -216,7 +216,73 @@
 
 
         </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clickable="true"
+            android:foreground="?android:attr/selectableItemBackground"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="8dp"
+            android:layout_marginBottom="8dp">
 
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical">
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:background="#413c43"
+                    android:orientation="vertical"
+                    android:paddingTop="16dp">
+
+                    <TextView
+                        style="@style/TextAppearance.AppCompat.Medium"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:text="Sahil Sheth"
+                        android:textColor="@color/white" />
+
+                    <TextView
+                        style="@style/TextAppearance.AppCompat.Small"
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:paddingLeft="16dp"
+                        android:paddingRight="16dp"
+                        android:textColor="@color/white"
+                        android:text="Marketing and Creative Head" />
+
+                    <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content">
+
+                        <Button
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:layout_width="0px"
+                            android:layout_height="54dp"
+                            android:layout_weight="1"
+                            android:onClick="onClick"
+                            android:tag="https://www.facebook.com/sahil.sheth.353?fb_dtsg_ag=AdyVbJ4nZ_hb9ElepvhSdZBicExAngBxOGPqUvXmpJE6oQ%3AAdyvGshBZHo8vqLbaQYs3VMg2UaPSsFjH1y-VuI8dwuZjw"
+                            android:text="Facebook" />
+
+                        <Button
+                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
+                            android:layout_width="0px"
+                            android:layout_height="54dp"
+                            android:layout_weight="1"
+                            android:onClick="onClick"
+                            android:tag="https://www.instagram.com/_sahilsheth23_/"
+                            android:text="Instagram" />
+
+                    </LinearLayout>
+                </LinearLayout>
+            </LinearLayout>
+
+
+        </android.support.v7.widget.CardView>
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -285,73 +351,7 @@
 
         </android.support.v7.widget.CardView>
 
-        <android.support.v7.widget.CardView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:clickable="true"
-            android:foreground="?android:attr/selectableItemBackground"
-            app:cardCornerRadius="5dp"
-            app:cardElevation="8dp"
-            android:layout_marginBottom="8dp">
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:background="#413c43"
-                    android:orientation="vertical"
-                    android:paddingTop="16dp">
-
-                    <TextView
-                        style="@style/TextAppearance.AppCompat.Medium"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:text="Sahil Sheth"
-                        android:textColor="@color/white" />
-
-                    <TextView
-                        style="@style/TextAppearance.AppCompat.Small"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:paddingLeft="16dp"
-                        android:paddingRight="16dp"
-                        android:textColor="@color/white"
-                        android:text="Marketing Head" />
-
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content">
-
-                        <Button
-                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                            android:layout_width="0px"
-                            android:layout_height="54dp"
-                            android:layout_weight="1"
-                            android:onClick="onClick"
-                            android:tag="https://www.facebook.com/sahil.sheth.353?fb_dtsg_ag=AdyVbJ4nZ_hb9ElepvhSdZBicExAngBxOGPqUvXmpJE6oQ%3AAdyvGshBZHo8vqLbaQYs3VMg2UaPSsFjH1y-VuI8dwuZjw"
-                            android:text="Facebook" />
-
-                        <Button
-                            style="@style/Base.Widget.AppCompat.Button.Borderless.Colored"
-                            android:layout_width="0px"
-                            android:layout_height="54dp"
-                            android:layout_weight="1"
-                            android:onClick="onClick"
-                            android:tag="https://www.instagram.com/_sahilsheth23_/"
-                            android:text="Instagram" />
-
-                    </LinearLayout>
-                </LinearLayout>
-            </LinearLayout>
-
-
-        </android.support.v7.widget.CardView>
 
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
