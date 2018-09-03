@@ -92,7 +92,7 @@ import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
 
 
 public class MainActivity extends AppCompatActivity
-        implements NavigationView.OnNavigationItemSelectedListener, BeaconConsumer {
+        implements NavigationView.OnNavigationItemSelectedListener, BeaconConsumer, LocationAssistant.Listener {
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     static FirebaseAuth mAuth;
     static int cooldown, maxWait, routeNo;
@@ -115,6 +115,7 @@ public class MainActivity extends AppCompatActivity
     static Menu globalMenu;
     int lvl;
     AlertDialog reverseDialog;
+    LocationAssistant assistant;
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
         globalMenu = menu;
@@ -142,7 +143,7 @@ public class MainActivity extends AppCompatActivity
             textView.setPadding(0, 0, 0, 16);
 
             Button button = new Button(this);
-            button.setBackgroundColor(Color.parseColor("#88000000"));
+            button.setBackgroundColor(Color.parseColor("#333333"));
             button.setText(R.string.scan_manual);
             button.setTextColor(getResources().getColor(R.color.colorAccent));
             button.setOnClickListener(new View.OnClickListener() {
@@ -160,7 +161,7 @@ public class MainActivity extends AppCompatActivity
                     final EditText codeText = new EditText(MainActivity.this);
                     codeText.setTransformationMethod(PasswordTransformationMethod.getInstance());
                     Button button = new Button(MainActivity.this);
-                    button.setBackgroundColor(Color.parseColor("#88000000"));
+                    button.setBackgroundColor(Color.parseColor("#333333"));
                     button.setText(R.string.action_confirm);
                     button.setTextColor(getResources().getColor(R.color.colorAccent));
                     button.setOnClickListener(new View.OnClickListener() {
@@ -170,6 +171,7 @@ public class MainActivity extends AppCompatActivity
                             checkManualPassword(input);
                             codeText.setText("");
                             bottomSheet.dismiss();
+                            bottomSheet.cancel();
                         }
                     });
 
@@ -240,7 +242,7 @@ public class MainActivity extends AppCompatActivity
         routeNo = pref.getInt("Route", 1);
         ConnectivityManager conMan = (ConnectivityManager) MainActivity.this.getSystemService(Context.CONNECTIVITY_SERVICE);
         mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
-
+        assistant = new LocationAssistant(this, this, LocationAssistant.Accuracy.HIGH, 5000, false);
         //wifi
         wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
         levelListener = new ValueEventListener() {
@@ -419,8 +421,9 @@ public class MainActivity extends AppCompatActivity
 //
                                 if (reverseDialog != null) {
                                     if (!reverseDialog.isShowing()) {
-
-                                        reverseDialog.show();
+                                        if (!((Activity) MainActivity.this).isFinishing()) {
+                                            reverseDialog.show();
+                                        }
                                     }
                                 } else {
                                     reverseDialog = reverseAlertDialog.create();
@@ -772,9 +775,11 @@ public class MainActivity extends AppCompatActivity
         }
 
     }
+
     @Override
     public void onResume() {
         super.onResume();
+        assistant.start();
         Log.i("Resume", "RESUMED");
         if (mAuth.getCurrentUser() != null) {
             UID = mAuth.getCurrentUser().getUid();
@@ -815,7 +820,7 @@ public class MainActivity extends AppCompatActivity
                 dialog.show();
             }
             locationTracker = new LocationTracker("my.action")
-                    .setInterval(5000)
+                    .setInterval(10000)
                     .setGps(true)
                     .setNetWork(false);
             locationTracker.currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
@@ -872,6 +877,8 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onPause() {
         super.onPause();
+        assistant.stop();
+        locationTracker.stopLocationService(getBaseContext());
         //  UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").removeEventListener(levelListener);
         // UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").removeEventListener(pointsListener);
         if (UserDatabaseReference != null && mAuth.getCurrentUser() != null) {
@@ -1000,7 +1007,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onDestroy() {
-        locationTracker.stopLocationService(getBaseContext());
+        //locationTracker.stopLocationService(getBaseContext());
         super.onDestroy();
         if (beaconManager != null) {
             if (beaconManager.isBound(MainActivity.this)) {
@@ -1340,6 +1347,47 @@ public class MainActivity extends AppCompatActivity
             beaconManager.startRangingBeaconsInRegion(new Region("myRangingUniqueId1", null, null, null));
         } catch (RemoteException e) {
         }
+    }
+
+    @Override
+    public void onNeedLocationPermission() {
+
+    }
+
+    @Override
+    public void onExplainLocationPermission() {
+
+    }
+
+    @Override
+    public void onLocationPermissionPermanentlyDeclined(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    @Override
+    public void onNeedLocationSettingsChange() {
+
+    }
+
+    @Override
+    public void onFallBackToSystemSettings(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    @Override
+    public void onNewLocationAvailable(Location location) {
+
+    }
+
+    @Override
+    public void onMockLocationsDetected(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+        Toast.makeText(MainActivity.this, "Stop Mocking Location", Toast.LENGTH_LONG).show();
+        //finishAffinity();
+    }
+
+    @Override
+    public void onError(LocationAssistant.ErrorType type, String message) {
+
     }
 //    void chooseRoute(){
 //        SharedPreferences preferences=getSharedPreferences(AppConstants.techRacePref,MODE_PRIVATE);

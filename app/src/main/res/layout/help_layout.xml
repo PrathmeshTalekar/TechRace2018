@@ -154,9 +154,8 @@
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:autoLink="phone"
                     android:gravity="center"
-                    android:text="@string/app_helpline_1"
+                    android:text="@string/app_helpline_2"
                     android:textColor="@android:color/white" />
-
                 <TextView
                     style="@style/TextAppearance.AppCompat.Medium"
                     android:layout_width="match_parent"
@@ -164,8 +163,10 @@
                     android:layout_marginTop="@dimen/activity_vertical_margin"
                     android:autoLink="phone"
                     android:gravity="center"
-                    android:text="@string/app_helpline_2"
+                    android:text="@string/app_helpline_1"
                     android:textColor="@android:color/white" />
+
+
             </LinearLayout>
         </android.support.v7.widget.CardView>
     </LinearLayout>

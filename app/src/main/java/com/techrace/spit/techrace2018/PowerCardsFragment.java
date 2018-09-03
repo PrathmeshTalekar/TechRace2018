@@ -92,7 +92,7 @@ public class PowerCardsFragment extends Fragment {
         unlockClue.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    if (level >= 7 && level <= 12){
+                    if (level >= 7 && level <= 11) {
                         if (sharedPreferences.getString("Clue 12", "abc").equals("abc")) {
                             if (MainActivity.points >= AppConstants.unlockACluePrice) {
                                 AlertDialog.Builder alert = new AlertDialog.Builder(getActivity())
