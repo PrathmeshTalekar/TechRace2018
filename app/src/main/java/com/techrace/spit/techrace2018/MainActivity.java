@@ -17,6 +17,7 @@ import android.content.res.Resources;
 import android.graphics.Color;
 
 import android.location.Location;
+import android.location.LocationManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
 
@@ -25,6 +26,7 @@ import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.design.widget.BottomSheetDialog;
 import android.support.v4.app.Fragment;
@@ -791,6 +793,23 @@ public class MainActivity extends AppCompatActivity
 
 
         try {
+            LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            boolean networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            if (!gpsEnabled || !networkEnabled) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                dialog.setMessage("Turn on Location").setCancelable(false);
+                dialog.setPositiveButton("Turn On", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+
+                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(myIntent);
+                        //get gps
+                    }
+                });
+                dialog.show();
+            }
             locationTracker = new LocationTracker("my.action")
                     .setInterval(5000)
                     .setGps(true)
@@ -804,7 +823,7 @@ public class MainActivity extends AppCompatActivity
 
                     // Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
 
-                    if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
+                    //     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
                         if (!timerOn && !event) {
                             if (distanceinmetres <= 250) {
                                 BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
@@ -830,7 +849,7 @@ public class MainActivity extends AppCompatActivity
 
                             }
                         }
-                    }
+                    //  }
 
                 }
 
