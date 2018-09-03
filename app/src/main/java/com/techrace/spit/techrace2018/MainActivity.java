@@ -2,6 +2,7 @@ package com.techrace.spit.techrace2018;
 
 import android.Manifest;
 import android.annotation.TargetApi;
+import android.app.Activity;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
@@ -423,7 +424,10 @@ public class MainActivity extends AppCompatActivity
                                     }
                                 } else {
                                     reverseDialog = reverseAlertDialog.create();
-                                    reverseDialog.show();
+                                    if (!((Activity) MainActivity.this).isFinishing()) {
+                                        reverseDialog.show();
+
+                                    }
                                 }
                             }
                         });

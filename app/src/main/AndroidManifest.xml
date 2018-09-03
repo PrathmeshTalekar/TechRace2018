@@ -49,6 +49,7 @@
         <activity
             android:name=".LeaderboardActivity"
             android:label="Leaderboard"
+            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -69,6 +70,7 @@
         <activity
             android:name=".AboutActivity"
             android:label="About"
+            android:screenOrientation="portrait"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -76,12 +78,15 @@
         </activity>
         <activity
             android:name=".CreditsActivity"
+            android:screenOrientation="portrait"
             android:label="Credits" />
         <activity
             android:name=".SponsorsActivity"
+            android:screenOrientation="portrait"
             android:label="Sponsors" />
         <activity
             android:name=".FeedActivity"
+            android:screenOrientation="portrait"
             android:label="Feed"
             android:parentActivityName=".MainActivity">
             <meta-data
@@ -89,12 +94,6 @@
                 android:value="com.techrace.spit.techrace2018.MainActivity" />
         </activity>
 
-        <service android:name=".MyFirebaseToken">
-
-            <intent-filter>
-                <action android:name="com.google.firebase.INSTANCE_ID_EVENT" />
-            </intent-filter>
-        </service>
         <service android:name=".MyFirebaseMessaging">
             <intent-filter>
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />

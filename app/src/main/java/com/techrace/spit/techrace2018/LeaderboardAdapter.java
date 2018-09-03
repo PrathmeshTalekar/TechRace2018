@@ -98,48 +98,53 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                         powerReference.child("Users").child(MainActivity.selectUID).addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
                             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                try {
+                                    c = dataSnapshot.child("cooldown").getValue(Integer.class);
+                                    int w = dataSnapshot.child("waited").getValue(Integer.class);
+                                    Log.i("value of points", "" + MainActivity.points);
+                                    if (w < MainActivity.maxWait) {
+                                        if (c == 0) {
+                                            android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(holder.cardView.getContext());
+                                            alertDialogBuilder.setCancelable(false)
+                                                    .setTitle("Are you sure?")
+                                                    .setMessage("Apply on " + name + "?")
+                                                    .setNegativeButton("No", null)
+                                                    .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                        @Override
+                                                        public void onClick(DialogInterface dialog, int which) {
+                                                            DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
+                                                            powerReference1.child("Users").child(MainActivity.selectUID).child("cooldown").setValue(PowerCardsFragment.twoORfour);
+                                                            powerReference1.child("Leaderboard").child(selectUID).child("Cooldown").setValue(PowerCardsFragment.twoORfour);
+                                                            if (PowerCardsFragment.twoORfour == 2) {
 
-                                c = dataSnapshot.child("cooldown").getValue(Integer.class);
-                                int w = dataSnapshot.child("waited").getValue(Integer.class);
-                                Log.i("value of points", "" + MainActivity.points);
-                                if (w < MainActivity.maxWait) {
-                                    if (c == 0) {
-                                        android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(holder.cardView.getContext());
-                                        alertDialogBuilder.setCancelable(false)
-                                                .setTitle("Are you sure?")
-                                                .setMessage("Apply on " + name + "?")
-                                                .setNegativeButton("No", null)
-                                                .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
-                                                    @Override
-                                                    public void onClick(DialogInterface dialog, int which) {
-                                                        DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                                                        powerReference1.child("Users").child(MainActivity.selectUID).child("cooldown").setValue(PowerCardsFragment.twoORfour);
-                                                        powerReference1.child("Leaderboard").child(selectUID).child("Cooldown").setValue(PowerCardsFragment.twoORfour);
-                                                        if (PowerCardsFragment.twoORfour == 2) {
-
-                                                            powerReference1.child("Users").child(UID).child("points")
-                                                                    .setValue(MainActivity.points - AppConstants.plusTwoPrice);
-                                                            // MainActivity.prefEditor.putInt("Points",points).apply();
-                                                            powerReference1.child("Users").child(selectUID).child("Applied By").setValue(UID);
-                                                        } else if (PowerCardsFragment.twoORfour == 4) {
-                                                            powerReference1.child("Users").child(UID).child("points")
-                                                                    .setValue(MainActivity.points - AppConstants.plusFourPrice);
-                                                            // MainActivity.prefEditor.putInt("Points",points).apply();
+                                                                powerReference1.child("Users").child(UID).child("points")
+                                                                        .setValue(MainActivity.points - AppConstants.plusTwoPrice);
+                                                                // MainActivity.prefEditor.putInt("Points",points).apply();
+                                                                powerReference1.child("Users").child(selectUID).child("Applied By").setValue(UID);
+                                                            } else if (PowerCardsFragment.twoORfour == 4) {
+                                                                powerReference1.child("Users").child(UID).child("points")
+                                                                        .setValue(MainActivity.points - AppConstants.plusFourPrice);
+                                                                // MainActivity.prefEditor.putInt("Points",points).apply();
+                                                            }
+                                                            Toast.makeText(holder.cardView.getContext(), "Power Card Applied", Toast.LENGTH_SHORT).show();
+                                                            ((Activity) context).finish();
+                                                            selectUser = false;
+                                                            MainActivity.selectUID = null;
                                                         }
-                                                        Toast.makeText(holder.cardView.getContext(), "Power Card Applied", Toast.LENGTH_SHORT).show();
-                                                        ((Activity) context).finish();
-                                                        selectUser = false;
-                                                        MainActivity.selectUID = null;
-                                                    }
-                                                }).show();
+                                                    }).show();
+                                        } else {
+                                            Toast.makeText(holder.cardView.getContext(), "Already Applied", Toast.LENGTH_SHORT).show();
+                                        }
+
                                     } else {
-                                        Toast.makeText(holder.cardView.getContext(), "Already Applied", Toast.LENGTH_SHORT).show();
+                                        Toast.makeText(holder.cardView.getContext(), "Already Applied " + MainActivity.maxWait + " Times", Toast.LENGTH_SHORT).show();
                                     }
-
-                                } else {
-                                    Toast.makeText(holder.cardView.getContext(), "Already Applied " + MainActivity.maxWait + " Times", Toast.LENGTH_SHORT).show();
+                                } catch (Exception e) {
+                                    Toast.makeText(holder.cardView.getContext(), "Please Try Again", Toast.LENGTH_LONG).show();
+                                    ((Activity) context).finish();
+                                    selectUser = false;
+                                    MainActivity.selectUID = null;
                                 }
-
                             }
 
                             @Override
