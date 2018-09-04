@@ -21,6 +21,7 @@ public class AppConstants {
     public static final int hint1Price = 0;
     public static final int hint2Price = 10;
     public static final int hint3Price = 20;
+    public static final int jackpotPrice = 50;
 
 //    public static final int loc1level1 = 5;
 //    public static final int loc1level2 = 5;

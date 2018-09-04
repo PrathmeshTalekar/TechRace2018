@@ -111,10 +111,11 @@ public class MainActivity extends AppCompatActivity
     String appliedBy = null;
     LocationTracker locationTracker;
     NetworkInfo.State wifi, mobile;
-    ValueEventListener levelListener, pointsListener, cooldownListener;
+    static boolean jackpotRunning = false;
     static Menu globalMenu;
     int lvl;
-    AlertDialog reverseDialog;
+    ValueEventListener levelListener, pointsListener, cooldownListener, jackpotListener;
+    AlertDialog reverseDialog, jpAlert;
     LocationAssistant assistant;
     @Override
     public boolean onPrepareOptionsMenu(Menu menu) {
@@ -460,6 +461,80 @@ public class MainActivity extends AppCompatActivity
 
             }
         };
+        jackpotListener = new ValueEventListener() {
+            @Override
+            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                try {
+
+                    int jp = dataSnapshot.getValue(Integer.class);
+                    Log.i("IN JP CHANGE", "" + jp);
+                    if (jp == 1) {
+                        FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("jackpot").addListenerForSingleValueEvent(new ValueEventListener() {
+                            @Override
+                            public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                boolean b = dataSnapshot.getValue(Boolean.class);
+                                if (!b) {
+                                    AlertDialog.Builder jackpotAlertDialog = new AlertDialog.Builder(MainActivity.this)
+                                            .setCancelable(false)
+                                            .setMessage("Do you want to play the JACKPOT question?")
+                                            .setTitle("Jackpot Available")
+                                            .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("points").setValue(points - AppConstants.jackpotPrice);
+
+                                                    Intent intent = new Intent(MainActivity.this, JackpotActivity.class);
+                                                    startActivity(intent);
+                                                    FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("jackpot").setValue(true);
+                                                }
+                                            })
+                                            .setNegativeButton("No", new DialogInterface.OnClickListener() {
+                                                @Override
+                                                public void onClick(DialogInterface dialog, int which) {
+                                                    FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("jackpot").setValue(true);
+                                                }
+                                            });
+                                    if (jpAlert != null) {
+                                        if (!jpAlert.isShowing()) {
+                                            if (!((Activity) MainActivity.this).isFinishing()) {
+                                                jpAlert.show();
+                                            }
+                                        }
+                                    } else {
+                                        jpAlert = jackpotAlertDialog.create();
+                                        if (!((Activity) MainActivity.this).isFinishing()) {
+                                            jpAlert.show();
+
+                                        }
+                                    }
+//                                    jpAlert=jackpotAlertDialog.create();
+//                                    jpAlert.show();
+                                }
+                            }
+
+                            @Override
+                            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                            }
+                        });
+
+                    } else {
+                        if (jackpotRunning) {
+                            Log.i("IN jp running", "" + jp);
+
+                            JackpotActivity.jackpot.finish();
+                        }
+
+                    }
+                } catch (Exception e) {
+                }
+            }
+
+            @Override
+            public void onCancelled(@NonNull DatabaseError databaseError) {
+
+            }
+        };
         // Log.i("MAUTH",mAuth.getCurrentUser().getDisplayName());
         if (mAuth.getCurrentUser() == null) {
 
@@ -471,7 +546,7 @@ public class MainActivity extends AppCompatActivity
             pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
 
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-//            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
+
 //            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
 
         }
@@ -527,9 +602,9 @@ public class MainActivity extends AppCompatActivity
                     timerOn = false;
                     MainActivity.beacon = true;
                     UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                    prefEditor = pref.edit();
-                    prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
                     lvlManual = level;
+                    prefEditor = pref.edit();
+                    prefEditor.putString(AppConstants.clueLevelPref + lvlManual, levelString).apply();
                     UserDatabaseReference.child("Users").child(UID).child("points").setValue(points + 5);
                     UserDatabaseReference.child("Users").child(UID).child("Time " + String.valueOf(lvlManual)).setValue(ServerValue.TIMESTAMP).addOnCompleteListener(new OnCompleteListener<Void>() {
                         @Override
@@ -782,6 +857,7 @@ public class MainActivity extends AppCompatActivity
         assistant.start();
         Log.i("Resume", "RESUMED");
         if (mAuth.getCurrentUser() != null) {
+
             UID = mAuth.getCurrentUser().getUid();
             pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
             points = pref.getInt(AppConstants.pointsPref, 0);
@@ -794,8 +870,10 @@ public class MainActivity extends AppCompatActivity
                 UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
                 prefEditor = pref.edit();
             }
+
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
+            UserDatabaseReference.child("Jackpot").child("Start").addValueEventListener(jackpotListener);
         }
 
 
@@ -887,9 +965,13 @@ public class MainActivity extends AppCompatActivity
                 prefEditor = pref.edit();
                 prefEditor.putBoolean("CoolAttached", false).commit();
             }
+
         }
         if (reverseDialog != null && reverseDialog.isShowing()) {
             reverseDialog.cancel();
+        }
+        if (jpAlert != null && jpAlert.isShowing()) {
+            jpAlert.cancel();
         }
     }
 
@@ -1020,6 +1102,11 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        UserDatabaseReference.child("Jackpot").removeEventListener(jackpotListener);
+    }
 
     @Override
     public void onBeaconServiceConnect() {

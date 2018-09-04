@@ -3,6 +3,7 @@ package com.techrace.spit.techrace2018;
 public class User {
     public String name, password, email, contact;
     public int level, cooldown, points, hintsLeft, waited;
+    public boolean jackpot;
     public User() {
         // Default constructor required for calls to DataSnapshot.getValue(User.class)
     }
@@ -17,6 +18,7 @@ public class User {
         this.contact = contact;
         this.hintsLeft = 3;
         this.waited = 0;
+        this.jackpot = false;
     }
 
 }
