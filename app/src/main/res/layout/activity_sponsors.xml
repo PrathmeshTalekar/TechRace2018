@@ -76,24 +76,25 @@
 
             </LinearLayout>
         </android.support.v7.widget.CardView>
-        <!--<android.support.v7.widget.CardView-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:layout_margin="8dp"-->
-        <!--app:cardCornerRadius="5dp"-->
-        <!--app:cardElevation="8dp">-->
 
-        <!--<LinearLayout-->
-        <!--android:layout_width="match_parent"-->
-        <!--android:layout_height="wrap_content"-->
-        <!--android:background="@color/cardBackground"-->
-        <!--android:orientation="vertical">-->
+        <android.support.v7.widget.CardView
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_margin="8dp"
+            app:cardCornerRadius="5dp"
+            app:cardElevation="8dp">
 
-        <!--<ImageView-->
-        <!--android:layout_width="150dp"-->
-        <!--android:layout_height="150dp"-->
-        <!--android:layout_gravity="center_horizontal"-->
-        <!--android:src="@drawable/navrang_logo" />-->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:background="@color/cardBackground"
+                android:orientation="vertical">
+
+                <ImageView
+                    android:layout_width="150dp"
+                    android:layout_height="150dp"
+                    android:layout_gravity="center_horizontal"
+                    android:src="@drawable/navlogo" />
         <!--<TextView-->
         <!--android:layout_width="match_parent"-->
         <!--android:layout_height="wrap_content"-->
@@ -104,8 +105,8 @@
         <!--android:textColor="@android:color/black"-->
         <!--android:textSize="20sp" />-->
 
-        <!--</LinearLayout>-->
-        <!--</android.support.v7.widget.CardView>-->
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
         <android.support.v7.widget.CardView
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

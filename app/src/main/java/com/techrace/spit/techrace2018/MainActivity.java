@@ -250,6 +250,7 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                 level = dataSnapshot.getValue(Integer.class);
+                Log.i("LEVEL", "" + level);
                 if (level != pref.getInt("Level", -1)) {
                     HomeFragment.hintView.setVisibility(View.INVISIBLE);
                     prefEditor = pref.edit();
@@ -258,59 +259,8 @@ public class MainActivity extends AppCompatActivity
                     prefEditor.putInt(AppConstants.levelPref, level).apply();
 
                 }
-                if (level == 7) {
 
-                    DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 7").child("Count");
-                    db.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            int cnt = dataSnapshot.getValue(Integer.class);
-                            FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 7").child("Count").setValue(cnt + 1);
-                            if (routeNo == 1) {
-                                FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 7").child("Count").setValue(cnt + 1);
-                            } else {
-                                FirebaseDatabase.getInstance().getReference().child("Route 1").child("Location 7").child("Count").setValue(cnt + 1);
-                            }
-                        }
 
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-                }
-                if (level == 11) {
-                    Log.i("In", "11");
-                    DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid()).child("waited");
-                    databaseReference.setValue(0);
-                    DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 11").child("Count");
-                    db.addListenerForSingleValueEvent(new ValueEventListener() {
-                        @Override
-                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                            int cnt = dataSnapshot.getValue(Integer.class);
-                            FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 11").child("Count").setValue(cnt + 1);
-                            if (routeNo == 1) {
-                                FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 11").child("Count").setValue(cnt + 1);
-                            } else {
-                                FirebaseDatabase.getInstance().getReference().child("Route 1").child("Location 11").child("Count").setValue(cnt + 1);
-                            }
-                            if (cnt % 2 == 0) {
-                                routeNo = 2;
-                                prefEditor = pref.edit();
-                                prefEditor.putInt("Route", 2).apply();
-                            } else {
-                                routeNo = 1;
-                                prefEditor = pref.edit();
-                                prefEditor.putInt("Route", 1).apply();
-                            }
-                        }
-
-                        @Override
-                        public void onCancelled(@NonNull DatabaseError databaseError) {
-
-                        }
-                    });
-                }
                 if (level != 13) {
 
                     HomeFragment.imgViewHome.setVisibility(View.GONE);
@@ -490,6 +440,7 @@ public class MainActivity extends AppCompatActivity
                                                     FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("points").setValue(points - AppConstants.jackpotPrice);
 
                                                     Intent intent = new Intent(MainActivity.this, JackpotActivity.class);
+                                                    intent.putExtra("EXTRA", 56);
                                                     startActivity(intent);
                                                     FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("jackpot").setValue(true);
                                                 }
@@ -525,11 +476,15 @@ public class MainActivity extends AppCompatActivity
                         });
 
                     } else {
+                        if (jpAlert != null && jpAlert.isShowing()) {
+                            jpAlert.cancel();
+                        }
                         if (jackpotRunning) {
                             Log.i("IN jp running", "" + jp);
 
                             JackpotActivity.jackpot.finish();
                         }
+
 
                     }
                 } catch (Exception e) {
@@ -776,7 +731,7 @@ public class MainActivity extends AppCompatActivity
                     } else if (lvlManual == 9) {
                         addPointsManual = -4;
                     } else if (lvlManual == 13) {
-                        addPointsManual = 5;
+                        addPointsManual = -5;
                     } else {
                         addPointsManual = 0;
                     }
@@ -880,6 +835,8 @@ public class MainActivity extends AppCompatActivity
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
             UserDatabaseReference.child("Jackpot").child("Start").addValueEventListener(jackpotListener);
+            prefEditor = pref.edit();
+            prefEditor.putBoolean("JacpotAttached", true).apply();
             if (pref.getInt(AppConstants.levelPref, -1) == 13) {
                 if (pref.getInt("Route", routeNo) == 1) {
                     HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_1crop);
@@ -924,31 +881,31 @@ public class MainActivity extends AppCompatActivity
                     // Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
 
                     //     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
-                        if (!timerOn && !event) {
-                            if (distanceinmetres <= 250) {
-                                BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                                if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
-                                    Toast.makeText(MainActivity.this, "Turn On Bluetooth", Toast.LENGTH_SHORT).show();
-                                }
-                                if (beacon) {
-                                    clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
-                                    beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
-                                    // To detect proprietary beacons, you must add a line like below corresponding to your beacon
-                                    // type.  Do a web search for "setBeaconLayout" to get the proper expression.
-                                    beaconManager.getBeaconParsers().add(new BeaconParser().
-                                            setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
-                                    beaconManager.bind(MainActivity.this);
-                                } else {
-                                    beaconManager.removeAllMonitorNotifiers();
-                                    beaconManager.applySettings();
-                                    beaconManager.unbind(MainActivity.this);
-                                }
-
-                            } else {
-                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
-
+                    if (!timerOn && !event) {
+                        if (distanceinmetres <= 250) {
+                            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                            if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                                Toast.makeText(MainActivity.this, "Turn On Bluetooth", Toast.LENGTH_SHORT).show();
                             }
+                            if (beacon) {
+                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
+                                beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
+                                // To detect proprietary beacons, you must add a line like below corresponding to your beacon
+                                // type.  Do a web search for "setBeaconLayout" to get the proper expression.
+                                beaconManager.getBeaconParsers().add(new BeaconParser().
+                                        setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
+                                beaconManager.bind(MainActivity.this);
+                            } else {
+                                beaconManager.removeAllMonitorNotifiers();
+                                beaconManager.applySettings();
+                                beaconManager.unbind(MainActivity.this);
+                            }
+
+                        } else {
+                            clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
+
                         }
+                    }
                     //  }
 
                 }
@@ -1118,7 +1075,11 @@ public class MainActivity extends AppCompatActivity
     @Override
     protected void onStop() {
         super.onStop();
-        UserDatabaseReference.child("Jackpot").removeEventListener(jackpotListener);
+        if (pref.getBoolean("JacpotAttached", false)) {
+            UserDatabaseReference.child("Jackpot").removeEventListener(jackpotListener);
+            prefEditor = pref.edit();
+            prefEditor.putBoolean("JacpotAttached", false).apply();
+        }
     }
 
     @Override
@@ -1272,6 +1233,62 @@ public class MainActivity extends AppCompatActivity
                                                                if (cooldown == 0) {
 
 
+                                                                   if (level == 7) {
+
+                                                                       DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 7").child("Count");
+                                                                       db.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                           @Override
+                                                                           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                               int cnt = dataSnapshot.getValue(Integer.class);
+                                                                               FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 7").child("Count").setValue(cnt + 1);
+                                                                               if (routeNo == 1) {
+                                                                                   FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 7").child("Count").setValue(cnt + 1);
+                                                                               } else {
+                                                                                   FirebaseDatabase.getInstance().getReference().child("Route 1").child("Location 7").child("Count").setValue(cnt + 1);
+                                                                               }
+                                                                           }
+
+                                                                           @Override
+                                                                           public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                           }
+                                                                       });
+                                                                   }
+                                                                   if (level == 11) {
+                                                                       Log.i("In", "11");
+                                                                       DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid()).child("waited");
+                                                                       databaseReference.setValue(0);
+                                                                       DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 11").child("Count");
+                                                                       db.addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                           @Override
+                                                                           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                               int cnt = dataSnapshot.getValue(Integer.class);
+                                                                               FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 11").child("Count").setValue(cnt + 1);
+                                                                               if (routeNo == 1) {
+                                                                                   FirebaseDatabase.getInstance().getReference().child("Route 2").child("Location 11").child("Count").setValue(cnt + 1);
+                                                                               } else {
+                                                                                   FirebaseDatabase.getInstance().getReference().child("Route 1").child("Location 11").child("Count").setValue(cnt + 1);
+                                                                               }
+                                                                               if (cnt % 2 == 0) {
+                                                                                   routeNo = 2;
+                                                                                   prefEditor = pref.edit();
+                                                                                   prefEditor.putInt("Route", 2).apply();
+
+                                                                               } else {
+                                                                                   routeNo = 1;
+                                                                                   prefEditor = pref.edit();
+                                                                                   prefEditor.putInt("Route", 1).apply();
+                                                                               }
+                                                                               FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("new route").setValue(routeNo);
+                                                                               Log.i("New route", "" + pref.getInt("Route", 1));
+                                                                           }
+
+                                                                           @Override
+                                                                           public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                           }
+                                                                       });
+                                                                   }
                                                                    prefEditor = pref.edit();
                                                                    prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
                                                                    UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
@@ -1490,18 +1507,5 @@ public class MainActivity extends AppCompatActivity
     public void onError(LocationAssistant.ErrorType type, String message) {
 
     }
-//    void chooseRoute(){
-//        SharedPreferences preferences=getSharedPreferences(AppConstants.techRacePref,MODE_PRIVATE);
-//        SharedPreferences.Editor editor=preferences.edit();
-//        String name1=preferences.getString("NAME","999");
-//        int a1=(int) name1.charAt(0);
-//        int a2=(int)name1.charAt(1);
-//        int a3=(int)name1.charAt(2);
-//        if(a3%2==0){
-//            editor.putInt("Route",2).apply();
-//        }
-//        else{
-//            editor.putInt("Route",1).apply();
-//        }
-//    }
+
 }

@@ -107,7 +107,7 @@ public class SignUpActivity extends AppCompatActivity {
                                                             editor.putInt("Route", 1).apply();
                                                             MainActivity.routeNo = 1;
                                                         }
-                                                        User user = new User(name, password, email, contact);
+                                                        User user = new User(name, password, email, contact, sharedPreferences.getInt("Route", 1));
                                                         FirebaseDatabase.getInstance().getReference("Users")
                                                                 .child(mAuth.getCurrentUser().getUid()).setValue(user).addOnCompleteListener(new OnCompleteListener<Void>() {
                                                             @Override

@@ -40,6 +40,10 @@ public class JackpotActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_jackpot);
         jackpot = this;
+        Intent i = getIntent();
+        if (i.getIntExtra("EXTRA", -99) != 56) {
+            finish();
+        }
         jackpotRunning = true;
         questionTextView = findViewById(R.id.questionTextView);
         answerEditText = findViewById(R.id.answerEditText);

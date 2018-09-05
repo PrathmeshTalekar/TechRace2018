@@ -58,10 +58,10 @@ public class NotificationReceiver extends BroadcastReceiver {
 //            new HomeFragment().updateClue();
 //            MainActivity.manualPass = false;
 //        } else {
-            Date d = new Date();
-            long l = d.getTime();
-            MainActivity.beacon = true;
-            timerOn = false;
+        Date d = new Date();
+        long l = d.getTime();
+        MainActivity.beacon = true;
+        timerOn = false;
 //        }
 
         // UserDatabaseReference.child("Users").child(UID).child("Time" + String.valueOf(level)).setValue(l);

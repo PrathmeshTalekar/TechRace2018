@@ -113,7 +113,7 @@ public class HomeFragment extends Fragment {
 
         firebaseDatabase = FirebaseDatabase.getInstance();
         routeNo = pref.getInt("Route", 1);
-        if (homeFragAuth.getCurrentUser() != null) {
+        if (homeFragAuth != null && homeFragAuth.getCurrentUser() != null) {
 
 
             UID = homeFragAuth.getCurrentUser().getUid();
