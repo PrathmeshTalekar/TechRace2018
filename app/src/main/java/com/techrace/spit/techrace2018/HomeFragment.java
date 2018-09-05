@@ -41,6 +41,7 @@ import android.view.ViewGroup;
 
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
@@ -99,7 +100,7 @@ public class HomeFragment extends Fragment {
     static Button hintButton;
     int hintsLeft;
     long lastClickTime;
-    ;
+    static ImageView imgViewHome;
     static CardView hintView, noteView;
     @Override
     public void onStop() {
@@ -197,6 +198,8 @@ public class HomeFragment extends Fragment {
         hintTextView = myView.findViewById(R.id.hintTextView);
         hintView = myView.findViewById(R.id.hint_view);
         noteView = myView.findViewById(R.id.noteView);
+        imgViewHome = myView.findViewById(R.id.imgViewHome);
+
         if (!pref.getString("Hint", "").equals("")) {
             hintTextView.setText(pref.getString("Hint", ""));
         } else {

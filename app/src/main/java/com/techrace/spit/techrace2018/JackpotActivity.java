@@ -95,11 +95,11 @@ public class JackpotActivity extends AppCompatActivity {
             @Override
             public void onClick(View v) {
                 answer = answerEditText.getText().toString().trim();
-                if (!answer.equals("")) {
+                if (!answer.equals("") || !(answer == null)) {
                     AlertDialog.Builder submitBuilder = new AlertDialog.Builder(JackpotActivity.this)
                             .setCancelable(false)
-                            .setMessage("Are you sure you want to submit?")
                             .setTitle("Are you sure?")
+                            .setMessage("Are you sure you want to submit?")
                             .setPositiveButton("Yes", new DialogInterface.OnClickListener() {
                                 @Override
                                 public void onClick(DialogInterface dialog, int which) {
@@ -125,6 +125,7 @@ public class JackpotActivity extends AppCompatActivity {
 
                                         @Override
                                         public void onCancelled(@NonNull DatabaseError databaseError) {
+
 
                                         }
                                     });

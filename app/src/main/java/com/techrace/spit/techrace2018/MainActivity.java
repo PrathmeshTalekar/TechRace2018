@@ -311,6 +311,12 @@ public class MainActivity extends AppCompatActivity
                         }
                     });
                 }
+                if (level != 13) {
+
+                    HomeFragment.imgViewHome.setVisibility(View.GONE);
+
+                }
+
             }
 
             @Override
@@ -874,6 +880,13 @@ public class MainActivity extends AppCompatActivity
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
             UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
             UserDatabaseReference.child("Jackpot").child("Start").addValueEventListener(jackpotListener);
+            if (pref.getInt(AppConstants.levelPref, -1) == 13) {
+                if (pref.getInt("Route", routeNo) == 1) {
+                    HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_1crop);
+                } else {
+                    HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_2crop);
+                }
+            }
         }
 
 
@@ -1216,8 +1229,9 @@ public class MainActivity extends AppCompatActivity
 
                                                                        AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
 
+
                                                                        alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-                                                                               + (cooldown * 59000), pendingIntentforAlarm);
+                                                                               + (cooldown * 60000), pendingIntentforAlarm);
 
                                                                        Log.i("cool", "" + cooldown);
 
