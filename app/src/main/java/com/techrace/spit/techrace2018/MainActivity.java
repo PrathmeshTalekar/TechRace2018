@@ -3,15 +3,18 @@ package com.techrace.spit.techrace2018;
 import android.Manifest;
 import android.annotation.TargetApi;
 import android.app.Activity;
+import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.bluetooth.BluetoothAdapter;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
@@ -24,6 +27,7 @@ import android.net.NetworkInfo;
 
 import android.os.Build;
 import android.os.Bundle;
+import android.os.Handler;
 import android.os.RemoteException;
 import android.os.VibrationEffect;
 import android.os.Vibrator;
@@ -59,6 +63,8 @@ import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ServerValue;
 import com.google.firebase.database.ValueEventListener;
+import com.techrace.spit.techrace2018.service.Constants;
+import com.techrace.spit.techrace2018.service.TimerService;
 
 import org.altbeacon.beacon.Beacon;
 import org.altbeacon.beacon.BeaconConsumer;
@@ -89,13 +95,15 @@ import static com.techrace.spit.techrace2018.HomeFragment.hintButton;
 import static com.techrace.spit.techrace2018.HomeFragment.level;
 import static com.techrace.spit.techrace2018.HomeFragment.levelString;
 import static com.techrace.spit.techrace2018.HomeFragment.timerTextView;
+import static com.techrace.spit.techrace2018.HomeFragment.clockView;
 
 
 public class MainActivity extends AppCompatActivity
         implements NavigationView.OnNavigationItemSelectedListener, BeaconConsumer, LocationAssistant.Listener {
     private static final int PERMISSION_REQUEST_COARSE_LOCATION = 1;
     static FirebaseAuth mAuth;
-    static int cooldown, maxWait, routeNo;
+    public static int cooldown;
+    static int maxWait, routeNo;
     public static Resources resources;
     static SharedPreferences pref;
     static SharedPreferences.Editor prefEditor;
@@ -103,6 +111,9 @@ public class MainActivity extends AppCompatActivity
     static boolean beacon = true, manualPass = false;
     static int points;
     String beaconID;
+    Intent timerService;
+    long currentTime, duration;
+
     static boolean timerOn = false, event = false;
     Beacon firstBeacon;
     static String selectUID = null;
@@ -123,6 +134,18 @@ public class MainActivity extends AppCompatActivity
         return true;
     }
 
+    private BroadcastReceiver broadcastReceiver = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            if (!updateUI(intent)) {
+                if (!updateUI(timerService)) {
+                    timerService.setAction(Constants.ACTION.STOPFOREGROUND_ACTION);
+                    startService(timerService);
+                    showTimerCompleteNotification();
+                }
+            }
+        }
+    };
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
@@ -210,6 +233,16 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    protected void onStart() {
+        super.onStart();
+        timerService = new Intent(this, TimerService.class);
+        //Register broadcast if service is already running
+        if (isMyServiceRunning(TimerService.class)) {
+            registerReceiver(broadcastReceiver, new IntentFilter(Constants.ACTION.BROADCAST_ACTION));
+        }
+    }
+
+    @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
 
@@ -245,6 +278,8 @@ public class MainActivity extends AppCompatActivity
         mobile = conMan.getNetworkInfo(ConnectivityManager.TYPE_MOBILE).getState();
         assistant = new LocationAssistant(this, this, LocationAssistant.Accuracy.HIGH, 5000, false);
         //wifi
+//        IntentFilter intentFilter=new IntentFilter(Constants.ACTION.BROADCAST_ACTION);
+//        this.registerReceiver(broadcastReceiver,intentFilter);
         wifi = conMan.getNetworkInfo(ConnectivityManager.TYPE_WIFI).getState();
         levelListener = new ValueEventListener() {
             @Override
@@ -544,6 +579,33 @@ public class MainActivity extends AppCompatActivity
 
     }
 
+    @Override
+    public void onRequestPermissionsResult(int requestCode,
+                                           String permissions[], int[] grantResults) {
+        switch (requestCode) {
+            case PERMISSION_REQUEST_COARSE_LOCATION: {
+                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
+                    Log.d("PERMISSION", "coarse location permission granted");
+                } else {
+                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
+                    builder.setTitle("Functionality limited");
+                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
+                    builder.setPositiveButton(android.R.string.ok, null);
+
+                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
+                        @Override
+                        public void onDismiss(DialogInterface dialog) {
+                        }
+                    });
+
+                    builder.show();
+                }
+
+            }
+        }
+
+    }
+
     void checkManualPassword(final String manualPassword) {
 
         DatabaseReference pass = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + String.valueOf(level)).child("passwords");
@@ -560,9 +622,23 @@ public class MainActivity extends AppCompatActivity
 
                     Toast.makeText(MainActivity.this, "Updating...", Toast.LENGTH_LONG).show();
                     // if (cooldown == 0) {
+
                     timerOn = false;
                     MainActivity.beacon = true;
                     UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                    final int levelLocal = level;
+                    FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            int c = dataSnapshot.getValue(Integer.class);
+                            FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").setValue(c + 1);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                     lvlManual = level;
                     prefEditor = pref.edit();
                     prefEditor.putString(AppConstants.clueLevelPref + lvlManual, levelString).apply();
@@ -611,6 +687,19 @@ public class MainActivity extends AppCompatActivity
                     timerOn = false;
                     MainActivity.beacon = true;
                     UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                    final int levelLocal = level;
+                    FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            int c = dataSnapshot.getValue(Integer.class);
+                            FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").setValue(c + 1);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                     prefEditor = pref.edit();
                     prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
                     lvlManual = level;
@@ -667,6 +756,19 @@ public class MainActivity extends AppCompatActivity
                     timerOn = false;
                     MainActivity.beacon = true;
                     UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                    final int levelLocal = level;
+                    FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            int c = dataSnapshot.getValue(Integer.class);
+                            FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").setValue(c + 1);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                     prefEditor = pref.edit();
                     prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
                     lvlManual = level;
@@ -723,6 +825,19 @@ public class MainActivity extends AppCompatActivity
                     timerOn = false;
                     MainActivity.beacon = true;
                     UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                    final int levelLocal = level;
+                    FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").addListenerForSingleValueEvent(new ValueEventListener() {
+                        @Override
+                        public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                            int c = dataSnapshot.getValue(Integer.class);
+                            FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").setValue(c + 1);
+                        }
+
+                        @Override
+                        public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                        }
+                    });
                     prefEditor = pref.edit();
                     prefEditor.putString(AppConstants.clueLevelPref + level, levelString).apply();
                     lvlManual = level;
@@ -784,142 +899,6 @@ public class MainActivity extends AppCompatActivity
 
             }
         });
-    }
-    @Override
-    public void onRequestPermissionsResult(int requestCode,
-                                           String permissions[], int[] grantResults) {
-        switch (requestCode) {
-            case PERMISSION_REQUEST_COARSE_LOCATION: {
-                if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d("PERMISSION", "coarse location permission granted");
-                } else {
-                    final AlertDialog.Builder builder = new AlertDialog.Builder(this);
-                    builder.setTitle("Functionality limited");
-                    builder.setMessage("Since location access has not been granted, this app will not be able to discover beacons when in the background.");
-                    builder.setPositiveButton(android.R.string.ok, null);
-
-                    builder.setOnDismissListener(new DialogInterface.OnDismissListener() {
-                        @Override
-                        public void onDismiss(DialogInterface dialog) {
-                        }
-                    });
-
-                    builder.show();
-                }
-
-            }
-        }
-
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-        assistant.start();
-        Log.i("Resume", "RESUMED");
-        if (mAuth.getCurrentUser() != null) {
-
-            UID = mAuth.getCurrentUser().getUid();
-            pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
-            points = pref.getInt(AppConstants.pointsPref, 0);
-            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-            Log.i("coolatt111", "" + pref.getBoolean("CoolAttached", false));
-            if (pref.getBoolean("CoolAttached", false) == false) {
-                Log.i("coolatt", "" + pref.getBoolean("CoolAttached", false));
-                prefEditor = pref.edit();
-                prefEditor.putBoolean("CoolAttached", true).commit();
-                UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
-                prefEditor = pref.edit();
-            }
-
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
-            UserDatabaseReference.child("Jackpot").child("Start").addValueEventListener(jackpotListener);
-            prefEditor = pref.edit();
-            prefEditor.putBoolean("JacpotAttached", true).apply();
-            if (pref.getInt(AppConstants.levelPref, -1) == 13) {
-                if (pref.getInt("Route", routeNo) == 1) {
-                    HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_1crop);
-                } else {
-                    HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_2crop);
-                }
-            }
-        }
-
-
-
-
-        try {
-            LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-            boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            boolean networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            if (!gpsEnabled || !networkEnabled) {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-                dialog.setMessage("Turn on Location").setCancelable(false);
-                dialog.setPositiveButton("Turn On", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
-
-                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(myIntent);
-                        //get gps
-                    }
-                });
-                dialog.show();
-            }
-            locationTracker = new LocationTracker("my.action")
-                    .setInterval(10000)
-                    .setGps(true)
-                    .setNetWork(false);
-            locationTracker.currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
-                @Override
-                public void onCurrentLocation(Location location) {
-                    //Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
-
-                    double distanceinmetres = clueLocation.distanceTo(location);
-
-                    // Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
-
-                    //     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
-                    if (!timerOn && !event) {
-                        if (distanceinmetres <= 250) {
-                            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                            if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
-                                Toast.makeText(MainActivity.this, "Turn On Bluetooth", Toast.LENGTH_SHORT).show();
-                            }
-                            if (beacon) {
-                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
-                                beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
-                                // To detect proprietary beacons, you must add a line like below corresponding to your beacon
-                                // type.  Do a web search for "setBeaconLayout" to get the proper expression.
-                                beaconManager.getBeaconParsers().add(new BeaconParser().
-                                        setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
-                                beaconManager.bind(MainActivity.this);
-                            } else {
-                                beaconManager.removeAllMonitorNotifiers();
-                                beaconManager.applySettings();
-                                beaconManager.unbind(MainActivity.this);
-                            }
-
-                        } else {
-                            clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
-
-                        }
-                    }
-                    //  }
-
-                }
-
-                @Override
-                public void onPermissionDiened() {
-                }
-            })).start(getBaseContext(), MainActivity.this);
-        } catch (Exception e) {
-            Log.i("EROOR", "" + e);
-
-
-        }
-
     }
 
     @Override
@@ -1083,6 +1062,145 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
+    public void onResume() {
+        super.onResume();
+        assistant.start();
+        Log.i("Resume", "RESUMED");
+        if (mAuth.getCurrentUser() != null) {
+
+            UID = mAuth.getCurrentUser().getUid();
+            pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
+            points = pref.getInt(AppConstants.pointsPref, 0);
+            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            Log.i("coolatt111", "" + pref.getBoolean("CoolAttached", false));
+            if (pref.getBoolean("CoolAttached", false) == false) {
+                Log.i("coolatt", "" + pref.getBoolean("CoolAttached", false));
+                prefEditor = pref.edit();
+                prefEditor.putBoolean("CoolAttached", true).commit();
+                UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
+                prefEditor = pref.edit();
+            }
+            cooldown = pref.getInt(AppConstants.cooldownPref, 0);
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
+            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
+            UserDatabaseReference.child("Jackpot").child("Start").addValueEventListener(jackpotListener);
+            prefEditor = pref.edit();
+            prefEditor.putBoolean("JacpotAttached", true).apply();
+            if (pref.getInt(AppConstants.levelPref, -1) == 13) {
+                if (pref.getInt("Route", routeNo) == 1) {
+                    HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_1crop);
+                } else {
+                    HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_2crop);
+                }
+            }
+        }
+
+
+        try {
+            LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+            boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+            boolean networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+            if (!gpsEnabled || !networkEnabled) {
+                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                dialog.setMessage("Turn on Location").setCancelable(false);
+                dialog.setPositiveButton("Turn On", new DialogInterface.OnClickListener() {
+                    @Override
+                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+
+                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                        startActivity(myIntent);
+                        //get gps
+                    }
+                });
+                dialog.show();
+            }
+            locationTracker = new LocationTracker("my.action")
+                    .setInterval(10000)
+                    .setGps(true)
+                    .setNetWork(false);
+            locationTracker.currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
+                @Override
+                public void onCurrentLocation(Location location) {
+                    //Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+
+                    double distanceinmetres = clueLocation.distanceTo(location);
+
+                    // Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
+
+                    //     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
+                    if (!timerOn && !event) {
+                        if (distanceinmetres <= 250) {
+                            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                            if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                                Toast.makeText(MainActivity.this, "Turn On Bluetooth", Toast.LENGTH_SHORT).show();
+                            }
+                            if (beacon) {
+                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
+                                beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
+                                // To detect proprietary beacons, you must add a line like below corresponding to your beacon
+                                // type.  Do a web search for "setBeaconLayout" to get the proper expression.
+                                beaconManager.getBeaconParsers().add(new BeaconParser().
+                                        setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
+                                beaconManager.setForegroundBetweenScanPeriod(1000);
+                                beaconManager.bind(MainActivity.this);
+                            } else {
+                                beaconManager.removeAllMonitorNotifiers();
+                                beaconManager.applySettings();
+                                beaconManager.unbind(MainActivity.this);
+                            }
+
+                        } else {
+                            clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
+
+                        }
+                    }
+                    //  }
+
+                }
+
+                @Override
+                public void onPermissionDiened() {
+                }
+            })).start(getBaseContext(), MainActivity.this);
+        } catch (Exception e) {
+            Log.i("EROOR", "" + e);
+
+
+        }
+
+    }
+
+    @Override
+    public void onNeedLocationPermission() {
+
+    }
+
+    @Override
+    public void onExplainLocationPermission() {
+
+    }
+
+    @Override
+    public void onLocationPermissionPermanentlyDeclined(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    @Override
+    public void onNeedLocationSettingsChange() {
+
+    }
+
+    @Override
+    public void onFallBackToSystemSettings(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
+
+    }
+
+    @Override
+    public void onNewLocationAvailable(Location location) {
+
+    }
+
+    @Override
     public void onBeaconServiceConnect() {
         beaconManager.addRangeNotifier(new RangeNotifier() {
                                            @Override
@@ -1093,7 +1211,7 @@ public class MainActivity extends AppCompatActivity
 
                                                    while (beacons.iterator().hasNext()) {
                                                        firstBeacon = beacons.iterator().next();
-                                                       ;
+
 
                                                        beaconID = firstBeacon.toString();
                                                        Log.i("SIZE", String.valueOf(beacons.size()));
@@ -1184,48 +1302,65 @@ public class MainActivity extends AppCompatActivity
                                                                } else {
                                                                    if (!timerOn) {
                                                                        timerOn = true;
-                                                                       Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
-                                                                       PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
-                                                                               MainActivity.this, 9999, intent, 0);
+//                                                                       Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
+//                                                                       PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
+//                                                                               MainActivity.this, 9999, intent, 0);
+//
+//                                                                       AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
+//
+//
+//                                                                       alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+//                                                                               + (cooldown * 60000), pendingIntentforAlarm);
+//
+//                                                                       Log.i("cool", "" + cooldown);
+//
+//                                                                       final String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+//                                                                       runOnUiThread(new Runnable() {
+//                                                                           @Override
+//                                                                           public void run() {
+//                                                                               HomeFragment.timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+//                                                                           }
+//                                                                       });
+//                                                                       prefEditor = pref.edit();
+//                                                                       prefEditor.putString("Note", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
+//
+//                                                                       NotificationCompat.Builder builderalarm =
+//                                                                               new NotificationCompat.Builder(MainActivity.this)
+//                                                                                       .setSmallIcon(R.mipmap.ic_launcher)
+//                                                                                       .setContentTitle("Please Wait")
+//                                                                                       .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
+//                                                                                       .setOngoing(true)
+//
+//                                                                                       .setAutoCancel(false)
+//
+//                                                                                       .setTimeoutAfter(cooldown * 60000).setChannelId("Timer");
+//                                                                       NotificationChannel mChannel;
+//                                                                       NotificationManager notificationManagerforAlarm =
+//                                                                               (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+//                                                                       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                                                           mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
+//                                                                           notificationManagerforAlarm.createNotificationChannel(mChannel);
+//                                                                       }
+//
+//
+//                                                                       notificationManagerforAlarm.notify(1, builderalarm.build());
 
-                                                                       AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
-
-
-                                                                       alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-                                                                               + (cooldown * 60000), pendingIntentforAlarm);
-
-                                                                       Log.i("cool", "" + cooldown);
-
-                                                                       final String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
                                                                        runOnUiThread(new Runnable() {
                                                                            @Override
                                                                            public void run() {
-                                                                               HomeFragment.timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+                                                                               HomeFragment.timerTextView.setText("Timer of " + cooldown + " minutes is set.");
                                                                            }
                                                                        });
-                                                                       prefEditor = pref.edit();
-                                                                       prefEditor.putString("Note", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
-
-                                                                       NotificationCompat.Builder builderalarm =
-                                                                               new NotificationCompat.Builder(MainActivity.this)
-                                                                                       .setSmallIcon(R.mipmap.ic_launcher)
-                                                                                       .setContentTitle("Please Wait")
-                                                                                       .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
-                                                                                       .setOngoing(true)
-
-                                                                                       .setAutoCancel(false)
-
-                                                                                       .setTimeoutAfter(cooldown * 60000).setChannelId("Timer");
-                                                                       NotificationChannel mChannel;
-                                                                       NotificationManager notificationManagerforAlarm =
-                                                                               (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                                                                       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                                           mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
-                                                                           notificationManagerforAlarm.createNotificationChannel(mChannel);
+                                                                       if (!isMyServiceRunning(TimerService.class)) {
+                                                                           timerService.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+                                                                           duration = cooldown * 60000;
+                                                                           prefEditor = pref.edit();
+                                                                           prefEditor.putLong("Duration", duration).apply();
+                                                                           timerService.putExtra(Constants.TIMER.DURATION, duration);
+                                                                           startService(timerService);
+                                                                           MainActivity.this.registerReceiver(broadcastReceiver, new IntentFilter(Constants.ACTION.BROADCAST_ACTION));
+                                                                           Log.i("here", "in");
                                                                        }
-
-
-                                                                       notificationManagerforAlarm.notify(1, builderalarm.build());
 
                                                                    }
                                                                }
@@ -1303,7 +1438,24 @@ public class MainActivity extends AppCompatActivity
                                                                                FirebaseDatabase.getInstance().getReference().child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                    @Override
                                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                       Log.i("loclvl", "" + level);
+                                                                                       beaconManager.unbind(MainActivity.this);
+                                                                                       beaconManager.removeAllRangeNotifiers();
+                                                                                       //beaconManager.disableForegroundServiceScanning();
+                                                                                       beaconManager.applySettings();
+                                                                                       final int levelLocal = level;
+                                                                                       FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                           @Override
+                                                                                           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                               int c = dataSnapshot.getValue(Integer.class);
+                                                                                               FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").setValue(c + 1);
+                                                                                           }
 
+                                                                                           @Override
+                                                                                           public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                           }
+                                                                                       });
                                                                                        long prevTime = dataSnapshot.child("Time " + (lvl - 1)).getValue(Long.class);
                                                                                        Log.i("prevTime", "" + prevTime);
                                                                                        long currentTime = dataSnapshot.child("Time " + lvl).getValue(Long.class);
@@ -1329,10 +1481,6 @@ public class MainActivity extends AppCompatActivity
                                                                                        ref.child("Users").child(UID).child("level").setValue(level + 1);
                                                                                        beacon = false;
                                                                                        timerOn = false;
-                                                                                       beaconManager.unbind(MainActivity.this);
-                                                                                       beaconManager.removeAllRangeNotifiers();
-                                                                                       //beaconManager.disableForegroundServiceScanning();
-                                                                                       beaconManager.applySettings();
                                                                                        hintButton.setEnabled(true);
                                                                                        prefEditor = pref.edit();
                                                                                        prefEditor.putString(AppConstants.hintPref, "");
@@ -1351,18 +1499,33 @@ public class MainActivity extends AppCompatActivity
                                                                                    @Override
                                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
+                                                                                       beaconManager.unbind(MainActivity.this);
+                                                                                       beaconManager.removeAllRangeNotifiers();
+                                                                                       //beaconManager.disableForegroundServiceScanning();
+                                                                                       beaconManager.applySettings();
+                                                                                       final int levelLocal = level;
+                                                                                       FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").addListenerForSingleValueEvent(new ValueEventListener() {
+                                                                                           @Override
+                                                                                           public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
+                                                                                               int c = dataSnapshot.getValue(Integer.class);
+                                                                                               FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").setValue(c + 1);
+                                                                                           }
+
+                                                                                           @Override
+                                                                                           public void onCancelled(@NonNull DatabaseError databaseError) {
+
+                                                                                           }
+                                                                                       });
                                                                                        long currentTime = dataSnapshot.child("Time " + lvl).getValue(Long.class);
                                                                                        Log.i("currentTime", "" + currentTime);
                                                                                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
                                                                                        ref.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvl, points, currentTime, cooldown, UID));
                                                                                        ref.child("Users").child(UID).child("points").setValue(points + 7);
+
                                                                                        ref.child("Users").child(UID).child("level").setValue(level + 1);
+
                                                                                        beacon = false;
                                                                                        timerOn = false;
-                                                                                       beaconManager.unbind(MainActivity.this);
-                                                                                       beaconManager.removeAllRangeNotifiers();
-                                                                                       //beaconManager.disableForegroundServiceScanning();
-                                                                                       beaconManager.applySettings();
                                                                                        hintButton.setEnabled(true);
                                                                                        prefEditor = pref.edit();
                                                                                        prefEditor.putString(AppConstants.hintPref, "");
@@ -1388,45 +1551,62 @@ public class MainActivity extends AppCompatActivity
 
                                                                    if (!timerOn) {
                                                                        timerOn = true;
-                                                                       Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
-                                                                       PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
-                                                                               MainActivity.this, 9999, intent, 0);
-
-                                                                       AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
-
-                                                                       alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
-                                                                               + (cooldown * 59000), pendingIntentforAlarm);
-
-                                                                       Log.i("cool", "" + cooldown);
-
-                                                                       final String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+//                                                                       Intent intent = new Intent(MainActivity.this, NotificationReceiver.class);
+//                                                                       PendingIntent pendingIntentforAlarm = PendingIntent.getBroadcast(
+//                                                                               MainActivity.this, 9999, intent, 0);
+//
+//                                                                       AlarmManager alarmManager = (AlarmManager) MainActivity.this.getSystemService(ALARM_SERVICE);
+//
+//                                                                       alarmManager.set(AlarmManager.RTC_WAKEUP, System.currentTimeMillis()
+//                                                                               + (cooldown * 59000), pendingIntentforAlarm);
+//
+//                                                                       Log.i("cool", "" + cooldown);
+//
+//                                                                       final String currentDateTimeString = DateFormat.getDateTimeInstance().format(new Date());
+//                                                                       runOnUiThread(new Runnable() {
+//                                                                           @Override
+//                                                                           public void run() {
+//                                                                               HomeFragment.timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+//                                                                           }
+//                                                                       });
+//                                                                       prefEditor = pref.edit();
+//                                                                       prefEditor.putString("Note", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
+//
+//                                                                       NotificationCompat.Builder builderalarm =
+//                                                                               new NotificationCompat.Builder(MainActivity.this)
+//                                                                                       .setSmallIcon(R.mipmap.ic_launcher)
+//                                                                                       .setContentTitle("Please Wait")
+//                                                                                       .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
+//                                                                                       .setOngoing(true)
+//                                                                                       .setAutoCancel(false)
+//                                                                                       .setTimeoutAfter(cooldown * 60000).setChannelId("Timer");
+//                                                                       NotificationChannel mChannel;
+//                                                                       NotificationManager notificationManagerforAlarm =
+//                                                                               (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+//                                                                       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//                                                                           mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
+//                                                                           notificationManagerforAlarm.createNotificationChannel(mChannel);
+//                                                                       }
+//
+//
+//                                                                       notificationManagerforAlarm.notify(1, builderalarm.build());
                                                                        runOnUiThread(new Runnable() {
                                                                            @Override
                                                                            public void run() {
-                                                                               HomeFragment.timerTextView.setText("Timer of " + cooldown + " mins is set on " + currentDateTimeString);
+                                                                               HomeFragment.timerTextView.setText("Timer of " + cooldown + " minutes is set.");
                                                                            }
                                                                        });
-                                                                       prefEditor = pref.edit();
-                                                                       prefEditor.putString("Note", "Timer of " + cooldown + " mins is set on " + currentDateTimeString).apply();
-
-                                                                       NotificationCompat.Builder builderalarm =
-                                                                               new NotificationCompat.Builder(MainActivity.this)
-                                                                                       .setSmallIcon(R.mipmap.ic_launcher)
-                                                                                       .setContentTitle("Please Wait")
-                                                                                       .setContentText("Timer of " + cooldown + " mins is set on " + currentDateTimeString)
-                                                                                       .setOngoing(true)
-                                                                                       .setAutoCancel(false)
-                                                                                       .setTimeoutAfter(cooldown * 60000).setChannelId("Timer");
-                                                                       NotificationChannel mChannel;
-                                                                       NotificationManager notificationManagerforAlarm =
-                                                                               (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
-                                                                       if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
-                                                                           mChannel = new NotificationChannel("Timer", "Timer", NotificationManager.IMPORTANCE_DEFAULT);
-                                                                           notificationManagerforAlarm.createNotificationChannel(mChannel);
+                                                                       Log.i("service run", "" + isMyServiceRunning(TimerService.class));
+                                                                       if (!isMyServiceRunning(TimerService.class)) {
+                                                                           timerService.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
+                                                                           duration = cooldown * 60000;
+                                                                           prefEditor = pref.edit();
+                                                                           prefEditor.putLong("Duration", duration).apply();
+                                                                           timerService.putExtra(Constants.TIMER.DURATION, duration);
+                                                                           startService(timerService);
+                                                                           MainActivity.this.registerReceiver(broadcastReceiver, new IntentFilter(Constants.ACTION.BROADCAST_ACTION));
+                                                                           Log.i("here", "in");
                                                                        }
-
-
-                                                                       notificationManagerforAlarm.notify(1, builderalarm.build());
 
                                                                    }
 
@@ -1468,44 +1648,106 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onNeedLocationPermission() {
-
-    }
-
-    @Override
-    public void onExplainLocationPermission() {
-
-    }
-
-    @Override
-    public void onLocationPermissionPermanentlyDeclined(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
-
-    }
-
-    @Override
-    public void onNeedLocationSettingsChange() {
-
-    }
-
-    @Override
-    public void onFallBackToSystemSettings(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
-
-    }
-
-    @Override
-    public void onNewLocationAvailable(Location location) {
+    public void onError(LocationAssistant.ErrorType type, String message) {
 
     }
 
     @Override
     public void onMockLocationsDetected(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
-        Toast.makeText(MainActivity.this, "Stop Mocking Location", Toast.LENGTH_LONG).show();
+        //Toast.makeText(MainActivity.this, "Stop Mocking Location", Toast.LENGTH_LONG).show();
         //finishAffinity();
     }
 
-    @Override
-    public void onError(LocationAssistant.ErrorType type, String message) {
+    //Receives the extra to update current timer and then updates the textView.
+    public boolean updateUI(Intent intent) {
+        if (!intent.hasExtra(Constants.TIMER.CURRENT_TIME)) return false;
 
+        this.currentTime = intent.getLongExtra(Constants.TIMER.CURRENT_TIME, 0L);
+        Log.i("durationbefore pref", "" + duration);
+        duration = pref.getLong("Duration", 120000);
+        Log.i("currentT", "" + this.currentTime);
+        Log.i("durationT", "" + duration);
+        if (this.currentTime >= duration) {
+            clockView.setText("");
+
+            prefEditor = pref.edit();
+            prefEditor.putLong("Duration", 0).apply();
+            Toast.makeText(MainActivity.this, "Timer done", Toast.LENGTH_SHORT).show();
+            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+            UserDatabaseReference.child("Users").child(UID).child("cooldown").setValue(0).addOnCompleteListener(new OnCompleteListener<Void>() {
+                @Override
+                public void onComplete(@NonNull Task<Void> task) {
+                    timerOn = false;
+                    event = false;
+                }
+            });
+            MainActivity.prefEditor = pref.edit().putInt("Cooldown", 0);
+            MainActivity.prefEditor.putString("Note", "").apply();
+
+            HomeFragment.timerTextView.setText("");
+            MainActivity.beacon = true;
+
+            return false;
+        }
+
+        int secs = (int) (currentTime / 1000);
+        int minutes = secs / 60;
+
+        clockView.setText(Integer.toString(minutes) + ":" + String.format("%02d", secs % 60));
+        return true;
+    }
+    /******************************************************************************************/
+
+
+    /************* Helper Methods ****************************/
+    private void showTimerCompleteNotification() {
+        Intent resultIntent = new Intent(this, MainActivity.class);
+        PendingIntent resultPendingIntent =
+                PendingIntent.getActivity(
+                        this,
+                        0,
+                        resultIntent,
+                        PendingIntent.FLAG_UPDATE_CURRENT
+                );
+        NotificationCompat.Builder mBuilder =
+                new NotificationCompat.Builder(this)
+                        .setSmallIcon(R.mipmap.ic_launcher)
+                        .setContentTitle("Timer Done!")
+                        .setContentText("Congrats")
+                        .setContentIntent(resultPendingIntent)
+                        .setColor(Color.BLACK)
+                        .setLights(Color.BLUE, 500, 500)
+                        .setDefaults(NotificationCompat.DEFAULT_VIBRATE)
+                        .setDefaults(NotificationCompat.DEFAULT_SOUND)
+                        .setStyle(new NotificationCompat.InboxStyle());
+
+        // Gets an instance of the NotificationManager service
+        final NotificationManager mNotifyMgr =
+                (NotificationManager) getSystemService(NOTIFICATION_SERVICE);
+        // Builds the notification and issues it.
+        mNotifyMgr.notify(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE, mBuilder.build());
+
+        //Cancel the notification after a little while
+        Handler h = new Handler();
+        long delayInMilliseconds = 5000;
+
+        h.postDelayed(new Runnable() {
+            public void run() {
+                mNotifyMgr.cancel(Constants.NOTIFICATION_ID.FOREGROUND_SERVICE);
+            }
+        }, delayInMilliseconds);
+    }
+
+    private boolean isMyServiceRunning(Class<?> serviceClass) {
+        ActivityManager manager = (ActivityManager) getSystemService(Context.ACTIVITY_SERVICE);
+        for (ActivityManager.RunningServiceInfo service : manager.getRunningServices(Integer.MAX_VALUE)) {
+            if (serviceClass.getName().equals(service.service.getClassName())) {
+                return true;
+            }
+        }
+        return false;
     }
 
 }
+
+

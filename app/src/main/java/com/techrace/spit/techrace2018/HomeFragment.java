@@ -82,7 +82,7 @@ public class HomeFragment extends Fragment {
 
     static final String TAG = "MonitoringActivity";
     static View myView;
-    static TextView clueTextView, hintTextView, timerTextView;
+    static TextView clueTextView, hintTextView, timerTextView, clockView;
     MenuItem myItem;
     AlertDialog hintDialog;
     static DatabaseReference UserDatabaseReference;
@@ -199,7 +199,7 @@ public class HomeFragment extends Fragment {
         hintView = myView.findViewById(R.id.hint_view);
         noteView = myView.findViewById(R.id.noteView);
         imgViewHome = myView.findViewById(R.id.imgViewHome);
-
+        clockView = myView.findViewById(R.id.clockView);
         if (!pref.getString("Hint", "").equals("")) {
             hintTextView.setText(pref.getString("Hint", ""));
         } else {

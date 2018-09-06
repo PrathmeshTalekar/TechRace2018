@@ -58,8 +58,7 @@ public class NotificationReceiver extends BroadcastReceiver {
 //            new HomeFragment().updateClue();
 //            MainActivity.manualPass = false;
 //        } else {
-        Date d = new Date();
-        long l = d.getTime();
+
         MainActivity.beacon = true;
         timerOn = false;
 //        }

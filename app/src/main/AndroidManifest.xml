@@ -22,10 +22,18 @@
         android:supportsRtl="true"
         android:theme="@style/Background">
         <activity
+
             android:name=".MainActivity"
             android:label="@string/app_name"
+
             android:screenOrientation="portrait"
-            android:theme="@style/AppTheme.NoActionBar"></activity>
+            android:theme="@style/AppTheme.NoActionBar">
+            <intent-filter>
+                <action android:name="android.intent.action.MAIN" />
+                <!--<action android:name="com.fahadhd.foregroundservice.action.broadcast"/>-->
+                <category android:name="android.intent.category.LAUNCHER" />
+            </intent-filter>
+        </activity>
         <activity
             android:name=".SplashActivity"
             android:screenOrientation="portrait"
@@ -98,8 +106,9 @@
                 <action android:name="com.google.firebase.MESSAGING_EVENT" />
             </intent-filter>
         </service>
-
-        <activity android:name=".JackpotActivity"></activity>
+        <service android:name=".service.TimerService" />
+        <!--android:process=":TechRace2018_background" />-->
+        <activity android:name=".JackpotActivity" />
 
     </application>
 

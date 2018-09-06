@@ -25,14 +25,27 @@
                 android:background="@color/cardBackground">
 
                 <TextView
+                    android:id="@+id/essential"
                     android:layout_width="match_parent"
                     android:layout_height="match_parent"
                     android:fontFamily="@font/capriola"
-                    android:padding="5sp"
-                    android:text="Hello World"
+
+                    android:text="Essentials and Rule Book"
                     android:textColor="@android:color/white"
-                    android:textSize="20sp" />
+                    android:textSize="22sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="match_parent"
+                    android:layout_below="@+id/essential"
+
+
+                    android:text="@string/rules"
+                    android:textColor="@android:color/white"
+                    android:textSize="18sp" />
             </RelativeLayout>
+
         </android.support.v7.widget.CardView>
     </LinearLayout>
 </ScrollView>
