@@ -119,8 +119,9 @@ public class FeedActivity extends AppCompatActivity {
                         Log.i("fee title", title);
 
                         String info = d.child("Info").getValue(String.class);
+                        String time = d.child("Time").getValue(String.class);
                         Log.i("feed info", info);
-                        feedItems.add(new Feed(title, info));
+                        feedItems.add(new Feed(title, info, time));
                     }
                     if (progressDialog.isShowing()) {
                         progressDialog.hide();

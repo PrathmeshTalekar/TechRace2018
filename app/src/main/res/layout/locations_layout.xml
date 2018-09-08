@@ -5,7 +5,9 @@
     android:id="@+id/list"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/transparent_black"
+    android:layout_margin="8sp"
+    android:background="@color/background"
+    android:padding="2sp"
     android:drawSelectorOnTop="true"
     android:orientation="vertical">
 

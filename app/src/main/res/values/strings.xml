@@ -30,20 +30,22 @@
 
     <string name="action_help">Help</string>
     <string name="action_confirm">Confirm</string>
-    <string name="rules">1. TechRace Android App will be given to you before the race.\n
-2. One Android Phone per team is a must.
-3. An active internet data pack must be on at all times during the race in the Android phone being used in the race.\n
-4. NO Private Transport of any sorts can be used in order to maintain parity among all participants. Use of any such means will lead to immediate disqualification.\n
-5. Completely charge the phone to be used by the team and Carry a power bank. (Recommended)\n
-6. Do not clutter in or around a particular location once you get the next clue. Be on the move.\n
-7. Carry enough cash to get around the city\n
-8. Stay safe on roads and do not run around.\n
-9.Buy train tickets when travelling by local trains to avoid unnecessary trouble.(We recommend to carry ATVM smart cards)\n
-10. Refreshments will be provided in the morning but bring food and water for when you get deep into the race.\n
-11. Any sort of cheating caught by our team will lead to direct disqualification\n
-12. Follow traffic rules\n
-13. Decision of the organizing committee is final in case of any dispute.\n
-14. Carry your umbrellas in case it rains.</string>
+    <string name="rules">
+<b>1)</b> An active internet data pack must be on at all times during the race in the Android phone being used in the race.\n
+<b>2)</b> NO Private Transport of any sorts can be used in order to maintain parity among all participants. Use of any such means will lead to immediate disqualification.\n
+<b>3)</b> Completely charge the phone to be used by the team and Carry a power bank. (Recommended)\n
+<b>4)</b> Do not clutter in or around a particular location once you get the next clue. Be on the move.\n
+<b>5)</b> Carry enough cash to get around the city\n
+<b>6)</b> Stay safe on roads and do not run around.\n
+<b>7)</b> Buy train tickets when travelling by local trains to avoid unnecessary trouble.(We recommend to carry ATVM smart cards)\n
+<b>8)</b> Refreshments will be provided in the morning but bring food and water for when you get deep into the race.\n
+<b>9)</b> Any sort of cheating caught by our team will lead to direct disqualification\n
+<b>10)</b> Follow traffic rules\n
+<b>11)</b> Decision of the organizing committee is final in case of any dispute.\n
+<b>12)</b> Carry your umbrellas in case it rains.\n
+<b>13)</b>Do not try any tricks with the app. There will be serious repercussions if anyone is found cheating.\n
+<b>14)</b>Do not kill the app unless needed.</string>
+
     <string name="scan_help">Ask a volunteer or organizer to input code manually.</string>
     <string name="scan_manual">Tap here to input code manually</string>
     <string name="manual_desc">Input the code below:</string>

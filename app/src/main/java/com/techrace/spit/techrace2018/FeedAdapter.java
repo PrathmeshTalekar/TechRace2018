@@ -34,8 +34,10 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
     public void onBindViewHolder(@NonNull FeedViewHolder holder, int position) {
         String title = feedArrayList.get(position).getmTitle();
         String info = feedArrayList.get(position).getmInfo();
+        String time = feedArrayList.get(position).getmTime();
         holder.titleText.setText(title);
         holder.infoText.setText(info);
+        holder.timeText.setText(time);
     }
 
     @Override
@@ -45,7 +47,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
 
     public static class FeedViewHolder extends RecyclerView.ViewHolder {
 
-        TextView titleText, infoText;
+        TextView titleText, infoText, timeText;
         CardView cardView;
 
         public FeedViewHolder(View itemView) {
@@ -53,6 +55,7 @@ public class FeedAdapter extends RecyclerView.Adapter<FeedAdapter.FeedViewHolder
             titleText = (TextView) itemView.findViewById(R.id.title);
             infoText = (TextView) itemView.findViewById(R.id.info);
             cardView = (CardView) itemView.findViewById(R.id.feedItemCard);
+            timeText = (TextView) itemView.findViewById(R.id.timeFeed);
         }
     }
 }

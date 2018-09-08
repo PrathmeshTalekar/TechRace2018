@@ -136,7 +136,7 @@ public class PowerCardsFragment extends Fragment {
                             Toast.makeText(getActivity(), "Already Unlocked", Toast.LENGTH_SHORT).show();
                         }
                     }else{
-                        Toast.makeText(getActivity(), "Unavailable Now", Toast.LENGTH_SHORT).show();
+                        Toast.makeText(getActivity(), "Unavailable At This Location", Toast.LENGTH_SHORT).show();
                     }
                 }
             });

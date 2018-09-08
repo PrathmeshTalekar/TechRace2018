@@ -6,6 +6,7 @@ import android.app.Activity;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
 import android.app.AlertDialog;
+import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
@@ -658,7 +659,13 @@ public class MainActivity extends AppCompatActivity
                                     UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
                                     prefEditor = pref.edit();
                                     prefEditor.putString("Note", "").apply();
-                                    timerTextView.setText("");
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            timerTextView.setText("");
+                                        }
+                                    });
+
                                     beacon = false;
                                     if (beaconManager != null) {
                                         beaconManager.unbind(MainActivity.this);
@@ -727,7 +734,13 @@ public class MainActivity extends AppCompatActivity
                                     UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
                                     prefEditor = pref.edit();
                                     prefEditor.putString("Note", "").apply();
-                                    timerTextView.setText("");
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            timerTextView.setText("");
+                                        }
+                                    });
+
                                     beacon = false;
                                     if (beaconManager != null) {
                                         beaconManager.unbind(MainActivity.this);
@@ -796,7 +809,13 @@ public class MainActivity extends AppCompatActivity
                                     UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
                                     prefEditor = pref.edit();
                                     prefEditor.putString("Note", "").apply();
-                                    timerTextView.setText("");
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            timerTextView.setText("");
+                                        }
+                                    });
+
                                     beacon = false;
                                     if (beaconManager != null) {
                                         beaconManager.unbind(MainActivity.this);
@@ -867,7 +886,12 @@ public class MainActivity extends AppCompatActivity
                                     UserDatabaseReference5.child("Users").child(UID).child("level").setValue(level + 1);
                                     prefEditor = pref.edit();
                                     prefEditor.putString("Note", "").apply();
-                                    timerTextView.setText("");
+                                    runOnUiThread(new Runnable() {
+                                        @Override
+                                        public void run() {
+                                            timerTextView.setText("");
+                                        }
+                                    });
                                     beacon = false;
                                     if (beaconManager != null) {
                                         beaconManager.unbind(MainActivity.this);
@@ -1066,108 +1090,109 @@ public class MainActivity extends AppCompatActivity
         super.onResume();
         assistant.start();
         Log.i("Resume", "RESUMED");
-        if (mAuth.getCurrentUser() != null) {
+        if (mAuth != null) {
+            if (mAuth.getCurrentUser() != null) {
 
-            UID = mAuth.getCurrentUser().getUid();
-            pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
-            points = pref.getInt(AppConstants.pointsPref, 0);
-            UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-            Log.i("coolatt111", "" + pref.getBoolean("CoolAttached", false));
-            if (pref.getBoolean("CoolAttached", false) == false) {
-                Log.i("coolatt", "" + pref.getBoolean("CoolAttached", false));
+                UID = mAuth.getCurrentUser().getUid();
+                pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
+                points = pref.getInt(AppConstants.pointsPref, 0);
+                UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
+                Log.i("coolatt111", "" + pref.getBoolean("CoolAttached", false));
+                if (pref.getBoolean("CoolAttached", false) == false) {
+                    Log.i("coolatt", "" + pref.getBoolean("CoolAttached", false));
+                    prefEditor = pref.edit();
+                    prefEditor.putBoolean("CoolAttached", true).commit();
+                    UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
+                    prefEditor = pref.edit();
+                }
+                cooldown = pref.getInt(AppConstants.cooldownPref, 0);
+                UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
+                UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
+                UserDatabaseReference.child("Jackpot").child("Start").addValueEventListener(jackpotListener);
                 prefEditor = pref.edit();
-                prefEditor.putBoolean("CoolAttached", true).commit();
-                UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
-                prefEditor = pref.edit();
-            }
-            cooldown = pref.getInt(AppConstants.cooldownPref, 0);
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("level").addValueEventListener(levelListener);
-            UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("points").addValueEventListener(pointsListener);
-            UserDatabaseReference.child("Jackpot").child("Start").addValueEventListener(jackpotListener);
-            prefEditor = pref.edit();
-            prefEditor.putBoolean("JacpotAttached", true).apply();
-            if (pref.getInt(AppConstants.levelPref, -1) == 13) {
-                if (pref.getInt("Route", routeNo) == 1) {
-                    HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_1crop);
-                } else {
-                    HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_2crop);
+                prefEditor.putBoolean("JacpotAttached", true).apply();
+                if (pref.getInt(AppConstants.levelPref, -1) == 13) {
+                    if (pref.getInt("Route", routeNo) == 1) {
+                        HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_1crop);
+                    } else {
+                        HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_2crop);
+                    }
                 }
             }
-        }
 
 
-        try {
-            LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
-            boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            boolean networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            if (!gpsEnabled || !networkEnabled) {
-                AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
-                dialog.setMessage("Turn on Location").setCancelable(false);
-                dialog.setPositiveButton("Turn On", new DialogInterface.OnClickListener() {
-                    @Override
-                    public void onClick(DialogInterface paramDialogInterface, int paramInt) {
+            try {
+                LocationManager locationManager = (LocationManager) this.getSystemService(Context.LOCATION_SERVICE);
+                boolean gpsEnabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
+                boolean networkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
+                if (!gpsEnabled || !networkEnabled) {
+                    AlertDialog.Builder dialog = new AlertDialog.Builder(MainActivity.this);
+                    dialog.setMessage("Turn on Location").setCancelable(false);
+                    dialog.setPositiveButton("Turn On", new DialogInterface.OnClickListener() {
+                        @Override
+                        public void onClick(DialogInterface paramDialogInterface, int paramInt) {
 
-                        Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
-                        startActivity(myIntent);
-                        //get gps
-                    }
-                });
-                dialog.show();
-            }
-            locationTracker = new LocationTracker("my.action")
-                    .setInterval(10000)
-                    .setGps(true)
-                    .setNetWork(false);
-            locationTracker.currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
-                @Override
-                public void onCurrentLocation(Location location) {
-                    //Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
-
-                    double distanceinmetres = clueLocation.distanceTo(location);
-
-                    // Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
-
-                    //     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
-                    if (!timerOn && !event) {
-                        if (distanceinmetres <= 250) {
-                            BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
-                            if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
-                                Toast.makeText(MainActivity.this, "Turn On Bluetooth", Toast.LENGTH_SHORT).show();
-                            }
-                            if (beacon) {
-                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
-                                beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
-                                // To detect proprietary beacons, you must add a line like below corresponding to your beacon
-                                // type.  Do a web search for "setBeaconLayout" to get the proper expression.
-                                beaconManager.getBeaconParsers().add(new BeaconParser().
-                                        setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
-                                beaconManager.setForegroundBetweenScanPeriod(1000);
-                                beaconManager.bind(MainActivity.this);
-                            } else {
-                                beaconManager.removeAllMonitorNotifiers();
-                                beaconManager.applySettings();
-                                beaconManager.unbind(MainActivity.this);
-                            }
-
-                        } else {
-                            clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
-
+                            Intent myIntent = new Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS);
+                            startActivity(myIntent);
+                            //get gps
                         }
+                    });
+                    dialog.show();
+                }
+                locationTracker = new LocationTracker("my.action")
+                        .setInterval(10000)
+                        .setGps(true)
+                        .setNetWork(false);
+                locationTracker.currentLocation(new CurrentLocationReceiver(new CurrentLocationListener() {
+                    @Override
+                    public void onCurrentLocation(Location location) {
+                        //Toast.makeText(myView.getContext(), "Currently:" + location.getLatitude() + " " + location.getLongitude(), Toast.LENGTH_SHORT).show();
+
+                        double distanceinmetres = clueLocation.distanceTo(location);
+
+                        // Toast.makeText(myView.getContext(), "Distance: " + distanceinmetres, Toast.LENGTH_SHORT).show();
+
+                        //     if (mobile == NetworkInfo.State.CONNECTED || wifi == NetworkInfo.State.CONNECTED) {
+                        if (!timerOn && !event) {
+                            if (distanceinmetres <= 250) {
+                                BluetoothAdapter bluetoothAdapter = BluetoothAdapter.getDefaultAdapter();
+                                if (bluetoothAdapter != null && !bluetoothAdapter.isEnabled()) {
+                                    Toast.makeText(MainActivity.this, "Turn On Bluetooth", Toast.LENGTH_SHORT).show();
+                                }
+                                if (beacon) {
+                                    clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.hotRed));
+                                    beaconManager = BeaconManager.getInstanceForApplication(MainActivity.this);
+                                    // To detect proprietary beacons, you must add a line like below corresponding to your beacon
+                                    // type.  Do a web search for "setBeaconLayout" to get the proper expression.
+                                    beaconManager.getBeaconParsers().add(new BeaconParser().
+                                            setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
+                                    beaconManager.setForegroundBetweenScanPeriod(1000);
+                                    beaconManager.bind(MainActivity.this);
+                                } else {
+                                    beaconManager.removeAllMonitorNotifiers();
+                                    beaconManager.applySettings();
+                                    beaconManager.unbind(MainActivity.this);
+                                }
+
+                            } else {
+                                clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
+
+                            }
+                        }
+                        //  }
+
                     }
-                    //  }
 
-                }
-
-                @Override
-                public void onPermissionDiened() {
-                }
-            })).start(getBaseContext(), MainActivity.this);
-        } catch (Exception e) {
-            Log.i("EROOR", "" + e);
+                    @Override
+                    public void onPermissionDiened() {
+                    }
+                })).start(getBaseContext(), MainActivity.this);
+            } catch (Exception e) {
+                Log.i("EROOR", "" + e);
 
 
+            }
         }
-
     }
 
     @Override
@@ -1224,12 +1249,6 @@ public class MainActivity extends AppCompatActivity
                                                        String s = "id1: " + NSID + " id2: 0x000000000000";
                                                        Log.i("AAAA", s);
                                                        final double dist = firstBeacon.getDistance();
-//                                                                    runOnUiThread(new Runnable() {
-//                                                                        @Override
-//                                                                        public void run() {
-//                                                                            t2.setText(String.valueOf(dist));
-//                                                                        }
-//                                                                    });
 
                                                        Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
                                                        if (beaconID.equals(s) && dist <= 0.40) {
@@ -1249,7 +1268,7 @@ public class MainActivity extends AppCompatActivity
                                                                    @Override
                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                                        int cnt = dataSnapshot.getValue(Integer.class);
-                                                                       if (cnt >= 50) {
+                                                                       if (cnt >= 75) {
                                                                            DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("points");
                                                                            db.setValue(0);
                                                                            Toast.makeText(MainActivity.this, "You Have Been Eliminated. Reset Points to 0.", Toast.LENGTH_LONG).show();
@@ -1271,7 +1290,7 @@ public class MainActivity extends AppCompatActivity
                                                                    @Override
                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                                        int cnt = dataSnapshot.getValue(Integer.class);
-                                                                       if (cnt >= 20) {
+                                                                       if (cnt >= 25) {
                                                                            DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("points");
                                                                            db.setValue(0);
                                                                            Toast.makeText(MainActivity.this, "You Have Been Eliminated. Reset Points to 0.", Toast.LENGTH_LONG).show();
@@ -1656,6 +1675,19 @@ public class MainActivity extends AppCompatActivity
     public void onMockLocationsDetected(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
         //Toast.makeText(MainActivity.this, "Stop Mocking Location", Toast.LENGTH_LONG).show();
         //finishAffinity();
+//        NotificationCompat.Builder fakeGPSNotifi=new NotificationCompat.Builder(MainActivity.this);
+//        fakeGPSNotifi.setContentTitle("DO NOT USE FAKE GPS")
+//                .setContentText("Cheaters will be eliminate");
+//        NotificationChannel mChannel;
+//        NotificationManager notificationManagerforFake =
+//               (NotificationManager) MainActivity.this.getSystemService(Context.NOTIFICATION_SERVICE);
+//        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+//           mChannel = new NotificationChannel("Fake", "Faked", NotificationManager.IMPORTANCE_DEFAULT);
+//           notificationManagerforFake.createNotificationChannel(mChannel);
+//        }
+//        if (notificationManagerforFake != null) {
+//            notificationManagerforFake.notify(123,fakeGPSNotifi.build());
+//        }
     }
 
     //Receives the extra to update current timer and then updates the textView.
@@ -1668,7 +1700,13 @@ public class MainActivity extends AppCompatActivity
         Log.i("currentT", "" + this.currentTime);
         Log.i("durationT", "" + duration);
         if (this.currentTime >= duration) {
-            clockView.setText("");
+            runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    clockView.setText("");
+                }
+            });
+
 
             prefEditor = pref.edit();
             prefEditor.putLong("Duration", 0).apply();
@@ -1683,17 +1721,20 @@ public class MainActivity extends AppCompatActivity
             });
             MainActivity.prefEditor = pref.edit().putInt("Cooldown", 0);
             MainActivity.prefEditor.putString("Note", "").apply();
-
-            HomeFragment.timerTextView.setText("");
             MainActivity.beacon = true;
 
             return false;
         }
 
-        int secs = (int) (currentTime / 1000);
-        int minutes = secs / 60;
+        final int secs = (int) (currentTime / 1000);
+        final int minutes = secs / 60;
+        runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                clockView.setText(Integer.toString(minutes) + ":" + String.format("%02d", secs % 60));
+            }
+        });
 
-        clockView.setText(Integer.toString(minutes) + ":" + String.format("%02d", secs % 60));
         return true;
     }
     /******************************************************************************************/
