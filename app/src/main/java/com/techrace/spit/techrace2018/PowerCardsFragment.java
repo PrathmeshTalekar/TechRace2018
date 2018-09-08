@@ -88,7 +88,7 @@ public class PowerCardsFragment extends Fragment {
 
         });
         sharedPreferences = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
-        Log.i("clue12", sharedPreferences.getString("Clue 12", "abc"));
+//        Log.i("clue12", sharedPreferences.getString("Clue 12", "abc"));
         unlockClue.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
@@ -115,7 +115,7 @@ public class PowerCardsFragment extends Fragment {
                                                         SharedPreferences.Editor edit = share.edit();
                                                         edit.putString("Clue 12", s).apply();
                                                         unlockClue.setClickable(false);
-                                                        Log.i("Clue 12", s);
+//                                                        Log.i("Clue 12", s);
                                                         Toast.makeText(getActivity(), "Unlocked", Toast.LENGTH_LONG).show();
                                                     }
 

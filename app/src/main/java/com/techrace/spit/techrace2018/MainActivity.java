@@ -285,8 +285,12 @@ public class MainActivity extends AppCompatActivity
         levelListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                level = dataSnapshot.getValue(Integer.class);
-                Log.i("LEVEL", "" + level);
+                try {
+                    level = dataSnapshot.getValue(Integer.class);
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "Please Try Again", Toast.LENGTH_SHORT).show();
+                }
+//                Log.i("LEVEL", "" + level);
                 if (level != pref.getInt("Level", -1)) {
                     HomeFragment.hintView.setVisibility(View.INVISIBLE);
                     prefEditor = pref.edit();
@@ -313,12 +317,16 @@ public class MainActivity extends AppCompatActivity
         pointsListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                points = dataSnapshot.getValue(Integer.class);
+                try {
+                    points = dataSnapshot.getValue(Integer.class);
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "Please Try Again", Toast.LENGTH_SHORT).show();
+                }
                 if (level > 1) {
                     DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
                     leadercooldown.child(UID).child("Points").setValue(points);
                 }
-                Log.i("Points updated", "" + points);
+//                Log.i("Points updated", "" + points);
                 prefEditor = pref.edit();
                 prefEditor.putInt(AppConstants.pointsPref, points).apply();
                 MenuItem myItem = globalMenu.findItem(R.id.pointsBox);
@@ -333,9 +341,13 @@ public class MainActivity extends AppCompatActivity
         cooldownListener = new ValueEventListener() {
             @Override
             public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                cooldown = dataSnapshot.getValue(Integer.class);
+                try {
+                    cooldown = dataSnapshot.getValue(Integer.class);
+                } catch (Exception e) {
+                    Toast.makeText(MainActivity.this, "Please Try Again", Toast.LENGTH_SHORT).show();
+                }
                 int localCool = pref.getInt(AppConstants.cooldownPref, -1);
-                Log.i("local cool", "" + localCool);
+//                Log.i("local cool", "" + localCool);
                 if (localCool == -1) {
                     prefEditor = pref.edit();
                     prefEditor.putInt(AppConstants.cooldownPref, cooldown).apply();
@@ -345,9 +357,9 @@ public class MainActivity extends AppCompatActivity
                     DatabaseReference leadercooldown = FirebaseDatabase.getInstance().getReference().child("Leaderboard");
                     leadercooldown.child(UID).child("Cooldown").setValue(cooldown);
                 }
-                Log.i("COOLDOWN FOUND", "" + cooldown);
+//                Log.i("COOLDOWN FOUND", "" + cooldown);
                 if (cooldown - localCool > 0) {
-                    Log.i("inside1", "ues" + points);
+//                    Log.i("inside1", "ues" + points);
                     if (points >= AppConstants.reversePrice) {
                         Vibrator v = (Vibrator) getSystemService(Context.VIBRATOR_SERVICE);
                         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
@@ -356,7 +368,7 @@ public class MainActivity extends AppCompatActivity
                             v.vibrate(500);
                         }
                         timerOn = false;
-                        Log.i("inside", "ues");
+//                        Log.i("inside", "ues");
                         runOnUiThread(new Runnable() {
                             @Override
                             public void run() {
@@ -367,11 +379,11 @@ public class MainActivity extends AppCompatActivity
                                             public void onClick(DialogInterface dialog, int which) {
 
                                                 DatabaseReference reverseReference = FirebaseDatabase.getInstance().getReference();
-                                                reverseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("Applied By").addListenerForSingleValueEvent(new ValueEventListener() {
+                                                reverseReference.child("Users").child(UID).child("Applied By").addListenerForSingleValueEvent(new ValueEventListener() {
                                                     @Override
                                                     public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                         appliedBy = dataSnapshot.getValue(String.class);
-                                                        Log.i("applied", appliedBy);
+//                                                        Log.i("applied", appliedBy);
                                                         DatabaseReference reverseReference1 = FirebaseDatabase.getInstance().getReference();
                                                         reverseReference1.child("Users").child(appliedBy).child("cooldown").setValue(cooldown);
                                                         reverseReference1.child("Users").child(appliedBy).child("Applied By").setValue(UID);
@@ -459,7 +471,7 @@ public class MainActivity extends AppCompatActivity
                 try {
 
                     int jp = dataSnapshot.getValue(Integer.class);
-                    Log.i("IN JP CHANGE", "" + jp);
+//                    Log.i("IN JP CHANGE", "" + jp);
                     if (jp == 1) {
                         FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("jackpot").addListenerForSingleValueEvent(new ValueEventListener() {
                             @Override
@@ -516,7 +528,7 @@ public class MainActivity extends AppCompatActivity
                             jpAlert.cancel();
                         }
                         if (jackpotRunning) {
-                            Log.i("IN jp running", "" + jp);
+//                            Log.i("IN jp running", "" + jp);
 
                             JackpotActivity.jackpot.finish();
                         }
@@ -532,7 +544,7 @@ public class MainActivity extends AppCompatActivity
 
             }
         };
-        // Log.i("MAUTH",mAuth.getCurrentUser().getDisplayName());
+//         Log.i("MAUTH",mAuth.getCurrentUser().getDisplayName());
         if (mAuth.getCurrentUser() == null) {
 
             Intent i = new Intent(MainActivity.this, SignUpActivity.class);
@@ -586,7 +598,7 @@ public class MainActivity extends AppCompatActivity
         switch (requestCode) {
             case PERMISSION_REQUEST_COARSE_LOCATION: {
                 if (grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                    Log.d("PERMISSION", "coarse location permission granted");
+//                    Log.d("PERMISSION", "coarse location permission granted");
                 } else {
                     final AlertDialog.Builder builder = new AlertDialog.Builder(this);
                     builder.setTitle("Functionality limited");
@@ -651,7 +663,7 @@ public class MainActivity extends AppCompatActivity
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     long ts = dataSnapshot.child("Time " + String.valueOf(lvlManual)).getValue(Long.class);
-                                    Log.i("ts", String.valueOf(ts));
+//                                    Log.i("ts", String.valueOf(ts));
                                     DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
                                     UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvlManual, points, ts, cooldown, UID));
 
@@ -726,7 +738,7 @@ public class MainActivity extends AppCompatActivity
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     long ts = dataSnapshot.child("Time " + String.valueOf(lvlManual)).getValue(Long.class);
-                                    Log.i("ts", String.valueOf(ts));
+//                                    Log.i("ts", String.valueOf(ts));
                                     DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
                                     UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvlManual, points, ts, cooldown, UID));
 
@@ -801,7 +813,7 @@ public class MainActivity extends AppCompatActivity
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     long ts = dataSnapshot.child("Time " + String.valueOf(lvlManual)).getValue(Long.class);
-                                    Log.i("ts", String.valueOf(ts));
+//                                    Log.i("ts", String.valueOf(ts));
                                     DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
                                     UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvlManual, points, ts, cooldown, UID));
 
@@ -878,7 +890,7 @@ public class MainActivity extends AppCompatActivity
                                 @Override
                                 public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                     long ts = dataSnapshot.child("Time " + String.valueOf(lvlManual)).getValue(Long.class);
-                                    Log.i("ts", String.valueOf(ts));
+//                                    Log.i("ts", String.valueOf(ts));
                                     DatabaseReference UserDatabaseReference5 = FirebaseDatabase.getInstance().getReference();
                                     UserDatabaseReference5.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvlManual, points, ts, cooldown, UID));
 
@@ -1089,7 +1101,7 @@ public class MainActivity extends AppCompatActivity
     public void onResume() {
         super.onResume();
         assistant.start();
-        Log.i("Resume", "RESUMED");
+//        Log.i("Resume", "RESUMED");
         if (mAuth != null) {
             if (mAuth.getCurrentUser() != null) {
 
@@ -1097,9 +1109,9 @@ public class MainActivity extends AppCompatActivity
                 pref = MainActivity.this.getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
                 points = pref.getInt(AppConstants.pointsPref, 0);
                 UserDatabaseReference = FirebaseDatabase.getInstance().getReference();
-                Log.i("coolatt111", "" + pref.getBoolean("CoolAttached", false));
+//                Log.i("coolatt111", "" + pref.getBoolean("CoolAttached", false));
                 if (pref.getBoolean("CoolAttached", false) == false) {
-                    Log.i("coolatt", "" + pref.getBoolean("CoolAttached", false));
+//                    Log.i("coolatt", "" + pref.getBoolean("CoolAttached", false));
                     prefEditor = pref.edit();
                     prefEditor.putBoolean("CoolAttached", true).commit();
                     UserDatabaseReference.child("Users").child(mAuth.getCurrentUser().getUid()).child("cooldown").addValueEventListener(cooldownListener);
@@ -1188,7 +1200,7 @@ public class MainActivity extends AppCompatActivity
                     }
                 })).start(getBaseContext(), MainActivity.this);
             } catch (Exception e) {
-                Log.i("EROOR", "" + e);
+//                Log.i("EROOR", "" + e);
 
 
             }
@@ -1232,25 +1244,25 @@ public class MainActivity extends AppCompatActivity
                                            public void didRangeBeaconsInRegion(Collection<Beacon> beacons, Region region) {
                                                if (beacons.size() > 0) {
                                                    //MainActivity.beaconManager.setForegroundBetweenScanPeriod(2000);
-                                                   Log.i(HomeFragment.TAG, "didRangeBeaconsInRegion called with beacon count:  " + beacons.size());
+//                                                   Log.i(HomeFragment.TAG, "didRangeBeaconsInRegion called with beacon count:  " + beacons.size());
 
                                                    while (beacons.iterator().hasNext()) {
                                                        firstBeacon = beacons.iterator().next();
 
 
                                                        beaconID = firstBeacon.toString();
-                                                       Log.i("SIZE", String.valueOf(beacons.size()));
-                                                       Log.i("BID", beaconID);
-                                                       Log.i("BEACON blue address", firstBeacon.getBluetoothAddress());
-                                                       Log.i("BEACON Id1", firstBeacon.getId1().toString());
-                                                       Log.i("BEACON Manufacture", String.valueOf(firstBeacon.getManufacturer()));
+//                                                       Log.i("SIZE", String.valueOf(beacons.size()));
+//                                                       Log.i("BID", beaconID);
+//                                                       Log.i("BEACON blue address", firstBeacon.getBluetoothAddress());
+//                                                       Log.i("BEACON Id1", firstBeacon.getId1().toString());
+//                                                       Log.i("BEACON Manufacture", String.valueOf(firstBeacon.getManufacturer()));
                                                        //Log.i("NSIDDD",MainActivity.NSID);
                                                        //Beacon firstBeacon = beacons.iterator().next();
                                                        String s = "id1: " + NSID + " id2: 0x000000000000";
-                                                       Log.i("AAAA", s);
+//                                                       Log.i("AAAA", s);
                                                        final double dist = firstBeacon.getDistance();
 
-                                                       Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
+//                                                       Log.i("FOUNDD", "The first beacon " + firstBeacon.toString() + " is about " + firstBeacon.getDistance() + " meters away.");
                                                        if (beaconID.equals(s) && dist <= 0.40) {
 
 
@@ -1378,14 +1390,17 @@ public class MainActivity extends AppCompatActivity
                                                                            timerService.putExtra(Constants.TIMER.DURATION, duration);
                                                                            startService(timerService);
                                                                            MainActivity.this.registerReceiver(broadcastReceiver, new IntentFilter(Constants.ACTION.BROADCAST_ACTION));
-                                                                           Log.i("here", "in");
+//                                                                           Log.i("here", "in");
                                                                        }
 
                                                                    }
                                                                }
                                                            } else {
                                                                if (cooldown == 0) {
-
+                                                                   beaconManager.unbind(MainActivity.this);
+                                                                   beaconManager.removeAllRangeNotifiers();
+                                                                   //beaconManager.disableForegroundServiceScanning();
+                                                                   beaconManager.applySettings();
 
                                                                    if (level == 7) {
 
@@ -1409,7 +1424,7 @@ public class MainActivity extends AppCompatActivity
                                                                        });
                                                                    }
                                                                    if (level == 11) {
-                                                                       Log.i("In", "11");
+//                                                                       Log.i("In", "11");
                                                                        DatabaseReference databaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(mAuth.getCurrentUser().getUid()).child("waited");
                                                                        databaseReference.setValue(0);
                                                                        DatabaseReference db = FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location 11").child("Count");
@@ -1434,7 +1449,7 @@ public class MainActivity extends AppCompatActivity
                                                                                    prefEditor.putInt("Route", 1).apply();
                                                                                }
                                                                                FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("new route").setValue(routeNo);
-                                                                               Log.i("New route", "" + pref.getInt("Route", 1));
+//                                                                               Log.i("New route", "" + pref.getInt("Route", 1));
                                                                            }
 
                                                                            @Override
@@ -1457,11 +1472,8 @@ public class MainActivity extends AppCompatActivity
                                                                                FirebaseDatabase.getInstance().getReference().child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                    @Override
                                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
-                                                                                       Log.i("loclvl", "" + level);
-                                                                                       beaconManager.unbind(MainActivity.this);
-                                                                                       beaconManager.removeAllRangeNotifiers();
-                                                                                       //beaconManager.disableForegroundServiceScanning();
-                                                                                       beaconManager.applySettings();
+//                                                                                       Log.i("loclvl", "" + level);
+
                                                                                        final int levelLocal = level;
                                                                                        FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                            @Override
@@ -1476,12 +1488,12 @@ public class MainActivity extends AppCompatActivity
                                                                                            }
                                                                                        });
                                                                                        long prevTime = dataSnapshot.child("Time " + (lvl - 1)).getValue(Long.class);
-                                                                                       Log.i("prevTime", "" + prevTime);
+//                                                                                       Log.i("prevTime", "" + prevTime);
                                                                                        long currentTime = dataSnapshot.child("Time " + lvl).getValue(Long.class);
-                                                                                       Log.i("currentTime", "" + currentTime);
-                                                                                       Log.i("System currentTime", "" + System.currentTimeMillis());
+//                                                                                       Log.i("currentTime", "" + currentTime);
+//                                                                                       Log.i("System currentTime", "" + System.currentTimeMillis());
                                                                                        long diff = currentTime - prevTime;
-                                                                                       Log.i("dddiffff", "" + diff);
+//                                                                                       Log.i("dddiffff", "" + diff);
 
                                                                                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
                                                                                        ref.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvl, points, currentTime, cooldown, UID));
@@ -1514,14 +1526,12 @@ public class MainActivity extends AppCompatActivity
                                                                                    }
                                                                                });
                                                                            } else {
+
                                                                                FirebaseDatabase.getInstance().getReference().child("Users").child(UID).addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                    @Override
                                                                                    public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
-                                                                                       beaconManager.unbind(MainActivity.this);
-                                                                                       beaconManager.removeAllRangeNotifiers();
-                                                                                       //beaconManager.disableForegroundServiceScanning();
-                                                                                       beaconManager.applySettings();
+
                                                                                        final int levelLocal = level;
                                                                                        FirebaseDatabase.getInstance().getReference().child("Route " + routeNo).child("Location " + levelLocal).child("Crossed").addListenerForSingleValueEvent(new ValueEventListener() {
                                                                                            @Override
@@ -1536,7 +1546,7 @@ public class MainActivity extends AppCompatActivity
                                                                                            }
                                                                                        });
                                                                                        long currentTime = dataSnapshot.child("Time " + lvl).getValue(Long.class);
-                                                                                       Log.i("currentTime", "" + currentTime);
+//                                                                                       Log.i("currentTime", "" + currentTime);
                                                                                        DatabaseReference ref = FirebaseDatabase.getInstance().getReference();
                                                                                        ref.child("Leaderboard").child(UID).setValue(new LeaderBoardOBject(HomeFragment.name, lvl, points, currentTime, cooldown, UID));
                                                                                        ref.child("Users").child(UID).child("points").setValue(points + 7);
@@ -1615,7 +1625,7 @@ public class MainActivity extends AppCompatActivity
                                                                                HomeFragment.timerTextView.setText("Timer of " + cooldown + " minutes is set.");
                                                                            }
                                                                        });
-                                                                       Log.i("service run", "" + isMyServiceRunning(TimerService.class));
+//                                                                       Log.i("service run", "" + isMyServiceRunning(TimerService.class));
                                                                        if (!isMyServiceRunning(TimerService.class)) {
                                                                            timerService.setAction(Constants.ACTION.STARTFOREGROUND_ACTION);
                                                                            duration = cooldown * 60000;
@@ -1624,7 +1634,7 @@ public class MainActivity extends AppCompatActivity
                                                                            timerService.putExtra(Constants.TIMER.DURATION, duration);
                                                                            startService(timerService);
                                                                            MainActivity.this.registerReceiver(broadcastReceiver, new IntentFilter(Constants.ACTION.BROADCAST_ACTION));
-                                                                           Log.i("here", "in");
+//                                                                           Log.i("here", "in");
                                                                        }
 
                                                                    }
@@ -1643,17 +1653,17 @@ public class MainActivity extends AppCompatActivity
             @Override
             public void didEnterRegion(Region region) {
 
-                Log.i("YESSS", "I just saw a beacon for the first time!");
+//                Log.i("YESSS", "I just saw a beacon for the first time!");
             }
 
             @Override
             public void didExitRegion(Region region) {
-                Log.i("NOOO", "I no longer see a beacon");
+//                Log.i("NOOO", "I no longer see a beacon");
             }
 
             @Override
             public void didDetermineStateForRegion(int state, Region region) {
-                Log.i("OOOO", "I have just switched from seeing/not seeing beacons: " + state);
+//                Log.i("OOOO", "I have just switched from seeing/not seeing beacons: " + state);
             }
         });
         try {
@@ -1673,8 +1683,8 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     public void onMockLocationsDetected(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
-        //Toast.makeText(MainActivity.this, "Stop Mocking Location", Toast.LENGTH_LONG).show();
-        //finishAffinity();
+        Toast.makeText(MainActivity.this, "Don't try to fool and stop faking location. :)", Toast.LENGTH_LONG).show();
+        finishAffinity();
 //        NotificationCompat.Builder fakeGPSNotifi=new NotificationCompat.Builder(MainActivity.this);
 //        fakeGPSNotifi.setContentTitle("DO NOT USE FAKE GPS")
 //                .setContentText("Cheaters will be eliminate");
@@ -1695,10 +1705,10 @@ public class MainActivity extends AppCompatActivity
         if (!intent.hasExtra(Constants.TIMER.CURRENT_TIME)) return false;
 
         this.currentTime = intent.getLongExtra(Constants.TIMER.CURRENT_TIME, 0L);
-        Log.i("durationbefore pref", "" + duration);
+//        Log.i("durationbefore pref", "" + duration);
         duration = pref.getLong("Duration", 120000);
-        Log.i("currentT", "" + this.currentTime);
-        Log.i("durationT", "" + duration);
+//        Log.i("currentT", "" + this.currentTime);
+//        Log.i("durationT", "" + duration);
         if (this.currentTime >= duration) {
             runOnUiThread(new Runnable() {
                 @Override

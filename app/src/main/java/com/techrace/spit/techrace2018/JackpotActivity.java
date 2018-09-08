@@ -66,13 +66,13 @@ public class JackpotActivity extends AppCompatActivity {
                 try {
 
                     int jp = dataSnapshot.getValue(Integer.class);
-                    Log.i("IN JP CHANGE", "" + jp);
+//                    Log.i("IN JP CHANGE", "" + jp);
                     if (jp == 1) {
-                        Log.i("IN JP YES", "" + jp);
+//                        Log.i("IN JP YES", "" + jp);
 
                     } else {
                         if (jackpotRunning) {
-                            Log.i("IN jp running", "" + jp);
+//                            Log.i("IN jp running", "" + jp);
 
                             JackpotActivity.this.finish();
                         }
@@ -114,7 +114,7 @@ public class JackpotActivity extends AppCompatActivity {
                                         @Override
                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                             String serverAnswer = dataSnapshot.getValue(String.class);
-                                            if (serverAnswer.equals(answer)) {
+                                            if (serverAnswer.equalsIgnoreCase(answer)) {
                                                 FirebaseDatabase.getInstance().getReference().child("Users").child(UID).child("points").setValue(points + (2 * AppConstants.jackpotPrice));
                                                 Toast.makeText(JackpotActivity.this, "Correct", Toast.LENGTH_LONG).show();
                                                 finish();

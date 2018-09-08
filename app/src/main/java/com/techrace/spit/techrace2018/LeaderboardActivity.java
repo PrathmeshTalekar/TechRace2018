@@ -51,7 +51,7 @@ public class LeaderboardActivity extends AppCompatActivity {
         Intent i = this.getIntent();
 //        Log.i("EXTRA INTENT11111",i.getExtras().getString("SELECT USER"));
         if (i.getExtras() != null) {
-            Log.i("EXTRA INTENT", i.getExtras().getString("SELECT USER"));
+//            Log.i("EXTRA INTENT", i.getExtras().getString("SELECT USER"));
             if (i.getExtras().getString("SELECT USER").equals("TRUE")) {
                 selectUser = true;
             }
@@ -141,7 +141,7 @@ public class LeaderboardActivity extends AppCompatActivity {
 
         @Override
         protected void onPreExecute() {
-            Log.i("LOADING", "True");
+//            Log.i("LOADING", "True");
             progressDialog = new ProgressDialog(LeaderboardActivity.this);
             progressDialog.setMessage("Populating Leaderboard...");
             progressDialog.setCancelable(true);
@@ -168,7 +168,7 @@ public class LeaderboardActivity extends AppCompatActivity {
 
                     for (DataSnapshot d : dataSnapshot.getChildren()) {
                         try {
-                            Log.i("DDDDDD", d.toString());
+//                            Log.i("DDDDDD", d.toString());
                             String uid = d.getKey();
                             int cool = d.child("Cooldown").getValue(Integer.class);
                             String name = (String) d.child("Name").getValue();
@@ -188,7 +188,7 @@ public class LeaderboardActivity extends AppCompatActivity {
                             maxLevel = current;
                         }
                     }
-                    Log.i("MAXLEVEL", String.valueOf(maxLevel));
+//                    Log.i("MAXLEVEL", String.valueOf(maxLevel));
                     while (maxLevel > 0) {
                         List<LBUpdate> sameLevelList = new ArrayList<>();
                         for (int i = 0; i < items.size(); i++) {
@@ -196,14 +196,14 @@ public class LeaderboardActivity extends AppCompatActivity {
                                 sameLevelList.add(items.get(i));
                             }
                         }
-                        Log.i("SAMELEVELLIST", sameLevelList.toString());
+//                        Log.i("SAMELEVELLIST", sameLevelList.toString());
                         Collections.sort(sameLevelList, new LBUpdate.TimeComparator());
                         Collections.reverse(sameLevelList);
                         finalList.addAll(sameLevelList);
                         // sameLevelList.clear();
-                        for (int j = 0; j < finalList.size(); j++) {
-                            Log.i("Final LIST LOG", finalList.toString());
-                        }
+//                        for (int j = 0; j < finalList.size(); j++) {
+////                            Log.i("Final LIST LOG", finalList.toString());
+//                        }
                         maxLevel--;
                     }
                     if (progressDialog.isShowing()) {
@@ -230,7 +230,7 @@ public class LeaderboardActivity extends AppCompatActivity {
         @Override
         protected void onPostExecute(Void aVoid) {
             super.onPostExecute(aVoid);
-            Log.i("LBLIST", finalList.toString());
+//            Log.i("LBLIST", finalList.toString());
 //
 
         }

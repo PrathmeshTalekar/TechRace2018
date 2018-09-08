@@ -84,6 +84,17 @@ public class SignUpActivity extends AppCompatActivity {
                             public void onComplete(@NonNull Task<AuthResult> task) {
                                 if (task.isSuccessful()) {
                                     Toast.makeText(SignUpActivity.this, "Login Successful", Toast.LENGTH_SHORT).show();
+                                    SharedPreferences sharedPreferences = getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
+                                    SharedPreferences.Editor editor = sharedPreferences.edit();
+                                    editor.putString("NAME", name).apply();
+                                    int a3 = (int) name.charAt(2);
+                                    if (a3 % 2 == 0) {
+                                        editor.putInt("Route", 2).apply();
+                                        MainActivity.routeNo = 2;
+                                    } else {
+                                        editor.putInt("Route", 1).apply();
+                                        MainActivity.routeNo = 1;
+                                    }
                                     finish();
                                 } else {
                                     mAuth.createUserWithEmailAndPassword(email, password)
@@ -92,7 +103,7 @@ public class SignUpActivity extends AppCompatActivity {
                                                 public void onComplete(@NonNull Task<AuthResult> task) {
 
                                                     if (task.isSuccessful()) {
-                                                        Log.i("UNAME", name);
+//                                                        Log.i("UNAME", name);
                                                         SharedPreferences sharedPreferences = getSharedPreferences(AppConstants.techRacePref, MODE_PRIVATE);
                                                         SharedPreferences.Editor editor = sharedPreferences.edit();
                                                         editor.putString("NAME", name).apply();

@@ -36,7 +36,7 @@ public class CluesFragment extends Fragment {
         ArrayList<String> clueList = new ArrayList<>();
         int i;
         for (i = 1; i < HomeFragment.level; i++) {
-            Log.i("clueList", sharedPreferences.getString("Clue " + i, "Not Found"));
+//            Log.i("clueList", sharedPreferences.getString("Clue " + i, "Not Found"));
             clueList.add(sharedPreferences.getString("Clue " + i, ""));
 
         }

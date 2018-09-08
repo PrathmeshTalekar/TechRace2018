@@ -28,11 +28,11 @@
 
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme.NoActionBar">
-            <intent-filter>
-                <action android:name="android.intent.action.MAIN" />
-                <!--<action android:name="com.fahadhd.foregroundservice.action.broadcast"/>-->
-                <category android:name="android.intent.category.LAUNCHER" />
-            </intent-filter>
+            <!--<intent-filter>-->
+            <!--<action android:name="android.intent.action.MAIN" />-->
+            <!--&lt;!&ndash;<action android:name="com.fahadhd.foregroundservice.action.broadcast"/>&ndash;&gt;-->
+            <!--<category android:name="android.intent.category.LAUNCHER" />-->
+            <!--</intent-filter>-->
         </activity>
         <activity
             android:name=".SplashActivity"

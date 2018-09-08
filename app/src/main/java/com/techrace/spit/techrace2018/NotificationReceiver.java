@@ -26,7 +26,7 @@ import static com.techrace.spit.techrace2018.HomeFragment.UserDatabaseReference;
 public class NotificationReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
-        Log.i("time done", "in recieve");
+//        Log.i("time done", "in recieve");
         NotificationCompat.Builder mBuilder =
                 new NotificationCompat.Builder(context)
                         .setSmallIcon(R.mipmap.ic_launcher_foreground)

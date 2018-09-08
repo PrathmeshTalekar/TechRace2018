@@ -23,6 +23,8 @@ import android.os.Bundle;
 
 
 import android.os.SystemClock;
+import android.os.VibrationEffect;
+import android.os.Vibrator;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.BottomSheetDialog;
@@ -117,7 +119,7 @@ public class HomeFragment extends Fragment {
 
 
             UID = homeFragAuth.getCurrentUser().getUid();
-            Log.i("UID", UID);
+//            Log.i("UID", UID);
 
 
             UserDatabaseReference = FirebaseDatabase.getInstance().getReference().child("Users").child(UID);
@@ -127,7 +129,7 @@ public class HomeFragment extends Fragment {
 
 
                     level = dataSnapshot.child("level").getValue(Integer.class);
-                    Log.i("LEVELL", String.valueOf(level));
+//                    Log.i("LEVELL", String.valueOf(level));
                     prefEditor = pref.edit();
                     prefEditor.putInt(AppConstants.levelPref, level);
                     points = dataSnapshot.child("points").getValue(Integer.class);
@@ -143,7 +145,7 @@ public class HomeFragment extends Fragment {
                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
 
                             levelString = dataSnapshot.child("Location " + level).child("Clue").getValue(String.class);
-                            Log.i("lvlstrnh", levelString);
+//                            Log.i("lvlstrnh", levelString);
                             prefEditor = pref.edit();
                             prefEditor.putString(AppConstants.cluePref, levelString).apply();
                             String locName = dataSnapshot.child("Location " + (level - 1)).child("Name").getValue(String.class);
@@ -156,10 +158,10 @@ public class HomeFragment extends Fragment {
                             prefEditor.putInt("Level 2", level2).apply();
 
                             NSID = dataSnapshot.child("Location " + level).child("NSID").getValue(String.class);
-                            Log.i("NSID", NSID);
+//                            Log.i("NSID", NSID);
                             clueLocation.setLatitude(Double.parseDouble(dataSnapshot.child("Location " + String.valueOf(level)).child("Latitude").getValue(String.class)));
                             clueLocation.setLongitude(Double.parseDouble(dataSnapshot.child("Location " + level).child("Longitude").getValue(String.class)));
-                            Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
+//                            Log.i("LOC LAT", String.valueOf(clueLocation.getLatitude()));
                             clueTextView.setText(levelString);
                             clueRelativeLayout.setBackgroundColor(MainActivity.resources.getColor(R.color.coldBlue));
                             if (pref.getString(AppConstants.hintPref, "").equals("")) {
@@ -229,6 +231,12 @@ public class HomeFragment extends Fragment {
                                 Toast.makeText(getActivity(), "No Hints Left", Toast.LENGTH_SHORT).show();
                             } else if (hintsLeft == 3) {
                                 if (points >= AppConstants.hint1Price) {
+                                    Vibrator v = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+                                    } else {
+                                        v.vibrate(500);
+                                    }
                                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
                                     alertDialogBuilder.setCancelable(true)
                                             .setTitle("Are you sure?")
@@ -245,7 +253,7 @@ public class HomeFragment extends Fragment {
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                             hintButton.setEnabled(false);
                                                             DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                                                            Log.i("point hint", "" + MainActivity.points);
+//                                                            Log.i("point hint", "" + MainActivity.points);
                                                             powerReference1.child("Users").child(UID).child("points")
                                                                     .setValue(MainActivity.points - AppConstants.hint1Price);
                                                             String hint = dataSnapshot.getValue(String.class);
@@ -271,6 +279,12 @@ public class HomeFragment extends Fragment {
                                 }
                             } else if (hintsLeft == 2) {
                                 if (points >= AppConstants.hint2Price) {
+                                    Vibrator v = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+                                    } else {
+                                        v.vibrate(500);
+                                    }
                                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
                                     alertDialogBuilder.setCancelable(false)
                                             .setTitle("Are you sure?")
@@ -287,7 +301,7 @@ public class HomeFragment extends Fragment {
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                             hintButton.setEnabled(false);
                                                             DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                                                            Log.i("point hint", "" + MainActivity.points);
+//                                                            Log.i("point hint", "" + MainActivity.points);
                                                             powerReference1.child("Users").child(UID).child("points")
                                                                     .setValue(MainActivity.points - AppConstants.hint2Price);
                                                             String hint = dataSnapshot.getValue(String.class);
@@ -310,6 +324,12 @@ public class HomeFragment extends Fragment {
                                 }
                             } else if (hintsLeft == 1) {
                                 if (points >= AppConstants.hint3Price) {
+                                    Vibrator v = (Vibrator) getActivity().getSystemService(Context.VIBRATOR_SERVICE);
+                                    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                                        v.vibrate(VibrationEffect.createOneShot(500, VibrationEffect.DEFAULT_AMPLITUDE));
+                                    } else {
+                                        v.vibrate(500);
+                                    }
                                     AlertDialog.Builder alertDialogBuilder = new AlertDialog.Builder(getActivity());
                                     alertDialogBuilder.setCancelable(false)
                                             .setTitle("Are you sure?")
@@ -326,7 +346,7 @@ public class HomeFragment extends Fragment {
                                                         public void onDataChange(@NonNull DataSnapshot dataSnapshot) {
                                                             hintButton.setEnabled(false);
                                                             DatabaseReference powerReference1 = FirebaseDatabase.getInstance().getReference();
-                                                            Log.i("point hint", "" + MainActivity.points);
+//                                                            Log.i("point hint", "" + MainActivity.points);
                                                             powerReference1.child("Users").child(UID).child("points")
                                                                     .setValue(MainActivity.points - AppConstants.hint3Price);
                                                             String hint = dataSnapshot.getValue(String.class);

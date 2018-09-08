@@ -28,7 +28,7 @@ public class LocationsFragment extends Fragment {
         int i;
         SharedPreferences sharedPreferences = getActivity().getSharedPreferences("com.techrace.spit.techrace2018", Context.MODE_PRIVATE);
         for (i = 1; i < HomeFragment.level; i++) {
-            Log.i("locationList", sharedPreferences.getString("Location " + i, "not found"));
+//            Log.i("locationList", sharedPreferences.getString("Location " + i, "not found"));
             location.add(new Location(sharedPreferences.getString("Location " + i, "")));
 
         }

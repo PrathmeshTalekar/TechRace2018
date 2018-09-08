@@ -38,7 +38,7 @@ public class MyFirebaseMessaging extends FirebaseMessagingService {
             String title = remoteMessage.getNotification().getTitle();
             String body = remoteMessage.getNotification().getBody();
             sendNotification(title, body);
-            Log.i("FBMessage", body);
+//            Log.i("FBMessage", body);
         }
     }
 

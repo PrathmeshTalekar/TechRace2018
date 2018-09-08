@@ -53,7 +53,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         final String name = leaderboardItems.get(position).name;
         final int points = leaderboardItems.get(position).points;
         final String uid = leaderboardItems.get(position).uid;
-        Log.i("uid", uid);
+//        Log.i("uid", uid);
         final int cool = leaderboardItems.get(position).cool;
         if (uid.equals(UID)) {
             holder.relativeLayout.setBackgroundColor(Color.WHITE);
@@ -82,15 +82,15 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
         holder.positionText.setText(String.valueOf(position + 1));
         holder.nameText.setText(name);
         holder.levelText.setText(String.valueOf(level));
-        Log.i("SELECT USER BOOL", "" + selectUser);
+//        Log.i("SELECT USER BOOL", "" + selectUser);
         if (selectUser) {
             holder.cardView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    Log.i("HI", "onclick");
+//                    Log.i("HI", "onclick");
 
                     MainActivity.selectUID = uid;
-                    Log.i("value of uid", MainActivity.selectUID);
+//                    Log.i("value of uid", MainActivity.selectUID);
                     if (MainActivity.selectUID != null && !selectUID.equals(UID)) {
 
                         powerReference = FirebaseDatabase.getInstance().getReference();
@@ -101,7 +101,7 @@ public class LeaderboardAdapter extends RecyclerView.Adapter<LeaderboardAdapter.
                                 try {
                                     c = dataSnapshot.child("cooldown").getValue(Integer.class);
                                     int w = dataSnapshot.child("waited").getValue(Integer.class);
-                                    Log.i("value of points", "" + MainActivity.points);
+//                                    Log.i("value of points", "" + MainActivity.points);
                                     if (w < MainActivity.maxWait) {
                                         if (c == 0) {
                                             android.support.v7.app.AlertDialog.Builder alertDialogBuilder = new android.support.v7.app.AlertDialog.Builder(holder.cardView.getContext());
