@@ -129,6 +129,13 @@ public class HomeFragment extends Fragment {
 
 
                     level = dataSnapshot.child("level").getValue(Integer.class);
+                    if (pref.getInt(AppConstants.levelPref, -1) == 13 || level == 13) {
+                        if (pref.getInt("Route", routeNo) == 1) {
+                            HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_1crop);
+                        } else {
+                            HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_2crop);
+                        }
+                    }
 //                    Log.i("LEVELL", String.valueOf(level));
                     prefEditor = pref.edit();
                     prefEditor.putInt(AppConstants.levelPref, level);

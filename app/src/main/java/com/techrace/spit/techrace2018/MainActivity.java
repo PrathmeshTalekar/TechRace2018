@@ -296,7 +296,7 @@ public class MainActivity extends AppCompatActivity
                     prefEditor = pref.edit();
                     prefEditor.putString(AppConstants.hintPref, "").apply();
                     prefEditor = pref.edit();
-                    prefEditor.putInt(AppConstants.levelPref, level).apply();
+                    prefEditor.putInt(AppConstants.levelPref, level).commit();
 
                 }
 
@@ -305,6 +305,15 @@ public class MainActivity extends AppCompatActivity
 
                     HomeFragment.imgViewHome.setVisibility(View.GONE);
 
+                }
+                if (pref.getInt(AppConstants.levelPref, -1) == 13 || level == 13) {
+                    if (pref.getInt("Route", routeNo) == 1) {
+                        HomeFragment.imgViewHome.setVisibility(View.VISIBLE);
+                        HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_1crop);
+                    } else {
+                        HomeFragment.imgViewHome.setVisibility(View.VISIBLE);
+                        HomeFragment.imgViewHome.setImageResource(R.drawable.untitled_2crop);
+                    }
                 }
 
             }
@@ -1178,7 +1187,7 @@ public class MainActivity extends AppCompatActivity
                                     // type.  Do a web search for "setBeaconLayout" to get the proper expression.
                                     beaconManager.getBeaconParsers().add(new BeaconParser().
                                             setBeaconLayout("s:0-1=feaa,m:2-2=00,p:3-3:-41,i:4-13,i:14-19"));
-                                    beaconManager.setForegroundBetweenScanPeriod(1000);
+                                    //beaconManager.setForegroundBetweenScanPeriod(1000);
                                     beaconManager.bind(MainActivity.this);
                                 } else {
                                     beaconManager.removeAllMonitorNotifiers();
@@ -1401,6 +1410,7 @@ public class MainActivity extends AppCompatActivity
                                                                    beaconManager.removeAllRangeNotifiers();
                                                                    //beaconManager.disableForegroundServiceScanning();
                                                                    beaconManager.applySettings();
+                                                                   beacon = false;
 
                                                                    if (level == 7) {
 
@@ -1684,7 +1694,7 @@ public class MainActivity extends AppCompatActivity
     @Override
     public void onMockLocationsDetected(View.OnClickListener fromView, DialogInterface.OnClickListener fromDialog) {
         Toast.makeText(MainActivity.this, "Don't try to fool and stop faking location. :)", Toast.LENGTH_LONG).show();
-        finishAffinity();
+        // finishAffinity();
 //        NotificationCompat.Builder fakeGPSNotifi=new NotificationCompat.Builder(MainActivity.this);
 //        fakeGPSNotifi.setContentTitle("DO NOT USE FAKE GPS")
 //                .setContentText("Cheaters will be eliminate");
