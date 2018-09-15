@@ -7,6 +7,9 @@
 
     tools:context=".MainActivity">
 
+    <!--Created by Prathmesh Talekar on 9th September 2018-->
+
+
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"

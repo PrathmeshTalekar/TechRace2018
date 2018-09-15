@@ -5,6 +5,9 @@
     android:background="@color/background"
     android:orientation="vertical">
 
+    <!--Created by Prathmesh Talekar on 9th September 2018-->
+
+
     <android.support.v4.widget.SwipeRefreshLayout
         android:id="@+id/feed_swiperefresh"
         android:layout_width="match_parent"

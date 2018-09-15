@@ -4,6 +4,9 @@
     android:layout_height="match_parent"
     tools:context=".RangingActivity" >
 
+    <!--Created by Prathmesh Talekar on 9th September 2018-->
+
+
     <EditText
         android:id="@+id/rangingText"
         android:layout_width="wrap_content"

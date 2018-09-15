@@ -6,6 +6,9 @@
 
     android:background="@color/transparent_black">
 
+    <!--Created by Prathmesh Talekar on 9th September 2018-->
+
+
     <RelativeLayout
         android:layout_width="match_parent"
         android:id="@+id/relHome"

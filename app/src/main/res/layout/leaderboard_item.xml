@@ -10,6 +10,9 @@
     android:layout_marginRight="8dp"
     app:cardCornerRadius="4dp">
 
+    <!--Created by Prathmesh Talekar on 9th September 2018-->
+
+
     <RelativeLayout
         android:id="@+id/leaderboardItemLayout"
         android:layout_width="match_parent"
